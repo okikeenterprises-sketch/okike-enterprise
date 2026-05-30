@@ -1,0 +1,119 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
+import { SiteLayout } from "@/components/site/SiteLayout";
+import { useAuth } from "@/hooks/use-auth";
+
+export const Route = createFileRoute("/login")({
+  head: () => ({
+    meta: [
+      { title: "Sign in — OKIKE" },
+      { name: "description", content: "Sign in to your OKIKE account to track your project progress in real time, message your team, and review deliverables." },
+      { property: "og:title", content: "Sign in — OKIKE" },
+      { property: "og:description", content: "Access your OKIKE dashboard to follow live project updates." },
+    ],
+    links: [{ rel: "canonical", href: "https://okike-enterprise.lovable.app/login" }],
+  }),
+  component: LoginPage,
+});
+
+function LoginPage() {
+  const navigate = useNavigate();
+  const { session, role } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (session) {
+      navigate({ to: role === "admin" ? "/admin" : "/dashboard" });
+    }
+  }, [session, role, navigate]);
+
+  async function onEmail(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    if (error) toast.error(error.message);
+  }
+
+  async function onGoogle() {
+    setBusy(true);
+    const res = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (res.error) {
+      setBusy(false);
+      toast.error(res.error.message ?? "Could not sign in with Google");
+    }
+  }
+
+  return (
+    <SiteLayout>
+      <section className="py-24 px-6">
+        <div className="max-w-md mx-auto bg-card rounded-3xl p-8 ring-1 ring-ink/5 flex flex-col gap-6">
+          <div>
+            <div className="text-xs font-semibold tracking-widest uppercase text-brand">Welcome back</div>
+            <h1 className="text-2xl font-medium mt-2">Sign in to OKIKE</h1>
+          </div>
+
+          <button
+            onClick={onGoogle}
+            disabled={busy}
+            className="w-full py-3 rounded-full bg-ink text-surface text-sm font-medium hover:bg-brand hover:text-brand-foreground transition disabled:opacity-50"
+          >
+            Continue with Google
+          </button>
+
+          <div className="flex items-center gap-3 text-xs text-ink/40">
+            <div className="flex-1 h-px bg-ink/10" /> or <div className="flex-1 h-px bg-ink/10" />
+          </div>
+
+          <form onSubmit={onEmail} className="flex flex-col gap-3">
+            <label htmlFor="login-email" className="sr-only">Email</label>
+            <input
+              id="login-email"
+              type="email"
+              required
+              placeholder="Email"
+              aria-label="Email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-surface ring-1 ring-ink/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-brand"
+            />
+            <label htmlFor="login-password" className="sr-only">Password</label>
+            <input
+              id="login-password"
+              type="password"
+              required
+              minLength={6}
+              placeholder="Password"
+              aria-label="Password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-surface ring-1 ring-ink/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-brand"
+            />
+            <button
+              disabled={busy}
+              className="w-full py-3 rounded-full bg-brand text-brand-foreground text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
+            >
+              {busy ? "…" : "Sign in"}
+            </button>
+          </form>
+
+          <p className="text-sm text-ink/60 text-center">
+            New to OKIKE?{" "}
+            <Link to="/signup" className="text-brand font-medium">
+              Create an account
+            </Link>
+          </p>
+        </div>
+      </section>
+    </SiteLayout>
+  );
+}

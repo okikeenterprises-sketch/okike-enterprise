@@ -1,0 +1,13 @@
+# OKIKE
+
+> OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers.
+
+## Pages
+
+- [Home](/): Overview of OKIKE — what we build and who we teach.
+- [Services](/services): Web, mobile, and custom software packages with fixed scope and timeline.
+- [Academy](/learn): A 12-week cohort program that takes students from beginner to industry-ready engineer.
+- [About](/about): Founder story, mission, and operating principles.
+- [Book a project](/book): Interactive builder to scope a project and request a proposal.
+- [Enroll](/enroll): Apply for the next academy cohort.
+- [Contact](/contact): Get in touch with the team.

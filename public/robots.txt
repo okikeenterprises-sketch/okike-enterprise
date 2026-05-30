@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /login
+Disallow: /signup
+
+Sitemap: https://okike-enterprise.lovable.app/sitemap.xml
