@@ -75,21 +75,44 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "OKIKE — Build software. Learn to build it." },
-      { name: "description", content: "OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers." },
+      {
+        name: "description",
+        content:
+          "OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers.",
+      },
       { name: "author", content: "OKIKE" },
       { property: "og:title", content: "OKIKE — Build software. Learn to build it." },
-      { property: "og:description", content: "OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers." },
+      {
+        property: "og:description",
+        content:
+          "OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "OKIKE — Build software. Learn to build it." },
-      { name: "twitter:description", content: "OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      {
+        name: "twitter:description",
+        content:
+          "OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png",
+      },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+      },
       { rel: "stylesheet", href: appCss },
     ],
     scripts: [
@@ -103,7 +126,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               "@id": "https://okike-enterprise.lovable.app/#organization",
               name: "OKIKE",
               url: "https://okike-enterprise.lovable.app",
-              description: "Software house and academy building products for ambitious teams and training the next generation of African engineers.",
+              description:
+                "Software house and academy building products for ambitious teams and training the next generation of African engineers.",
             },
             {
               "@type": "WebSite",

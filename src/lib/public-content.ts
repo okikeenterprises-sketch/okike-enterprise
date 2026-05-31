@@ -1,6 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type PublicService = { id: string; title: string; description: string | null; icon: string | null };
+export type PublicService = {
+  id: string;
+  title: string;
+  description: string | null;
+  icon: string | null;
+};
 export type PublicPackage = {
   id: string;
   name: string;
@@ -12,8 +17,19 @@ export type PublicPackage = {
   featured: boolean;
   request_quote: boolean;
 };
-export type PublicPartner = { id: string; name: string; logo_url: string | null; url: string | null };
-export type PublicTeam = { id: string; name: string; role: string | null; bio: string | null; image_url: string | null };
+export type PublicPartner = {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  url: string | null;
+};
+export type PublicTeam = {
+  id: string;
+  name: string;
+  role: string | null;
+  bio: string | null;
+  image_url: string | null;
+};
 
 export async function getServices(): Promise<PublicService[]> {
   const { data } = await supabase

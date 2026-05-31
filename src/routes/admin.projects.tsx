@@ -10,11 +10,24 @@ export const Route = createFileRoute("/admin/projects")({
 });
 
 type Project = {
-  id: string; client_email: string; title: string; package_name: string | null;
-  total: number | null; deposit: number | null; stage: string; admin_notes: string | null;
+  id: string;
+  client_email: string;
+  title: string;
+  package_name: string | null;
+  total: number | null;
+  deposit: number | null;
+  stage: string;
+  admin_notes: string | null;
   created_at: string;
 };
-type Milestone = { id: string; project_id: string; name: string; status: string; note: string | null; position: number };
+type Milestone = {
+  id: string;
+  project_id: string;
+  name: string;
+  status: string;
+  note: string | null;
+  position: number;
+};
 type Update = { id: string; project_id: string; message: string; created_at: string };
 
 const STAGES = ["submitted", "reviewing", "accepted", "declined", "in_progress", "completed"];
@@ -31,20 +44,31 @@ function AdminProjects() {
   const postUp = useServerFn(postProjectUpdate);
 
   async function load() {
-    const { data } = await supabase.from("client_projects").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("client_projects")
+      .select("*")
+      .order("created_at", { ascending: false });
     setList((data ?? []) as Project[]);
   }
   async function loadDetail(id: string) {
     const [{ data: m }, { data: u }] = await Promise.all([
       supabase.from("project_milestones").select("*").eq("project_id", id).order("position"),
-      supabase.from("project_updates").select("*").eq("project_id", id).order("created_at", { ascending: false }),
+      supabase
+        .from("project_updates")
+        .select("*")
+        .eq("project_id", id)
+        .order("created_at", { ascending: false }),
     ]);
     setMs((m ?? []) as Milestone[]);
     setUp((u ?? []) as Update[]);
   }
 
-  useEffect(() => { load(); }, []);
-  useEffect(() => { if (open) loadDetail(open.id); }, [open]);
+  useEffect(() => {
+    load();
+  }, []);
+  useEffect(() => {
+    if (open) loadDetail(open.id);
+  }, [open]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,32 +76,62 @@ function AdminProjects() {
       <div className="bg-card rounded-2xl ring-1 ring-ink/5 overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-surface text-xs uppercase tracking-wider text-ink/40">
-            <tr><th className="text-left px-4 py-3">Title</th><th className="text-left px-4 py-3">Client</th><th className="text-left px-4 py-3">Stage</th><th className="text-left px-4 py-3">Total</th><th></th></tr>
+            <tr>
+              <th className="text-left px-4 py-3">Title</th>
+              <th className="text-left px-4 py-3">Client</th>
+              <th className="text-left px-4 py-3">Stage</th>
+              <th className="text-left px-4 py-3">Total</th>
+              <th></th>
+            </tr>
           </thead>
           <tbody className="divide-y divide-ink/5">
             {list.map((p) => (
               <tr key={p.id} className="hover:bg-surface/60">
                 <td className="px-4 py-3 font-medium">{p.title}</td>
                 <td className="px-4 py-3 text-xs">{p.client_email}</td>
-                <td className="px-4 py-3"><span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 capitalize">{p.stage.replace("_", " ")}</span></td>
-                <td className="px-4 py-3">{p.total ? `$${Number(p.total).toLocaleString()}` : "—"}</td>
-                <td className="px-4 py-3 text-right"><button onClick={() => setOpen(p)} className="text-brand text-sm font-medium">Manage</button></td>
+                <td className="px-4 py-3">
+                  <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 capitalize">
+                    {p.stage.replace("_", " ")}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  {p.total ? `$${Number(p.total).toLocaleString()}` : "—"}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <button onClick={() => setOpen(p)} className="text-brand text-sm font-medium">
+                    Manage
+                  </button>
+                </td>
               </tr>
             ))}
-            {list.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-ink/40">No projects yet — accept an inquiry first.</td></tr>}
+            {list.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-ink/40">
+                  No projects yet — accept an inquiry first.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-ink/40 flex items-center justify-center p-4" onClick={() => setOpen(null)}>
-          <div className="bg-surface rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-auto p-6 flex flex-col gap-5" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 bg-ink/40 flex items-center justify-center p-4"
+          onClick={() => setOpen(null)}
+        >
+          <div
+            className="bg-surface rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-auto p-6 flex flex-col gap-5"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-medium">{open.title}</h2>
                 <p className="text-sm text-ink/60">{open.client_email}</p>
               </div>
-              <button onClick={() => setOpen(null)} className="text-ink/40 text-2xl">×</button>
+              <button onClick={() => setOpen(null)} className="text-ink/40 text-2xl">
+                ×
+              </button>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3">
@@ -89,22 +143,35 @@ function AdminProjects() {
                     try {
                       await updateProj({ data: { id: open.id, stage: e.target.value as any } });
                       toast.success("Stage updated");
-                      await load(); await loadDetail(open.id);
-                    } catch (err: any) { toast.error(err.message); }
+                      await load();
+                      await loadDetail(open.id);
+                    } catch (err: any) {
+                      toast.error(err.message);
+                    }
                   }}
                   className="bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2"
                 >
-                  {STAGES.map((s) => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
+                  {STAGES.map((s) => (
+                    <option key={s} value={s}>
+                      {s.replace("_", " ")}
+                    </option>
+                  ))}
                 </select>
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 <span className="text-xs uppercase tracking-wider text-ink/40">Total ($)</span>
                 <input
-                  type="number" defaultValue={open.total ?? ""}
+                  type="number"
+                  defaultValue={open.total ?? ""}
                   onBlur={async (e) => {
                     const v = e.target.value ? Number(e.target.value) : null;
-                    try { await updateProj({ data: { id: open.id, total: v } }); toast.success("Saved"); await load(); }
-                    catch (err: any) { toast.error(err.message); }
+                    try {
+                      await updateProj({ data: { id: open.id, total: v } });
+                      toast.success("Saved");
+                      await load();
+                    } catch (err: any) {
+                      toast.error(err.message);
+                    }
                   }}
                   className="bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2"
                 />
@@ -112,13 +179,21 @@ function AdminProjects() {
             </div>
 
             <label className="flex flex-col gap-1 text-sm">
-              <span className="text-xs uppercase tracking-wider text-ink/40">Notes for the client</span>
+              <span className="text-xs uppercase tracking-wider text-ink/40">
+                Notes for the client
+              </span>
               <textarea
                 defaultValue={open.admin_notes ?? ""}
                 rows={3}
                 onBlur={async (e) => {
-                  try { await updateProj({ data: { id: open.id, admin_notes: e.target.value || null } }); toast.success("Notes saved"); }
-                  catch (err: any) { toast.error(err.message); }
+                  try {
+                    await updateProj({
+                      data: { id: open.id, admin_notes: e.target.value || null },
+                    });
+                    toast.success("Notes saved");
+                  } catch (err: any) {
+                    toast.error(err.message);
+                  }
                 }}
                 className="bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-sm"
               />
@@ -129,23 +204,39 @@ function AdminProjects() {
                 <div className="text-xs uppercase tracking-wider text-ink/40 mb-2">Milestones</div>
                 <div className="flex flex-col gap-2">
                   {ms.map((m) => (
-                    <div key={m.id} className="bg-card rounded-xl p-3 ring-1 ring-ink/5 flex flex-wrap items-center gap-3">
+                    <div
+                      key={m.id}
+                      className="bg-card rounded-xl p-3 ring-1 ring-ink/5 flex flex-wrap items-center gap-3"
+                    >
                       <div className="font-medium text-sm w-24">{m.name}</div>
                       <select
                         defaultValue={m.status}
                         onChange={async (e) => {
-                          try { await updateMs({ data: { id: m.id, status: e.target.value as any } }); toast.success("Saved"); await loadDetail(open.id); }
-                          catch (err: any) { toast.error(err.message); }
+                          try {
+                            await updateMs({ data: { id: m.id, status: e.target.value as any } });
+                            toast.success("Saved");
+                            await loadDetail(open.id);
+                          } catch (err: any) {
+                            toast.error(err.message);
+                          }
                         }}
                         className="bg-surface ring-1 ring-ink/10 rounded-lg px-2 py-1 text-sm"
                       >
-                        {M_STATUS.map((s) => <option key={s} value={s}>{s}</option>)}
+                        {M_STATUS.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
                       </select>
                       <input
-                        defaultValue={m.note ?? ""} placeholder="Note"
+                        defaultValue={m.note ?? ""}
+                        placeholder="Note"
                         onBlur={async (e) => {
-                          try { await updateMs({ data: { id: m.id, note: e.target.value || null } }); }
-                          catch (err: any) { toast.error(err.message); }
+                          try {
+                            await updateMs({ data: { id: m.id, note: e.target.value || null } });
+                          } catch (err: any) {
+                            toast.error(err.message);
+                          }
                         }}
                         className="flex-1 bg-surface ring-1 ring-ink/10 rounded-lg px-3 py-1 text-sm"
                       />
@@ -159,23 +250,34 @@ function AdminProjects() {
               <div className="text-xs uppercase tracking-wider text-ink/40 mb-2">Post update</div>
               <div className="flex gap-2">
                 <input
-                  value={newMsg} onChange={(e) => setNewMsg(e.target.value)}
+                  value={newMsg}
+                  onChange={(e) => setNewMsg(e.target.value)}
                   placeholder="What should the client know?"
                   className="flex-1 bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-sm"
                 />
                 <button
                   onClick={async () => {
                     if (!newMsg.trim()) return;
-                    try { await postUp({ data: { project_id: open.id, message: newMsg } }); setNewMsg(""); toast.success("Posted"); await loadDetail(open.id); }
-                    catch (err: any) { toast.error(err.message); }
+                    try {
+                      await postUp({ data: { project_id: open.id, message: newMsg } });
+                      setNewMsg("");
+                      toast.success("Posted");
+                      await loadDetail(open.id);
+                    } catch (err: any) {
+                      toast.error(err.message);
+                    }
                   }}
                   className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium"
-                >Post</button>
+                >
+                  Post
+                </button>
               </div>
               <ul className="mt-3 flex flex-col gap-2">
                 {up.map((u) => (
                   <li key={u.id} className="bg-card rounded-lg p-3 text-sm">
-                    <div className="text-xs text-ink/40">{new Date(u.created_at).toLocaleString()}</div>
+                    <div className="text-xs text-ink/40">
+                      {new Date(u.created_at).toLocaleString()}
+                    </div>
                     <div>{u.message}</div>
                   </li>
                 ))}

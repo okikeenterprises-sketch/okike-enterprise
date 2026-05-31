@@ -28,11 +28,13 @@ function ContactPage() {
     setBusy(true);
     const fd = new FormData(e.currentTarget);
     try {
-      const res = await send({ data: {
-        name: String(fd.get("name") || ""),
-        email: String(fd.get("email") || ""),
-        message: String(fd.get("message") || ""),
-      }});
+      const res = await send({
+        data: {
+          name: String(fd.get("name") || ""),
+          email: String(fd.get("email") || ""),
+          message: String(fd.get("message") || ""),
+        },
+      });
       if (res.ok) {
         navigate({ to: "/thank-you" });
       } else {
@@ -55,17 +57,30 @@ function ContactPage() {
           </h1>
           <div className="flex items-center gap-3 text-ink/60">
             <Mail className="size-4 text-brand" />
-            <span>For project inquiries, use the <a href="/book" className="text-brand underline-offset-2 hover:underline">project form</a>.</span>
+            <span>
+              For project inquiries, use the{" "}
+              <a href="/book" className="text-brand underline-offset-2 hover:underline">
+                project form
+              </a>
+              .
+            </span>
           </div>
         </div>
       </section>
 
       <section className="px-6 pb-24">
-        <form onSubmit={onSubmit} className="max-w-3xl mx-auto bg-card rounded-3xl p-8 md:p-12 ring-1 ring-ink/5 flex flex-col gap-6">
+        <form
+          onSubmit={onSubmit}
+          className="max-w-3xl mx-auto bg-card rounded-3xl p-8 md:p-12 ring-1 ring-ink/5 flex flex-col gap-6"
+        >
           <Field label="Name" name="name" required />
           <Field label="Email" name="email" type="email" required />
           <TextArea label="Message" name="message" required minLength={5} rows={6} />
-          <button type="submit" disabled={busy} className="bg-brand text-brand-foreground py-3 px-6 rounded-full font-medium hover:opacity-90 transition disabled:opacity-50 self-start">
+          <button
+            type="submit"
+            disabled={busy}
+            className="bg-brand text-brand-foreground py-3 px-6 rounded-full font-medium hover:opacity-90 transition disabled:opacity-50 self-start"
+          >
             {busy ? "Sending…" : "Send message"}
           </button>
         </form>
@@ -74,10 +89,24 @@ function ContactPage() {
   );
 }
 
-export function Field({ label, name, type = "text", required, ...rest }: { label: string; name: string; type?: string; required?: boolean } & React.InputHTMLAttributes<HTMLInputElement>) {
+export function Field({
+  label,
+  name,
+  type = "text",
+  required,
+  ...rest
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+} & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-widest text-ink/60">{label}{required && <span className="text-brand"> *</span>}</span>
+      <span className="text-xs font-semibold uppercase tracking-widest text-ink/60">
+        {label}
+        {required && <span className="text-brand"> *</span>}
+      </span>
       <input
         name={name}
         type={type}
@@ -89,10 +118,22 @@ export function Field({ label, name, type = "text", required, ...rest }: { label
   );
 }
 
-export function TextArea({ label, name, required, ...rest }: { label: string; name: string; required?: boolean } & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function TextArea({
+  label,
+  name,
+  required,
+  ...rest
+}: {
+  label: string;
+  name: string;
+  required?: boolean;
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-widest text-ink/60">{label}{required && <span className="text-brand"> *</span>}</span>
+      <span className="text-xs font-semibold uppercase tracking-widest text-ink/60">
+        {label}
+        {required && <span className="text-brand"> *</span>}
+      </span>
       <textarea
         name={name}
         required={required}
@@ -103,18 +144,37 @@ export function TextArea({ label, name, required, ...rest }: { label: string; na
   );
 }
 
-export function Select({ label, name, options, required }: { label: string; name: string; options: string[]; required?: boolean }) {
+export function Select({
+  label,
+  name,
+  options,
+  required,
+}: {
+  label: string;
+  name: string;
+  options: string[];
+  required?: boolean;
+}) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-widest text-ink/60">{label}{required && <span className="text-brand"> *</span>}</span>
+      <span className="text-xs font-semibold uppercase tracking-widest text-ink/60">
+        {label}
+        {required && <span className="text-brand"> *</span>}
+      </span>
       <select
         name={name}
         required={required}
         defaultValue=""
         className="bg-surface border border-ink/10 rounded-lg px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition"
       >
-        <option value="" disabled>Choose…</option>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+        <option value="" disabled>
+          Choose…
+        </option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
       </select>
     </label>
   );

@@ -27,7 +27,9 @@ function AdminPayments() {
     async function load() {
       const { data } = await supabase
         .from("client_projects")
-        .select("id, title, client_email, package_name, total, deposit, currency, stage, created_at")
+        .select(
+          "id, title, client_email, package_name, total, deposit, currency, stage, created_at",
+        )
         .order("created_at", { ascending: false });
       setRows((data ?? []) as Project[]);
       setLoading(false);
@@ -37,7 +39,9 @@ function AdminPayments() {
 
   const pipeline = rows.reduce((s, r) => s + Number(r.total ?? 0), 0);
   const deposits = rows.reduce((s, r) => s + Number(r.deposit ?? 0), 0);
-  const completed = rows.filter((r) => r.stage === "completed").reduce((s, r) => s + Number(r.total ?? 0), 0);
+  const completed = rows
+    .filter((r) => r.stage === "completed")
+    .reduce((s, r) => s + Number(r.total ?? 0), 0);
 
   return (
     <div className="flex flex-col gap-5">
@@ -83,8 +87,12 @@ function AdminPayments() {
                         {p.stage.replace("_", " ")}
                       </span>
                     </td>
-                    <td className="px-2 py-3 text-right text-ink/70 tabular-nums">{p.deposit ? fmt(Number(p.deposit)) : "—"}</td>
-                    <td className="px-6 py-3 text-right font-medium tabular-nums">{p.total ? fmt(Number(p.total)) : "—"}</td>
+                    <td className="px-2 py-3 text-right text-ink/70 tabular-nums">
+                      {p.deposit ? fmt(Number(p.deposit)) : "—"}
+                    </td>
+                    <td className="px-6 py-3 text-right font-medium tabular-nums">
+                      {p.total ? fmt(Number(p.total)) : "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

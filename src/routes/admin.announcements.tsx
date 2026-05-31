@@ -30,7 +30,9 @@ function AdminAnnouncements() {
       .channel("admin-contact")
       .on("postgres_changes", { event: "*", schema: "public", table: "contact_messages" }, load)
       .subscribe();
-    return () => { supabase.removeChannel(c); };
+    return () => {
+      supabase.removeChannel(c);
+    };
   }, []);
 
   async function remove(id: string) {
@@ -66,12 +68,18 @@ function AdminAnnouncements() {
                 <button onClick={() => setOpen(m)} className="flex-1 min-w-0 text-left">
                   <div className="flex items-center justify-between gap-3">
                     <div className="font-medium truncate">{m.name}</div>
-                    <span className="text-xs text-ink/40 shrink-0">{new Date(m.created_at).toLocaleString()}</span>
+                    <span className="text-xs text-ink/40 shrink-0">
+                      {new Date(m.created_at).toLocaleString()}
+                    </span>
                   </div>
                   <div className="text-xs text-ink/60">{m.email}</div>
                   <div className="text-sm text-ink/80 mt-1 line-clamp-2">{m.message}</div>
                 </button>
-                <button onClick={() => remove(m.id)} className="text-ink/40 hover:text-rose-500 p-1.5 rounded" aria-label="Delete">
+                <button
+                  onClick={() => remove(m.id)}
+                  className="text-ink/40 hover:text-rose-500 p-1.5 rounded"
+                  aria-label="Delete"
+                >
                   <Trash2 className="size-4" />
                 </button>
               </li>
@@ -81,19 +89,39 @@ function AdminAnnouncements() {
       </section>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setOpen(null)}>
-          <div onClick={(e) => e.stopPropagation()} className="bg-card ring-1 ring-border rounded-2xl max-w-lg w-full p-6">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+          onClick={() => setOpen(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-card ring-1 ring-border rounded-2xl max-w-lg w-full p-6"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="font-semibold">{open.name}</div>
-                <a href={`mailto:${open.email}`} className="text-xs text-brand hover:underline">{open.email}</a>
+                <a href={`mailto:${open.email}`} className="text-xs text-brand hover:underline">
+                  {open.email}
+                </a>
               </div>
-              <span className="text-xs text-ink/40">{new Date(open.created_at).toLocaleString()}</span>
+              <span className="text-xs text-ink/40">
+                {new Date(open.created_at).toLocaleString()}
+              </span>
             </div>
             <p className="text-sm text-ink/80 mt-4 whitespace-pre-wrap">{open.message}</p>
             <div className="mt-5 flex gap-2 justify-end">
-              <a href={`mailto:${open.email}`} className="rounded-xl bg-brand text-brand-foreground px-4 py-2 text-sm font-medium">Reply</a>
-              <button onClick={() => setOpen(null)} className="rounded-xl bg-foreground/5 ring-1 ring-border px-4 py-2 text-sm">Close</button>
+              <a
+                href={`mailto:${open.email}`}
+                className="rounded-xl bg-brand text-brand-foreground px-4 py-2 text-sm font-medium"
+              >
+                Reply
+              </a>
+              <button
+                onClick={() => setOpen(null)}
+                className="rounded-xl bg-foreground/5 ring-1 ring-border px-4 py-2 text-sm"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

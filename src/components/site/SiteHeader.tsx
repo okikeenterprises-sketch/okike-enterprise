@@ -1,7 +1,15 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import okikeLogo from "@/assets/okike-logo.png";
 import { useState } from "react";
-import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, ArrowUpRight } from "lucide-react";
+import {
+  Menu,
+  X,
+  User as UserIcon,
+  LogOut,
+  LayoutDashboard,
+  Shield,
+  ArrowUpRight,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "./ThemeToggle";
 import {
@@ -49,9 +57,6 @@ export function SiteHeader() {
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
 
-
-
-
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="size-9 rounded-full bg-ink text-surface text-sm font-medium flex items-center justify-center hover:bg-brand hover:text-brand-foreground transition">
@@ -81,7 +86,10 @@ export function SiteHeader() {
             </DropdownMenu>
           ) : (
             <>
-              <Link to="/login" className="text-sm font-medium text-ink/70 hover:text-ink transition">
+              <Link
+                to="/login"
+                className="text-sm font-medium text-ink/70 hover:text-ink transition"
+              >
                 Sign in
               </Link>
               <Link
@@ -119,7 +127,11 @@ export function SiteHeader() {
             ))}
             {session ? (
               <>
-                <Link to="/dashboard" onClick={() => setOpen(false)} className="text-sm font-medium">
+                <Link
+                  to="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="text-sm font-medium"
+                >
                   Dashboard
                 </Link>
                 {role === "admin" && (
@@ -140,7 +152,11 @@ export function SiteHeader() {
               </>
             ) : (
               <>
-                <Link to="/login" onClick={() => setOpen(false)} className="text-sm font-medium flex items-center gap-2">
+                <Link
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                  className="text-sm font-medium flex items-center gap-2"
+                >
                   <UserIcon className="size-4" /> Sign in
                 </Link>
                 <Link

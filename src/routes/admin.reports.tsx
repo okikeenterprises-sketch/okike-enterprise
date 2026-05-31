@@ -17,7 +17,13 @@ type Counts = {
 };
 
 function AdminReports() {
-  const [c, setC] = useState<Counts>({ users: 0, inquiries: 0, projects: 0, contact: 0, enrollments: 0 });
+  const [c, setC] = useState<Counts>({
+    users: 0,
+    inquiries: 0,
+    projects: 0,
+    contact: 0,
+    enrollments: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,14 +52,18 @@ function AdminReports() {
     if (error) return toast.error(error.message);
     const rows = (data ?? []) as any[];
     const header = columns.join(",");
-    const body = rows.map((r) =>
-      columns.map((c) => {
-        const v = r[c];
-        if (v == null) return "";
-        const s = typeof v === "string" ? v : JSON.stringify(v);
-        return `"${s.replace(/"/g, '""')}"`;
-      }).join(",")
-    ).join("\n");
+    const body = rows
+      .map((r) =>
+        columns
+          .map((c) => {
+            const v = r[c];
+            if (v == null) return "";
+            const s = typeof v === "string" ? v : JSON.stringify(v);
+            return `"${s.replace(/"/g, '""')}"`;
+          })
+          .join(","),
+      )
+      .join("\n");
     const csv = header + "\n" + body;
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -66,11 +76,57 @@ function AdminReports() {
   }
 
   const reports = [
-    { table: "profiles", columns: ["id", "user_id", "email", "full_name", "created_at"], label: "Users", count: c.users },
-    { table: "project_inquiries", columns: ["id", "name", "email", "phone", "company", "project_type", "budget", "timeline", "status", "created_at"], label: "Inquiries", count: c.inquiries },
-    { table: "client_projects", columns: ["id", "title", "client_email", "package_name", "stage", "total", "deposit", "currency", "created_at"], label: "Projects", count: c.projects },
-    { table: "contact_messages", columns: ["id", "name", "email", "message", "created_at"], label: "Contact Messages", count: c.contact },
-    { table: "course_enrollments", columns: ["id", "name", "email", "phone", "experience_level", "goals", "created_at"], label: "Course Enrollments", count: c.enrollments },
+    {
+      table: "profiles",
+      columns: ["id", "user_id", "email", "full_name", "created_at"],
+      label: "Users",
+      count: c.users,
+    },
+    {
+      table: "project_inquiries",
+      columns: [
+        "id",
+        "name",
+        "email",
+        "phone",
+        "company",
+        "project_type",
+        "budget",
+        "timeline",
+        "status",
+        "created_at",
+      ],
+      label: "Inquiries",
+      count: c.inquiries,
+    },
+    {
+      table: "client_projects",
+      columns: [
+        "id",
+        "title",
+        "client_email",
+        "package_name",
+        "stage",
+        "total",
+        "deposit",
+        "currency",
+        "created_at",
+      ],
+      label: "Projects",
+      count: c.projects,
+    },
+    {
+      table: "contact_messages",
+      columns: ["id", "name", "email", "message", "created_at"],
+      label: "Contact Messages",
+      count: c.contact,
+    },
+    {
+      table: "course_enrollments",
+      columns: ["id", "name", "email", "phone", "experience_level", "goals", "created_at"],
+      label: "Course Enrollments",
+      count: c.enrollments,
+    },
   ];
 
   return (

@@ -17,7 +17,12 @@ async function ensureAdmin(supabase: any, userId: string) {
 export const setInquiryStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({ id: z.string().uuid(), status: z.enum(["new", "reviewing", "accepted", "declined"]) }).parse(d),
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["new", "reviewing", "accepted", "declined"]),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
@@ -83,7 +88,9 @@ export const updateProject = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        stage: z.enum(["submitted", "reviewing", "accepted", "declined", "in_progress", "completed"]).optional(),
+        stage: z
+          .enum(["submitted", "reviewing", "accepted", "declined", "in_progress", "completed"])
+          .optional(),
         admin_notes: z.string().max(4000).nullable().optional(),
         title: z.string().max(200).optional(),
         total: z.number().nullable().optional(),
@@ -165,9 +172,7 @@ export const cmsUpsert = createServerFn({ method: "POST" })
 
 export const cmsDelete = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z.object({ table: z.enum(ALLOWED_TABLES), id: z.string() }).parse(d),
-  )
+  .inputValidator((d) => z.object({ table: z.enum(ALLOWED_TABLES), id: z.string() }).parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
     const col = data.table === "site_settings" ? "key" : "id";

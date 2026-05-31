@@ -43,23 +43,22 @@
   --color-ink-muted: var(--ink-muted);
   --color-contrast: var(--contrast);
   --color-contrast-foreground: var(--contrast-foreground);
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
   --radius: 0.75rem;
-
 
   /* Fixed always-dark accent (does NOT flip with theme) — used for editorial dark bands */
   --contrast: oklch(0.16 0.004 90);
   --contrast-foreground: oklch(0.985 0.003 95);
 
   /* Yellow & Black brand — LIGHT theme (default) */
-  --surface: oklch(0.985 0.003 95);          /* off-white background */
-  --ink: oklch(0.16 0.004 90);               /* near-black text */
+  --surface: oklch(0.985 0.003 95); /* off-white background */
+  --ink: oklch(0.16 0.004 90); /* near-black text */
   --ink-muted: oklch(0.16 0.004 90 / 60%);
-  --brand: oklch(0.82 0.18 95);              /* signature yellow */
-  --brand-foreground: oklch(0.14 0.004 90);  /* black on yellow */
+  --brand: oklch(0.82 0.18 95); /* signature yellow */
+  --brand-foreground: oklch(0.14 0.004 90); /* black on yellow */
 
   --background: var(--surface);
   --foreground: var(--ink);
@@ -81,7 +80,6 @@
   --input: oklch(0.16 0.004 90 / 15%);
   --ring: var(--brand);
 }
-
 
 .dark {
   --surface: oklch(0.16 0.004 90);
@@ -114,11 +112,12 @@
     border-color: var(--color-border);
   }
 
-  html, body {
+  html,
+  body {
     background-color: var(--color-surface);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01', 'ss03';
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "ss03";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

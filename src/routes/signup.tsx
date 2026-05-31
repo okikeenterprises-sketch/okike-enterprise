@@ -10,9 +10,16 @@ export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
       { title: "Create account — OKIKE" },
-      { name: "description", content: "Create an OKIKE account to scope projects, track live progress through every milestone, and message your build team directly." },
+      {
+        name: "description",
+        content:
+          "Create an OKIKE account to scope projects, track live progress through every milestone, and message your build team directly.",
+      },
       { property: "og:title", content: "Create account — OKIKE" },
-      { property: "og:description", content: "Sign up for OKIKE to track your project in real time." },
+      {
+        property: "og:description",
+        content: "Sign up for OKIKE to track your project in real time.",
+      },
     ],
     links: [{ rel: "canonical", href: "https://okike-enterprise.lovable.app/signup" }],
   }),
@@ -66,7 +73,9 @@ function SignupPage() {
       <section className="py-24 px-6">
         <div className="max-w-md mx-auto bg-card rounded-3xl p-8 ring-1 ring-ink/5 flex flex-col gap-6">
           <div>
-            <div className="text-xs font-semibold tracking-widest uppercase text-brand">Get started</div>
+            <div className="text-xs font-semibold tracking-widest uppercase text-brand">
+              Get started
+            </div>
             <h1 className="text-2xl font-medium mt-2">Create your OKIKE account</h1>
             <p className="text-sm text-ink/60 mt-2">Track your projects in real time.</p>
           </div>
@@ -84,7 +93,9 @@ function SignupPage() {
           </div>
 
           <form onSubmit={onSignup} className="flex flex-col gap-3">
-            <label htmlFor="signup-name" className="sr-only">Full name</label>
+            <label htmlFor="signup-name" className="sr-only">
+              Full name
+            </label>
             <input
               id="signup-name"
               required
@@ -95,7 +106,9 @@ function SignupPage() {
               onChange={(e) => setFullName(e.target.value)}
               className="bg-surface ring-1 ring-ink/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-brand"
             />
-            <label htmlFor="signup-email" className="sr-only">Email</label>
+            <label htmlFor="signup-email" className="sr-only">
+              Email
+            </label>
             <input
               id="signup-email"
               type="email"
@@ -107,7 +120,9 @@ function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="bg-surface ring-1 ring-ink/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-brand"
             />
-            <label htmlFor="signup-password" className="sr-only">Password</label>
+            <label htmlFor="signup-password" className="sr-only">
+              Password
+            </label>
             <input
               id="signup-password"
               type="password"

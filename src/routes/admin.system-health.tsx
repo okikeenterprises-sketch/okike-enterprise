@@ -24,16 +24,29 @@ function AdminSystemHealth() {
 
     const t1 = performance.now();
     const { error: dbErr } = await supabase.from("site_settings").select("key").limit(1);
-    results.database = { label: "Database (read)", ok: !dbErr, latency: Math.round(performance.now() - t1), detail: dbErr?.message };
+    results.database = {
+      label: "Database (read)",
+      ok: !dbErr,
+      latency: Math.round(performance.now() - t1),
+      detail: dbErr?.message,
+    };
 
     const t2 = performance.now();
     const { data: s, error: authErr } = await supabase.auth.getSession();
-    results.auth = { label: "Auth session", ok: !authErr && !!s.session, latency: Math.round(performance.now() - t2), detail: authErr?.message };
+    results.auth = {
+      label: "Auth session",
+      ok: !authErr && !!s.session,
+      latency: Math.round(performance.now() - t2),
+      detail: authErr?.message,
+    };
 
     const t3 = performance.now();
     const rt = await new Promise<boolean>((resolve) => {
       const ch = supabase.channel(`health-${Date.now()}`);
-      const timeout = setTimeout(() => { supabase.removeChannel(ch); resolve(false); }, 4000);
+      const timeout = setTimeout(() => {
+        supabase.removeChannel(ch);
+        resolve(false);
+      }, 4000);
       ch.subscribe((status) => {
         if (status === "SUBSCRIBED") {
           clearTimeout(timeout);
@@ -49,7 +62,9 @@ function AdminSystemHealth() {
     setRunning(false);
   }
 
-  useEffect(() => { runChecks(); }, []);
+  useEffect(() => {
+    runChecks();
+  }, []);
 
   const allOk = Object.values(checks).every((c) => c.ok === true);
 
@@ -73,13 +88,15 @@ function AdminSystemHealth() {
         </button>
       </div>
 
-      <section className={`rounded-2xl p-6 ring-1 ${allOk ? "bg-emerald-500/10 ring-emerald-500/25" : "bg-amber-500/10 ring-amber-500/25"}`}>
+      <section
+        className={`rounded-2xl p-6 ring-1 ${allOk ? "bg-emerald-500/10 ring-emerald-500/25" : "bg-amber-500/10 ring-amber-500/25"}`}
+      >
         <div className="text-sm font-medium">
           {Object.values(checks).every((c) => c.ok === null)
             ? "Checking…"
             : allOk
-            ? "All systems operational"
-            : "Some checks failed — review below"}
+              ? "All systems operational"
+              : "Some checks failed — review below"}
         </div>
       </section>
 
@@ -95,9 +112,11 @@ function AdminSystemHealth() {
 function HealthCard({ icon: Icon, check }: { icon: any; check: Check }) {
   const status = check.ok === null ? "checking" : check.ok ? "ok" : "down";
   const color =
-    status === "ok" ? "text-emerald-500 bg-emerald-500/15" :
-    status === "down" ? "text-rose-500 bg-rose-500/15" :
-    "text-ink/50 bg-foreground/5";
+    status === "ok"
+      ? "text-emerald-500 bg-emerald-500/15"
+      : status === "down"
+        ? "text-rose-500 bg-rose-500/15"
+        : "text-ink/50 bg-foreground/5";
   return (
     <div className="rounded-2xl bg-card ring-1 ring-border p-5">
       <div className="flex items-center gap-3 mb-3">

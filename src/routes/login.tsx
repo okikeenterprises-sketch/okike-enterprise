@@ -10,9 +10,16 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — OKIKE" },
-      { name: "description", content: "Sign in to your OKIKE account to track your project progress in real time, message your team, and review deliverables." },
+      {
+        name: "description",
+        content:
+          "Sign in to your OKIKE account to track your project progress in real time, message your team, and review deliverables.",
+      },
       { property: "og:title", content: "Sign in — OKIKE" },
-      { property: "og:description", content: "Access your OKIKE dashboard to follow live project updates." },
+      {
+        property: "og:description",
+        content: "Access your OKIKE dashboard to follow live project updates.",
+      },
     ],
     links: [{ rel: "canonical", href: "https://okike-enterprise.lovable.app/login" }],
   }),
@@ -56,7 +63,9 @@ function LoginPage() {
       <section className="py-24 px-6">
         <div className="max-w-md mx-auto bg-card rounded-3xl p-8 ring-1 ring-ink/5 flex flex-col gap-6">
           <div>
-            <div className="text-xs font-semibold tracking-widest uppercase text-brand">Welcome back</div>
+            <div className="text-xs font-semibold tracking-widest uppercase text-brand">
+              Welcome back
+            </div>
             <h1 className="text-2xl font-medium mt-2">Sign in to OKIKE</h1>
           </div>
 
@@ -73,7 +82,9 @@ function LoginPage() {
           </div>
 
           <form onSubmit={onEmail} className="flex flex-col gap-3">
-            <label htmlFor="login-email" className="sr-only">Email</label>
+            <label htmlFor="login-email" className="sr-only">
+              Email
+            </label>
             <input
               id="login-email"
               type="email"
@@ -85,7 +96,9 @@ function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="bg-surface ring-1 ring-ink/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-brand"
             />
-            <label htmlFor="login-password" className="sr-only">Password</label>
+            <label htmlFor="login-password" className="sr-only">
+              Password
+            </label>
             <input
               id="login-password"
               type="password"

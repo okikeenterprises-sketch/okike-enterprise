@@ -7,6 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { askAssistant } from "@/lib/ai-assistant.functions";
 import { toast } from "sonner";
 import heroImg from "@/assets/dashboard-hero.jpg";
+import okikeLogo from "@/assets/okike-logo.png";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -153,10 +154,10 @@ function DashboardPage() {
           <div className="px-1 lg:px-2">
             <Link
               to="/"
-              className="block text-xl lg:text-2xl font-semibold tracking-tight text-brand text-center lg:text-left"
+              className="flex items-center justify-center lg:justify-start"
+              aria-label="OKIKE home"
             >
-              <span className="lg:hidden">O</span>
-              <span className="hidden lg:inline">OKIKE</span>
+              <img src={okikeLogo} alt="OKIKE" className="h-7 w-auto lg:h-8" />
             </Link>
             <div className="hidden lg:block text-[11px] text-ink/50 mt-0.5">
               Your Digital Ecosystem
@@ -295,7 +296,14 @@ function DashboardPage() {
             {section === "projects" && (
               <ProjectsView projects={projects} milestones={milestones} loading={dataLoading} />
             )}
-            {section === "ai" && <AIView firstName={firstName} />}
+            {section === "ai" && (
+              <AIView
+                firstName={firstName}
+                projects={projects}
+                milestones={milestones}
+                updates={updates}
+              />
+            )}
             {section === "messages" && (
               <EmptyView
                 title="No messages yet"
@@ -645,7 +653,17 @@ function MilestonesView({
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
-function AIView({ firstName }: { firstName: string }) {
+function AIView({
+  firstName,
+  projects,
+  milestones,
+  updates,
+}: {
+  firstName: string;
+  projects: any[];
+  milestones: any[];
+  updates: any[];
+}) {
   const ask = useServerFn(askAssistant);
   const [messages, setMessages] = useState<ChatMsg[]>([
     {
@@ -669,7 +687,12 @@ function AIView({ firstName }: { firstName: string }) {
     setInput("");
     setBusy(true);
     try {
-      const res = await ask({ data: { messages: next } });
+      const res = await ask({
+        data: {
+          messages: next,
+          projectData: { projects, milestones, updates },
+        },
+      });
       if (res.ok) {
         setMessages([...next, { role: "assistant", content: res.text }]);
       } else {

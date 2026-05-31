@@ -11,9 +11,17 @@ export const Route = createFileRoute("/admin/inquiries")({
 
 type Inquiry = {
   id: string;
-  name: string; email: string; phone: string | null; company: string | null;
-  project_type: string; budget: string | null; timeline: string | null; details: string;
-  status: string; created_at: string; client_user_id: string | null;
+  name: string;
+  email: string;
+  phone: string | null;
+  company: string | null;
+  project_type: string;
+  budget: string | null;
+  timeline: string | null;
+  details: string;
+  status: string;
+  created_at: string;
+  client_user_id: string | null;
 };
 
 function InquiriesPage() {
@@ -23,10 +31,15 @@ function InquiriesPage() {
   const convert = useServerFn(convertInquiryToProject);
 
   async function load() {
-    const { data } = await supabase.from("project_inquiries").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("project_inquiries")
+      .select("*")
+      .order("created_at", { ascending: false });
     setList((data ?? []) as Inquiry[]);
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,37 +65,72 @@ function InquiriesPage() {
                 </td>
                 <td className="px-4 py-3">{i.project_type}</td>
                 <td className="px-4 py-3 text-xs">{i.budget || "—"}</td>
-                <td className="px-4 py-3"><span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800 capitalize">{i.status}</span></td>
+                <td className="px-4 py-3">
+                  <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800 capitalize">
+                    {i.status}
+                  </span>
+                </td>
                 <td className="px-4 py-3 text-xs">{new Date(i.created_at).toLocaleDateString()}</td>
                 <td className="px-4 py-3 text-right">
-                  <button onClick={() => setOpen(i)} className="text-brand text-sm font-medium">Open</button>
+                  <button onClick={() => setOpen(i)} className="text-brand text-sm font-medium">
+                    Open
+                  </button>
                 </td>
               </tr>
             ))}
-            {list.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-ink/40">No inquiries</td></tr>}
+            {list.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-ink/40">
+                  No inquiries
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-ink/40 flex items-center justify-center p-4" onClick={() => setOpen(null)}>
-          <div className="bg-surface rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto p-6 flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 bg-ink/40 flex items-center justify-center p-4"
+          onClick={() => setOpen(null)}
+        >
+          <div
+            className="bg-surface rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto p-6 flex flex-col gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-medium">{open.name}</h2>
-                <p className="text-sm text-ink/60">{open.email}{open.phone && ` · ${open.phone}`}{open.company && ` · ${open.company}`}</p>
+                <p className="text-sm text-ink/60">
+                  {open.email}
+                  {open.phone && ` · ${open.phone}`}
+                  {open.company && ` · ${open.company}`}
+                </p>
               </div>
-              <button onClick={() => setOpen(null)} className="text-ink/40 text-2xl leading-none">×</button>
+              <button onClick={() => setOpen(null)} className="text-ink/40 text-2xl leading-none">
+                ×
+              </button>
             </div>
             <div className="text-sm space-y-2">
-              <div><b>Type:</b> {open.project_type}</div>
-              <div><b>Budget:</b> {open.budget || "—"}</div>
-              <div><b>Timeline:</b> {open.timeline || "—"}</div>
-              <div><b>Has account:</b> {open.client_user_id ? "Yes" : "No (will match by email when they sign up)"}</div>
+              <div>
+                <b>Type:</b> {open.project_type}
+              </div>
+              <div>
+                <b>Budget:</b> {open.budget || "—"}
+              </div>
+              <div>
+                <b>Timeline:</b> {open.timeline || "—"}
+              </div>
+              <div>
+                <b>Has account:</b>{" "}
+                {open.client_user_id ? "Yes" : "No (will match by email when they sign up)"}
+              </div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wider text-ink/40 mb-1">Details</div>
-              <pre className="text-xs bg-card p-3 rounded-xl whitespace-pre-wrap font-sans">{open.details}</pre>
+              <pre className="text-xs bg-card p-3 rounded-xl whitespace-pre-wrap font-sans">
+                {open.details}
+              </pre>
             </div>
             <div className="flex flex-wrap gap-2 pt-2 border-t border-ink/5">
               <button
@@ -92,21 +140,30 @@ function InquiriesPage() {
                     toast.success("Marked as reviewing");
                     await load();
                     setOpen(null);
-                  } catch (e: any) { toast.error(e.message); }
+                  } catch (e: any) {
+                    toast.error(e.message);
+                  }
                 }}
                 className="px-4 py-2 rounded-full text-sm bg-amber-100 text-amber-900"
-              >Mark reviewing</button>
+              >
+                Mark reviewing
+              </button>
               <button
                 onClick={async () => {
                   if (!confirm("Decline this inquiry?")) return;
                   try {
                     await setStatus({ data: { id: open.id, status: "declined" } });
                     toast.success("Declined");
-                    await load(); setOpen(null);
-                  } catch (e: any) { toast.error(e.message); }
+                    await load();
+                    setOpen(null);
+                  } catch (e: any) {
+                    toast.error(e.message);
+                  }
                 }}
                 className="px-4 py-2 rounded-full text-sm bg-red-100 text-red-900"
-              >Decline</button>
+              >
+                Decline
+              </button>
               <button
                 onClick={async () => {
                   const title = prompt("Project title:", open.project_type);
@@ -114,11 +171,16 @@ function InquiriesPage() {
                   try {
                     await convert({ data: { inquiryId: open.id, title } });
                     toast.success("Converted to project");
-                    await load(); setOpen(null);
-                  } catch (e: any) { toast.error(e.message); }
+                    await load();
+                    setOpen(null);
+                  } catch (e: any) {
+                    toast.error(e.message);
+                  }
                 }}
                 className="px-4 py-2 rounded-full text-sm bg-brand text-brand-foreground ml-auto"
-              >Accept & convert to project</button>
+              >
+                Accept & convert to project
+              </button>
             </div>
           </div>
         </div>
