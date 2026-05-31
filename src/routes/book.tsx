@@ -22,11 +22,13 @@ export const Route = createFileRoute("/book")({
 
 type PackageId = "starter" | "business" | "custom";
 
+const formatNaira = (amount: number) => `₦${amount.toLocaleString()}`;
+
 const PACKAGES: { id: PackageId; name: string; base: number | null; timeline: string; desc: string; includes: string[] }[] = [
   {
     id: "starter",
     name: "Starter Site",
-    base: 800,
+    base: 150000,
     timeline: "1 week",
     desc: "A polished single-page site that converts visitors into leads.",
     includes: ["Custom design", "Mobile-responsive", "Contact form + analytics", "Hosting setup", "1 round of revisions"],
@@ -34,7 +36,7 @@ const PACKAGES: { id: PackageId; name: string; base: number | null; timeline: st
   {
     id: "business",
     name: "Business Site",
-    base: 2500,
+    base: 400000,
     timeline: "2–3 weeks",
     desc: "Multi-page marketing site with CMS so you can edit content yourself.",
     includes: ["Up to 8 pages", "Editable CMS", "Email + WhatsApp", "SEO foundation", "2 rounds of revisions", "30 days of support"],
@@ -52,14 +54,14 @@ const PACKAGES: { id: PackageId; name: string; base: number | null; timeline: st
 type AddOn = { id: string; label: string; price: number; desc: string; for: PackageId[] };
 
 const ADDONS: AddOn[] = [
-  { id: "extra_pages", label: "Extra pages", price: 200, desc: "+3 additional pages designed and built.", for: ["starter", "business"] },
-  { id: "copywriting", label: "Copywriting", price: 400, desc: "We write the words for you.", for: ["starter", "business"] },
-  { id: "blog", label: "Blog / news section", price: 500, desc: "CMS-powered blog with categories.", for: ["business"] },
-  { id: "ecommerce", label: "Simple e-commerce", price: 900, desc: "Up to 20 products, Stripe checkout.", for: ["business"] },
-  { id: "booking", label: "Online booking", price: 600, desc: "Calendar bookings + email confirmations.", for: ["business"] },
-  { id: "i18n", label: "Multi-language", price: 450, desc: "Two languages with switcher.", for: ["starter", "business"] },
-  { id: "auth", label: "User accounts", price: 800, desc: "Sign up, login, password reset.", for: ["business"] },
-  { id: "seo_pro", label: "SEO accelerator", price: 350, desc: "Schema, sitemap, page-speed pass.", for: ["starter", "business"] },
+  { id: "extra_pages", label: "Extra pages", price: 40000, desc: "+3 additional pages designed and built.", for: ["starter", "business"] },
+  { id: "copywriting", label: "Copywriting", price: 80000, desc: "We write the words for you.", for: ["starter", "business"] },
+  { id: "blog", label: "Blog / news section", price: 100000, desc: "CMS-powered blog with categories.", for: ["business"] },
+  { id: "ecommerce", label: "Simple e-commerce", price: 180000, desc: "Up to 20 products, Stripe checkout.", for: ["business"] },
+  { id: "booking", label: "Online booking", price: 120000, desc: "Calendar bookings + email confirmations.", for: ["business"] },
+  { id: "i18n", label: "Multi-language", price: 90000, desc: "Two languages with switcher.", for: ["starter", "business"] },
+  { id: "auth", label: "User accounts", price: 160000, desc: "Sign up, login, password reset.", for: ["business"] },
+  { id: "seo_pro", label: "SEO accelerator", price: 70000, desc: "Schema, sitemap, page-speed pass.", for: ["starter", "business"] },
 ];
 
 const TIMELINE_OPTIONS = [
@@ -145,11 +147,11 @@ function BookPage() {
     const summary = {
       package: selectedPkg.name,
       scope,
-      addons: availableAddons.filter((a) => addons[a.id]).map((a) => `${a.label} ($${a.price})`),
+      addons: availableAddons.filter((a) => addons[a.id]).map((a) => `${a.label} (${formatNaira(a.price)})`),
       timeline: tl.label,
       pricing: isCustom
         ? "Custom — quote on request"
-        : { subtotal, total, deposit, currency: "USD" },
+        : { subtotal, total, deposit, currency: "NGN" },
       intent,
     };
     const detailsBlock =
@@ -163,7 +165,7 @@ function BookPage() {
           phone: contact.phone || "",
           company: contact.company || "",
           project_type: selectedPkg.name,
-          budget: isCustom ? "Custom quote" : `$${total.toLocaleString()} (deposit $${deposit.toLocaleString()})`,
+          budget: isCustom ? "Custom quote" : `${formatNaira(total)} (deposit ${formatNaira(deposit)})`,
           timeline: tl.label,
           details: detailsBlock,
         },
@@ -237,7 +239,7 @@ function BookPage() {
                           <div className="font-medium">{p.name}</div>
                           {active && <Check className="size-4 text-brand" />}
                         </div>
-                        <div className="text-2xl font-medium">{p.base ? `$${p.base.toLocaleString()}` : "Custom"}</div>
+                        <div className="text-2xl font-medium">{p.base ? formatNaira(p.base) : "Custom"}</div>
                         <div className="text-xs uppercase tracking-wider text-ink/40">{p.timeline}</div>
                         <p className="text-sm text-ink/60">{p.desc}</p>
                         <ul className="text-xs text-ink/60 space-y-1.5 mt-1">
@@ -298,7 +300,7 @@ function BookPage() {
                         <div className="flex-1">
                           <div className="flex items-baseline justify-between gap-2">
                             <div className="font-medium text-sm">{a.label}</div>
-                            <div className="text-sm text-ink/70">+${a.price}</div>
+                            <div className="text-sm text-ink/70">+{formatNaira(a.price)}</div>
                           </div>
                           <p className="text-xs text-ink/50 mt-1">{a.desc}</p>
                         </div>
@@ -375,13 +377,13 @@ function BookPage() {
                   <div className="rounded-2xl bg-contrast text-contrast-foreground p-6 flex flex-col gap-4">
                     <div className="flex items-baseline justify-between">
                       <span className="text-sm opacity-70">Project total</span>
-                      <span className="text-2xl font-medium">${total.toLocaleString()}</span>
+                      <span className="text-2xl font-medium">{formatNaira(total)}</span>
                     </div>
                     <div className="flex items-baseline justify-between">
                       <span className="text-sm opacity-70">Deposit (30%) due now</span>
-                      <span className="text-3xl font-medium text-brand">${deposit.toLocaleString()}</span>
+                      <span className="text-3xl font-medium text-brand">{formatNaira(deposit)}</span>
                     </div>
-                    <div className="text-xs opacity-60">Remaining ${(total - deposit).toLocaleString()} invoiced at handover.</div>
+                    <div className="text-xs opacity-60">Remaining {formatNaira(total - deposit)} invoiced at handover.</div>
                   </div>
                 ) : (
                   <div className="rounded-2xl bg-contrast text-contrast-foreground p-6 flex flex-col gap-2">
@@ -399,7 +401,7 @@ function BookPage() {
                       title="Online deposit payments coming soon — submit your brief and we'll send a payment link."
                       className="flex-1 bg-brand/40 text-brand-foreground py-3 px-6 rounded-full font-medium cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      <Lock className="size-4" /> Pay ${deposit.toLocaleString()} deposit (coming soon)
+                      <Lock className="size-4" /> Pay {formatNaira(deposit)} deposit (coming soon)
                     </button>
                   )}
                   <button
@@ -427,7 +429,7 @@ function BookPage() {
                 </button>
                 {!isCustom && currentKey !== "package" && currentKey !== "scope" && currentKey !== "contact" && (
                   <div className="hidden md:block text-sm text-ink/60">
-                    Running total: <span className="font-medium text-ink">${total.toLocaleString()}</span>
+                    Running total: <span className="font-medium text-ink">{formatNaira(total)}</span>
                   </div>
                 )}
                 <button
@@ -513,7 +515,7 @@ function PriceBar({ subtotal, total, multiplier }: { subtotal: number; total: nu
     <div className="rounded-2xl bg-surface ring-1 ring-ink/10 p-5 flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-col">
         <span className="text-xs uppercase tracking-wider text-ink/40">Subtotal</span>
-        <span className="text-lg font-medium">${subtotal.toLocaleString()}</span>
+        <span className="text-lg font-medium">{formatNaira(subtotal)}</span>
       </div>
       {multiplier !== 1 && (
         <div className="flex flex-col">
@@ -523,7 +525,7 @@ function PriceBar({ subtotal, total, multiplier }: { subtotal: number; total: nu
       )}
       <div className="flex flex-col items-end">
         <span className="text-xs uppercase tracking-wider text-brand">Project total</span>
-        <span className="text-2xl font-medium">${total.toLocaleString()}</span>
+        <span className="text-2xl font-medium">{formatNaira(total)}</span>
       </div>
     </div>
   );
