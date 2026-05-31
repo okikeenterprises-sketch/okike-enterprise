@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tansta
 import okikeLogo from "@/assets/okike-logo.png";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { ThemeToggle } from "@/components/site/ThemeToggle";
 import {
   LayoutGrid,
   Users,
@@ -19,13 +20,14 @@ import {
   X,
   LogOut,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — OKIKE" }] }),
   component: AdminLayout,
 });
 
-const NAV: { to: string; label: string; icon: any; exact?: boolean }[] = [
+const NAV: { to: string; label: string; icon: LucideIcon; exact?: boolean }[] = [
   { to: "/admin", label: "Overview", icon: LayoutGrid, exact: true },
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/inquiries", label: "Inquiries", icon: Inbox },
@@ -53,11 +55,13 @@ function AdminLayout() {
     else if (role && role !== "admin") navigate({ to: "/dashboard" });
   }, [session, role, loading, navigate]);
 
-  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   if (loading || !session || role !== "admin") {
     return (
-      <div className="dark min-h-screen bg-background text-foreground flex items-center justify-center text-muted-foreground">
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center text-muted-foreground">
         Loading…
       </div>
     );
@@ -69,8 +73,12 @@ function AdminLayout() {
   const SidebarNav = (
     <>
       <div className="px-1">
-        <Link to="/" className="block" aria-label="OKIKE home"><img src={okikeLogo} alt="OKIKE" className="h-8 w-auto" /></Link>
-        <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">Admin Console</div>
+        <Link to="/" className="block" aria-label="OKIKE home">
+          <img src={okikeLogo} alt="OKIKE" className="h-8 w-auto" />
+        </Link>
+        <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">
+          Admin Console
+        </div>
       </div>
 
       <nav className="mt-7 flex-1 flex flex-col gap-1 overflow-y-auto">
@@ -80,7 +88,7 @@ function AdminLayout() {
           return (
             <Link
               key={t.to}
-              to={t.to as any}
+              to={t.to}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                 active
                   ? "bg-brand/15 text-brand ring-1 ring-brand/30"
@@ -103,7 +111,10 @@ function AdminLayout() {
           <div className="text-[11px] text-muted-foreground">Admin</div>
         </div>
         <button
-          onClick={async () => { await signOut(); navigate({ to: "/" }); }}
+          onClick={async () => {
+            await signOut();
+            navigate({ to: "/" });
+          }}
           className="text-muted-foreground hover:text-brand p-1 rounded"
           aria-label="Sign out"
         >
@@ -114,7 +125,7 @@ function AdminLayout() {
   );
 
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="flex">
         {/* Desktop sidebar */}
         <aside className="hidden lg:flex sticky top-0 h-screen w-64 shrink-0 flex-col border-r border-border bg-card px-5 py-5 overflow-y-auto">
@@ -150,7 +161,9 @@ function AdminLayout() {
             </button>
             <div className="flex-1 min-w-0">
               <h2 className="text-sm font-medium text-foreground/80 truncate">
-                {NAV.find((n) => (n.exact ? location.pathname === n.to : location.pathname.startsWith(n.to)))?.label ?? "Admin"}
+                {NAV.find((n) =>
+                  n.exact ? location.pathname === n.to : location.pathname.startsWith(n.to),
+                )?.label ?? "Admin"}
               </h2>
             </div>
             <Link
@@ -159,6 +172,7 @@ function AdminLayout() {
             >
               Client view
             </Link>
+            <ThemeToggle />
           </header>
 
           <main className="flex-1 px-4 md:px-8 py-6">
