@@ -527,6 +527,99 @@ export type Database = {
         };
         Relationships: [];
       };
+      blog_posts: {
+        Row: {
+          author: string | null;
+          content: string | null;
+          created_at: string;
+          excerpt: string | null;
+          id: string;
+          image_url: string | null;
+          position: number;
+          published: boolean;
+          slug: string;
+          tags: string[];
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          author?: string | null;
+          content?: string | null;
+          created_at?: string;
+          excerpt?: string | null;
+          id?: string;
+          image_url?: string | null;
+          position?: number;
+          published?: boolean;
+          slug: string;
+          tags?: string[];
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          author?: string | null;
+          content?: string | null;
+          created_at?: string;
+          excerpt?: string | null;
+          id?: string;
+          image_url?: string | null;
+          position?: number;
+          published?: boolean;
+          slug?: string;
+          tags?: string[];
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      courses: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          duration: string;
+          id: string;
+          image_url: string | null;
+          instructor: string | null;
+          lessons: Json;
+          position: number;
+          published: boolean;
+          slug: string;
+          title: string;
+          track: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          duration: string;
+          id?: string;
+          image_url?: string | null;
+          instructor?: string | null;
+          lessons?: Json;
+          position?: number;
+          published?: boolean;
+          slug: string;
+          title: string;
+          track: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          duration?: string;
+          id?: string;
+          image_url?: string | null;
+          instructor?: string | null;
+          lessons?: Json;
+          position?: number;
+          published?: boolean;
+          slug?: string;
+          title?: string;
+          track?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -559,7 +652,7 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof DatabaseWithoutInternals, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends

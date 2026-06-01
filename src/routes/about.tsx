@@ -45,7 +45,7 @@ function AboutPage() {
       <section className="px-6 border-b border-ink/10">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-ink/10">
           <Fact k="Founded" v="2023" />
-          <Fact k="Headquarters" v="Lagos, NG" />
+          <Fact k="Head Offices" v="Akwa Ibom & Enugu, NG" />
           <Fact k="Disciplines" v="Build · Teach" />
           <Fact k="Cohort size" v="≤ 20" />
         </div>

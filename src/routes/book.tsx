@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, ArrowLeft, ArrowRight, Lock } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { submitInquiry } from "@/lib/forms.functions";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/book")({
   head: () => ({
@@ -168,14 +169,13 @@ const SCOPE_QUESTIONS = {
 function BookPage() {
   const navigate = useNavigate();
   const send = useServerFn(submitInquiry);
+  const { session, loading, user } = useAuth();
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
-
   const [pkg, setPkg] = useState<PackageId | null>(null);
   const [scope, setScope] = useState({ goal: "", pages: "", brand: "", description: "" });
   const [addons, setAddons] = useState<Record<string, boolean>>({});
   const [timeline, setTimeline] = useState<string>("standard");
-  const [contact, setContact] = useState({ name: "", email: "", phone: "", company: "" });
 
   const selectedPkg = PACKAGES.find((p) => p.id === pkg) ?? null;
   const isCustom = pkg === "custom";
@@ -188,18 +188,37 @@ function BookPage() {
     return selectedPkg.base + addonTotal;
   }, [selectedPkg, addons, availableAddons]);
 
+  useEffect(() => {
+    if (!loading && !session) {
+      navigate({ to: "/signup" });
+    }
+  }, [session, loading, navigate]);
+
+  if (loading) {
+    return (
+      <SiteLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-ink/60">Loading…</div>
+        </div>
+      </SiteLayout>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
+
   const tl = TIMELINE_OPTIONS.find((t) => t.id === timeline)!;
   const total = Math.round(subtotal * tl.multiplier);
   const deposit = Math.round(total * 0.3);
 
-  // Steps: 0 package, 1 scope, 2 add-ons, 3 timeline, 4 contact, 5 review
+  // Steps: 0 package, 1 scope, 2 add-ons, 3 timeline, 4 review
   // Custom skips add-ons (step 2)
   const STEPS = isCustom
     ? [
         { key: "package", label: "Package" },
         { key: "scope", label: "Scope" },
         { key: "timeline", label: "Timeline" },
-        { key: "contact", label: "Contact" },
         { key: "review", label: "Review" },
       ]
     : [
@@ -207,7 +226,6 @@ function BookPage() {
         { key: "scope", label: "Scope" },
         { key: "addons", label: "Add-ons" },
         { key: "timeline", label: "Timeline" },
-        { key: "contact", label: "Contact" },
         { key: "review", label: "Review" },
       ];
 
@@ -225,12 +243,16 @@ function BookPage() {
     if (currentKey === "scope")
       return !!scope.goal && (isCustom ? scope.description.length >= 10 : !!scope.pages);
     if (currentKey === "timeline") return !!timeline;
-    if (currentKey === "contact") return contact.name.length > 0 && /.+@.+\..+/.test(contact.email);
     return true;
   }
 
   async function submit(intent: "deposit" | "save") {
-    if (!selectedPkg) return;
+    if (!selectedPkg || !user?.id || !user?.email) {
+      toast.error("Please make sure you're logged in.");
+      return;
+    }
+
+    const fullName = user.user_metadata?.full_name || user.email.split("@")[0];
     setBusy(true);
     const summary = {
       package: selectedPkg.name,
@@ -247,26 +269,35 @@ function BookPage() {
     const detailsBlock = `${scope.description || "(no extra description)"}\n\n— Builder summary —\n${JSON.stringify(summary, null, 2)}`;
 
     try {
+      console.log("Submitting project...");
       const res = await send({
         data: {
-          name: contact.name,
-          email: contact.email,
-          phone: contact.phone || "",
-          company: contact.company || "",
+          name: fullName,
+          email: user.email,
+          phone: "",
+          company: "",
           project_type: selectedPkg.name,
           budget: isCustom
             ? "Custom quote"
             : `${formatNaira(total)} (deposit ${formatNaira(deposit)})`,
           timeline: tl.label,
           details: detailsBlock,
+          client_user_id: user.id,
+          package_name: selectedPkg.name,
+          total: isCustom ? null : total,
+          deposit: isCustom ? null : deposit,
+          currency: "NGN",
         },
       });
+      console.log("Submit response:", res);
       if (res.ok) {
-        navigate({ to: "/thank-you" });
+        toast.success("Project submitted successfully!");
+        navigate({ to: "/dashboard" });
       } else {
         toast.error(res.error);
       }
-    } catch {
+    } catch (error) {
+      console.error("Submit error:", error);
       toast.error("Please double-check the form and try again.");
     } finally {
       setBusy(false);
@@ -284,7 +315,7 @@ function BookPage() {
             Scope your project. See your price. Lock it in.
           </h1>
           <p className="text-ink/60 max-w-[52ch]">
-            Six quick steps. We'll send a written proposal within 24 hours of submission.
+            Five quick steps. We'll send a written proposal within 24 hours of submission.
           </p>
         </div>
       </section>
@@ -482,53 +513,12 @@ function BookPage() {
               </div>
             )}
 
-            {/* Step 5: Contact */}
-            {currentKey === "contact" && (
-              <div className="flex flex-col gap-6">
-                <StepHeader
-                  title="Who are you?"
-                  subtitle="So we know where to send the proposal."
-                />
-                <div className="grid md:grid-cols-2 gap-4">
-                  <Input
-                    label="Your name"
-                    value={contact.name}
-                    onChange={(v) => setContact({ ...contact, name: v })}
-                    required
-                  />
-                  <Input
-                    label="Email"
-                    type="email"
-                    value={contact.email}
-                    onChange={(v) => setContact({ ...contact, email: v })}
-                    required
-                  />
-                  <Input
-                    label="Phone or WhatsApp"
-                    value={contact.phone}
-                    onChange={(v) => setContact({ ...contact, phone: v })}
-                    placeholder="Optional"
-                  />
-                  <Input
-                    label="Company"
-                    value={contact.company}
-                    onChange={(v) => setContact({ ...contact, company: v })}
-                    placeholder="Optional"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Step 6: Review */}
+            {/* Step 5: Review */}
             {currentKey === "review" && selectedPkg && (
               <div className="flex flex-col gap-6">
                 <StepHeader
-                  title="Review and confirm"
-                  subtitle={
-                    isCustom
-                      ? "We'll reply with a custom quote within 24 hours."
-                      : "Lock in your project with a 30% deposit."
-                  }
+                  title="Review and submit"
+                  subtitle="Submit your project and we'll review it shortly."
                 />
 
                 <div className="rounded-2xl bg-surface ring-1 ring-ink/10 p-6 flex flex-col gap-4">
@@ -548,59 +538,28 @@ function BookPage() {
                     />
                   )}
                   <SummaryRow label="Timeline" value={tl.label} />
-                  <SummaryRow label="Contact" value={`${contact.name} · ${contact.email}`} />
+                  {!isCustom && <SummaryRow label="Estimated total" value={formatNaira(total)} />}
                 </div>
 
-                {!isCustom ? (
-                  <div className="rounded-2xl bg-contrast text-contrast-foreground p-6 flex flex-col gap-4">
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-sm opacity-70">Project total</span>
-                      <span className="text-2xl font-medium">{formatNaira(total)}</span>
-                    </div>
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-sm opacity-70">Deposit (30%) due now</span>
-                      <span className="text-3xl font-medium text-brand">
-                        {formatNaira(deposit)}
-                      </span>
-                    </div>
-                    <div className="text-xs opacity-60">
-                      Remaining {formatNaira(total - deposit)} invoiced at handover.
-                    </div>
+                <div className="rounded-2xl bg-contrast text-contrast-foreground p-6 flex flex-col gap-2">
+                  <div className="text-sm opacity-70">Next steps</div>
+                  <div className="text-sm font-medium">1. You submit your project request</div>
+                  <div className="text-sm font-medium">
+                    2. We review and send you an approval decision
                   </div>
-                ) : (
-                  <div className="rounded-2xl bg-contrast text-contrast-foreground p-6 flex flex-col gap-2">
-                    <div className="text-sm opacity-70">Pricing</div>
-                    <div className="text-2xl font-medium">Custom quote on request</div>
-                    <div className="text-xs opacity-60">
-                      We'll send a fixed-scope proposal within 24 hours.
-                    </div>
+                  <div className="text-sm font-medium">
+                    3. Once approved, you'll be able to pay and get started
                   </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row gap-3">
-                  {!isCustom && (
-                    <button
-                      type="button"
-                      disabled
-                      title="Online deposit payments coming soon — submit your brief and we'll send a payment link."
-                      className="flex-1 bg-brand/40 text-brand-foreground py-3 px-6 rounded-full font-medium cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      <Lock className="size-4" /> Pay {formatNaira(deposit)} deposit (coming soon)
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => submit(isCustom ? "save" : "deposit")}
-                    disabled={busy || !contact.name || !contact.email}
-                    className={`${isCustom ? "flex-1" : ""} bg-ink text-surface py-3 px-6 rounded-full font-medium hover:bg-ink/90 transition disabled:opacity-50`}
-                  >
-                    {busy
-                      ? "Sending…"
-                      : isCustom
-                        ? "Submit for custom quote"
-                        : "Submit brief — we'll send a payment link"}
-                  </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => submit(isCustom ? "save" : "deposit")}
+                  disabled={busy || !user?.id}
+                  className="w-full bg-ink text-surface py-3 px-6 rounded-full font-medium hover:bg-ink/90 transition disabled:opacity-50"
+                >
+                  {busy ? "Submitting…" : "Submit Project"}
+                </button>
               </div>
             )}
 
@@ -615,15 +574,12 @@ function BookPage() {
                 >
                   <ArrowLeft className="size-4" /> Back
                 </button>
-                {!isCustom &&
-                  currentKey !== "package" &&
-                  currentKey !== "scope" &&
-                  currentKey !== "contact" && (
-                    <div className="hidden md:block text-sm text-ink/60">
-                      Running total:{" "}
-                      <span className="font-medium text-ink">{formatNaira(total)}</span>
-                    </div>
-                  )}
+                {!isCustom && currentKey !== "package" && currentKey !== "scope" && (
+                  <div className="hidden md:block text-sm text-ink/60">
+                    Running total:{" "}
+                    <span className="font-medium text-ink">{formatNaira(total)}</span>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={next}

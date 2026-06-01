@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, CheckCircle, ChevronRight, BookOpen, Clock, Users, Star } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { CurriculumLead } from "@/components/site/CurriculumLead";
 import { Testimonials } from "@/components/site/Testimonials";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/learn")({
   head: () => ({
@@ -59,6 +60,22 @@ export const Route = createFileRoute("/learn")({
   }),
   component: LearnPage,
 });
+
+type Course = {
+  id: string;
+  title: string;
+  slug: string;
+  track: string;
+  description: string | null;
+  duration: string;
+  image_url: string | null;
+  instructor: string | null;
+  lessons: string[];
+  position: number;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+};
 
 const tracks = [
   {
@@ -118,6 +135,26 @@ const curriculum = [
 function LearnPage() {
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
   const [isCourseSelected, setIsCourseSelected] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCourses() {
+      const { data } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("published", true)
+        .order("position", { ascending: true });
+      setCourses(
+        (data || []).map((course: any) => ({
+          ...course,
+          lessons: course.lessons || [],
+        })),
+      );
+      setLoading(false);
+    }
+    loadCourses();
+  }, []);
 
   return (
     <SiteLayout>
@@ -154,7 +191,9 @@ function LearnPage() {
                     Selected
                   </div>
                   <h3 className="text-3xl font-medium mb-2">{selectedTrack}</h3>
-                  <p className="text-ink/60 mb-6">Your learning journey begins in your dashboard!</p>
+                  <p className="text-ink/60 mb-6">
+                    Your learning journey begins in your dashboard!
+                  </p>
                 </div>
                 <div className="flex gap-3">
                   <button
@@ -179,57 +218,71 @@ function LearnPage() {
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-xs font-semibold tracking-widest uppercase text-brand mb-4">
-            Tracks
+            Courses
           </div>
           <h2 className="text-3xl md:text-4xl font-medium mb-4 max-w-[32ch] text-balance">
             Pick the path that fits the career you want.
           </h2>
           <p className="text-ink/60 mb-12 max-w-[48ch]">
-            Click on any track to learn more and select it for enrollment.
+            Click on any course to learn more and select it for enrollment.
           </p>
-          <div className="grid md:grid-cols-2 gap-6">
-            {tracks.map((t) => (
-              <div
-                key={t.name}
-                data-reveal
-                onClick={() => {
-                  setSelectedTrack(t.name);
-                  setIsCourseSelected(true);
-                }}
-                className={`bg-card rounded-2xl p-8 ring-1 transition cursor-pointer ${
-                  selectedTrack === t.name
-                    ? "ring-brand bg-brand/5"
-                    : "ring-ink/5 hover:ring-brand/30 hover:bg-ink/5"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-xs uppercase tracking-widest text-brand font-semibold">
-                    {t.tag}
+          {loading ? (
+            <div className="text-center py-12 text-ink/50">Loading courses...</div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {courses.map((course) => (
+                <div
+                  key={course.id}
+                  data-reveal
+                  onClick={() => {
+                    setSelectedTrack(course.title);
+                    setIsCourseSelected(true);
+                  }}
+                  className={`bg-card rounded-2xl p-8 ring-1 transition cursor-pointer ${
+                    selectedTrack === course.title
+                      ? "ring-brand bg-brand/5"
+                      : "ring-ink/5 hover:ring-brand/30 hover:bg-ink/5"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-xs uppercase tracking-widest text-brand font-semibold">
+                      {course.track}
+                    </div>
+                    {selectedTrack === course.title && (
+                      <CheckCircle className="size-6 text-brand" />
+                    )}
                   </div>
-                  {selectedTrack === t.name && (
-                    <CheckCircle className="size-6 text-brand" />
+                  <h3 className="text-2xl font-medium mb-2">{course.title}</h3>
+                  <p className="text-ink/60 mb-4">{course.description}</p>
+                  {course.lessons && course.lessons.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {course.lessons.slice(0, 5).map((lesson) => (
+                        <span
+                          key={lesson}
+                          className="text-xs px-3 py-1 rounded-full bg-ink/5 text-ink/70"
+                        >
+                          {lesson}
+                        </span>
+                      ))}
+                    </div>
                   )}
-                </div>
-                <h3 className="text-2xl font-medium mb-2">{t.name}</h3>
-                <p className="text-ink/60 mb-4">{t.desc}</p>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {t.stack.map((s) => (
-                    <span key={s} className="text-xs px-3 py-1 rounded-full bg-ink/5 text-ink/70">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex items-center justify-between pt-4 border-t border-ink/10">
-                  <div className="flex items-center gap-4 text-sm text-ink/60">
-                    <span className="flex items-center gap-1"><Clock className="size-4" /> 12 weeks</span>
-                    <span className="flex items-center gap-1"><Users className="size-4" /> ≤ 20</span>
-                    <span className="flex items-center gap-1"><Star className="size-4" /> 4.9/5</span>
+                  <div className="flex items-center justify-between pt-4 border-t border-ink/10">
+                    <div className="flex items-center gap-4 text-sm text-ink/60">
+                      <span className="flex items-center gap-1">
+                        <Clock className="size-4" /> {course.duration}
+                      </span>
+                      {course.instructor && (
+                        <span className="flex items-center gap-1">
+                          <Users className="size-4" /> {course.instructor}
+                        </span>
+                      )}
+                    </div>
+                    <ChevronRight className="size-5 text-brand" />
                   </div>
-                  <ChevronRight className="size-5 text-brand" />
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -342,7 +395,7 @@ function LearnPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-xs uppercase tracking-widest text-brand font-semibold mb-2">{label}</div>
+      <div className="text-xs uppercase tracking-wider text-brand font-semibold mb-2">{label}</div>
       <div className="text-3xl font-medium">{value}</div>
     </div>
   );
