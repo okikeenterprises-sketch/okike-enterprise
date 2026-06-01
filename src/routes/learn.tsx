@@ -154,20 +154,20 @@ function LearnPage() {
                     Selected
                   </div>
                   <h3 className="text-3xl font-medium mb-2">{selectedTrack}</h3>
-                  <p className="text-ink/60 mb-6">Great choice! Ready to start your journey?</p>
+                  <p className="text-ink/60 mb-6">Your learning journey begins in your dashboard!</p>
                 </div>
                 <div className="flex gap-3">
-                  <button 
-                    onClick={() => setIsCourseSelected(false)} 
+                  <button
+                    onClick={() => setIsCourseSelected(false)}
                     className="px-6 py-3 rounded-full border border-ink/20 hover:bg-ink/5 transition"
                   >
                     Choose another
                   </button>
                   <Link
-                    to="/enroll"
+                    to="/signup"
                     className="px-6 py-3 rounded-full bg-brand text-brand-foreground font-medium hover:opacity-90 transition"
                   >
-                    Enroll now
+                    Get Started
                   </Link>
                 </div>
               </div>
@@ -335,24 +335,6 @@ function LearnPage() {
       />
 
       <CurriculumLead />
-
-      <section className="py-24 px-6">
-        <div className="max-w-3xl mx-auto bg-card rounded-3xl p-12 ring-1 ring-ink/5 flex flex-col items-center text-center gap-6">
-          <div className="text-xs font-semibold tracking-widest uppercase text-brand">Tuition</div>
-          <div className="text-5xl md:text-6xl font-medium">$1,200</div>
-          <div className="text-ink/60">or 3 monthly payments of $450</div>
-          <p className="text-ink/60 max-w-[48ch] text-pretty">
-            Scholarships available for exceptional candidates. Apply now and we'll review every
-            application personally.
-          </p>
-          <Link
-            to="/enroll"
-            className="bg-brand text-contrast-foreground py-3 px-6 rounded-full font-medium hover:opacity-90 transition"
-          >
-            Apply now
-          </Link>
-        </div>
-      </section>
     </SiteLayout>
   );
 }

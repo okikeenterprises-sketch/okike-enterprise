@@ -19,6 +19,7 @@ import {
   Package,
   X,
   LogOut,
+  BookOpen,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -34,6 +35,7 @@ const NAV: { to: string; label: string; icon: LucideIcon; exact?: boolean }[] = 
   { to: "/admin/projects", label: "Projects", icon: FolderKanban },
   { to: "/admin/payments", label: "Payments", icon: CreditCard },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/admin/content/courses", label: "Courses", icon: BookOpen },
   { to: "/admin/content/services", label: "Services", icon: Package },
   { to: "/admin/content/packages", label: "Packages", icon: Package },
   { to: "/admin/content/portfolio", label: "Portfolio", icon: ImageIcon },
