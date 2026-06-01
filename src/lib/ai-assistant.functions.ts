@@ -7,10 +7,32 @@ const MessageSchema = z.object({
   content: z.string().min(1).max(8000),
 });
 
+type Project = {
+  id: string;
+  title: string;
+  package_name: string | null;
+  stage: string;
+  created_at: string;
+};
+
+type Milestone = {
+  id: string;
+  project_id: string;
+  name: string;
+  status: string;
+};
+
+type Update = {
+  id: string;
+  project_id: string;
+  message: string;
+  created_at: string;
+};
+
 type ProjectData = {
-  projects: any[];
-  milestones: any[];
-  updates: any[];
+  projects: Project[];
+  milestones: Milestone[];
+  updates: Update[];
 };
 
 export const askAssistant = createServerFn({ method: "POST" })
@@ -103,7 +125,8 @@ If the user asks to create a project, tell them to click the "Start a project" b
       const json = await res.json();
       const text: string = json?.choices?.[0]?.message?.content ?? "";
       return { ok: true as const, text };
-    } catch (e: any) {
-      return { ok: false as const, error: e?.message ?? "AI request failed." };
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "AI request failed.";
+      return { ok: false as const, error: errorMessage };
     }
   });
