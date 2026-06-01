@@ -1,19 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, Send, X, Sparkles, ArrowUpRight, User } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { askPublicAI } from "@/lib/public-ai.functions";
+import { Bot, Send, X, Sparkles, ArrowUpRight, User, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { toast } from "sonner";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
 export function WelcomeAI() {
-  const ask = useServerFn(askPublicAI);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([
     {
       role: "assistant",
-      content: "Hi there! 👋 Welcome to OKIKE. I'd love to tell you about what we do. We're a software house and academy — we build great software and teach people to build it too. Would you like to know more about our services, our academy, or how to get started?",
+      content: "Hi there! 👋 Welcome to OKIKE. I'm your AI assistant. I'd love to tell you about what we do. We're a software house and academy — we build great software and teach people to build it too!",
     },
   ]);
   const [input, setInput] = useState("");
@@ -24,6 +20,14 @@ export function WelcomeAI() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const responses: Record<string, string> = {
+    "What services do you offer?": "We offer custom software development including web applications, mobile apps, AI tools, and SaaS platforms. We also have an academy where we teach full-stack development, UI/UX design, Python, cybersecurity, and data analysis!",
+    "Tell me about the academy": "Our academy offers comprehensive training programs in full-stack development, UI/UX design, Python development, cybersecurity, and data analysis. We provide hands-on projects, mentorship, and career support!",
+    "How do I book a project?": "Great question! You can click the 'Book project' button below or visit /book to start a conversation with us about your project needs.",
+    "What's your pricing like?": "We have transparent packages for every stage! From simple landing pages to custom SaaS solutions. Check out our Services page for more details or click 'Start a project' to get a custom quote.",
+    default: "That's a great question! I'd recommend signing up to explore our services, or booking a project consultation to discuss your needs in detail. Would you like to know more about our software development services or our academy?",
+  };
+
   async function send(text?: string) {
     const content = (text ?? input).trim();
     if (!content || busy) return;
@@ -33,22 +37,15 @@ export function WelcomeAI() {
     setInput("");
     setBusy(true);
 
-    try {
-      const res = await ask({
-        data: {
-          messages: next,
-        },
-      });
-      if (res.ok) {
-        setMessages([...next, { role: "assistant", content: res.text }]);
-      } else {
-        toast.error(res.error);
+    // Simulate AI response
+    setTimeout(() => {
+      let response = responses[content];
+      if (!response) {
+        response = responses.default;
       }
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "AI request failed");
-    } finally {
+      setMessages([...next, { role: "assistant", content: response }]);
       setBusy(false);
-    }
+    }, 800);
   }
 
   const quickQuestions = [
@@ -119,12 +116,9 @@ export function WelcomeAI() {
                 <div className="size-8 rounded-full bg-brand/20 flex items-center justify-center shrink-0">
                   <Bot className="size-4 text-brand" />
                 </div>
-                <div className="bg-ink/[0.04] rounded-2xl px-4 py-3">
-                  <div className="flex gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-ink/30 animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <div className="w-2 h-2 rounded-full bg-ink/30 animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <div className="w-2 h-2 rounded-full bg-ink/30 animate-bounce" style={{ animationDelay: "300ms" }} />
-                  </div>
+                <div className="bg-ink/[0.04] rounded-2xl px-4 py-3 flex items-center gap-2">
+                  <Loader2 className="size-4 animate-spin text-ink/60" />
+                  <span className="text-sm text-ink/60">Thinking…</span>
                 </div>
               </div>
             )}
