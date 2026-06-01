@@ -24,6 +24,10 @@ type Inquiry = {
   client_user_id: string | null;
 };
 
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Something went wrong";
+}
+
 function InquiriesPage() {
   const [list, setList] = useState<Inquiry[]>([]);
   const [open, setOpen] = useState<Inquiry | null>(null);
@@ -140,8 +144,8 @@ function InquiriesPage() {
                     toast.success("Marked as reviewing");
                     await load();
                     setOpen(null);
-                  } catch (e: any) {
-                    toast.error(e.message);
+                  } catch (e: unknown) {
+                    toast.error(errorMessage(e));
                   }
                 }}
                 className="px-4 py-2 rounded-full text-sm bg-amber-100 text-amber-900"
@@ -156,8 +160,8 @@ function InquiriesPage() {
                     toast.success("Declined");
                     await load();
                     setOpen(null);
-                  } catch (e: any) {
-                    toast.error(e.message);
+                  } catch (e: unknown) {
+                    toast.error(errorMessage(e));
                   }
                 }}
                 className="px-4 py-2 rounded-full text-sm bg-red-100 text-red-900"
@@ -173,8 +177,8 @@ function InquiriesPage() {
                     toast.success("Converted to project");
                     await load();
                     setOpen(null);
-                  } catch (e: any) {
-                    toast.error(e.message);
+                  } catch (e: unknown) {
+                    toast.error(errorMessage(e));
                   }
                 }}
                 className="px-4 py-2 rounded-full text-sm bg-brand text-brand-foreground ml-auto"

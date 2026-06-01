@@ -43,15 +43,24 @@ const KEYS: {
   },
 ];
 
+type SettingValue = Record<string, string>;
+type SettingsMap = Record<string, SettingValue>;
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Something went wrong";
+}
+
 function SiteSettingsPage() {
-  const [settings, setSettings] = useState<Record<string, any>>({});
+  const [settings, setSettings] = useState<SettingsMap>({});
   const upsert = useServerFn(cmsUpsert);
 
   async function load() {
     const { data } = await supabase.from("site_settings").select("*");
-    const m: Record<string, any> = {};
-    (data ?? []).forEach((r: any) => {
-      m[r.key] = r.value;
+    const m: SettingsMap = {};
+    (data ?? []).forEach((r) => {
+      if (r.value && typeof r.value === "object" && !Array.isArray(r.value)) {
+        m[r.key] = r.value as SettingValue;
+      }
     });
     setSettings(m);
   }
@@ -63,8 +72,8 @@ function SiteSettingsPage() {
     try {
       await upsert({ data: { table: "site_settings", row: { key, value: settings[key] ?? {} } } });
       toast.success("Saved");
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(errorMessage(e));
     }
   }
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Download } from "lucide-react";
 import { toast } from "sonner";
+import type { Json } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/admin/reports")({
   component: AdminReports,
@@ -14,6 +15,12 @@ type Counts = {
   projects: number;
   contact: number;
   enrollments: number;
+};
+type CsvRow = Record<string, Json | undefined>;
+type CsvSupabase = {
+  from(table: string): {
+    select(columns: string): Promise<{ data: CsvRow[] | null; error: { message: string } | null }>;
+  };
 };
 
 function AdminReports() {
@@ -48,9 +55,10 @@ function AdminReports() {
   }, []);
 
   async function exportCsv(table: string, columns: string[]) {
-    const { data, error } = await supabase.from(table as any).select(columns.join(","));
+    const tableClient = supabase as unknown as CsvSupabase;
+    const { data, error } = await tableClient.from(table).select(columns.join(","));
     if (error) return toast.error(error.message);
-    const rows = (data ?? []) as any[];
+    const rows = data ?? [];
     const header = columns.join(",");
     const body = rows
       .map((r) =>

@@ -27,6 +27,9 @@ type Point = {
   messages: number;
 };
 type Stage = { name: string; count: number };
+type CountKey = Exclude<keyof Point, "day">;
+type DatedRow = { created_at: string };
+type ProjectRow = DatedRow & { stage: string };
 
 function AdminAnalytics() {
   const [series, setSeries] = useState<Point[]>([]);
@@ -55,11 +58,11 @@ function AdminAnalytics() {
           messages: 0,
         });
       }
-      const bump = (arr: any[] | null, key: keyof Point) => {
+      const bump = (arr: DatedRow[] | null, key: CountKey) => {
         for (const r of arr ?? []) {
-          const k = (r.created_at as string).slice(0, 10);
+          const k = r.created_at.slice(0, 10);
           const pt = days.find((d) => d.day === k);
-          if (pt) (pt as any)[key] += 1;
+          if (pt) pt[key] += 1;
         }
       };
       bump(profiles, "signups");
@@ -69,8 +72,8 @@ function AdminAnalytics() {
       setSeries(days);
 
       const stageCounts: Record<string, number> = {};
-      for (const p of proj ?? []) {
-        const k = (p as any).stage as string;
+      for (const p of (proj ?? []) as ProjectRow[]) {
+        const k = p.stage;
         stageCounts[k] = (stageCounts[k] ?? 0) + 1;
       }
       setStages(

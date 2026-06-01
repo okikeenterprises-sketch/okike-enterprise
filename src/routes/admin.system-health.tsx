@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { HeartPulse, Database, Activity, Globe, RefreshCw } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/admin/system-health")({
   component: AdminSystemHealth,
@@ -109,7 +110,7 @@ function AdminSystemHealth() {
   );
 }
 
-function HealthCard({ icon: Icon, check }: { icon: any; check: Check }) {
+function HealthCard({ icon: Icon, check }: { icon: LucideIcon; check: Check }) {
   const status = check.ok === null ? "checking" : check.ok ? "ok" : "down";
   const color =
     status === "ok"

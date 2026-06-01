@@ -41,10 +41,14 @@ function HomePage() {
   const [founder, setFounder] = useState<{ quote?: string; name?: string }>({});
 
   useEffect(() => {
+    const settingText = (value: unknown) => (typeof value === "string" ? value : undefined);
     getPackages().then((rows) => setPackages(rows.slice(0, 3)));
     getPartners().then(setPartners);
     getSettings(["founder_quote", "founder_name"]).then((s) =>
-      setFounder({ quote: s.founder_quote, name: s.founder_name }),
+      setFounder({
+        quote: settingText(s.founder_quote),
+        name: settingText(s.founder_name),
+      }),
     );
   }, []);
 
@@ -67,7 +71,7 @@ function HomePage() {
           <div className="flex flex-col gap-8">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-ink/10 bg-surface/60 backdrop-blur px-4 py-2 text-xs font-medium tracking-wide text-ink/80">
               <Sparkles className="size-3.5 text-brand" />
-              We build. We automate. We scale.
+              We build. We teach. We scale.
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.02] text-ink text-balance">
@@ -135,7 +139,7 @@ function HomePage() {
             </div>
             <div className="absolute -bottom-4 -left-4 hidden md:block rounded-xl bg-surface ring-1 ring-ink/10 px-4 py-3 shadow-lg">
               <div className="text-[10px] uppercase tracking-widest text-ink/40">Live</div>
-              <div className="text-sm font-semibold text-ink">12 products shipped this quarter</div>
+              <div className="text-sm font-semibold text-ink">3 products shipped this quarter</div>
             </div>
           </div>
         </div>
@@ -176,7 +180,7 @@ function HomePage() {
       <section className="border-y border-ink/5 bg-surface">
         <div className="max-w-7xl mx-auto px-6 py-10 text-center">
           <p className="text-base md:text-lg font-medium tracking-tight text-ink/80">
-            Launching June 1st, 2026 — built from the ground up, with intention.
+            Now open for projects — built from the ground up, with intention.
           </p>
         </div>
       </section>

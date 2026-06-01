@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 export type PublicService = {
   id: string;
@@ -46,7 +47,7 @@ export async function getPackages(): Promise<PublicPackage[]> {
     .select("id, name, tagline, slug, price, currency, features, featured, request_quote")
     .eq("published", true)
     .order("position", { ascending: true });
-  return ((data ?? []) as any[]).map((p) => ({
+  return ((data ?? []) as (Omit<PublicPackage, "features"> & { features: unknown })[]).map((p) => ({
     ...p,
     features: Array.isArray(p.features) ? (p.features as string[]) : [],
   }));
@@ -70,9 +71,9 @@ export async function getTeam(): Promise<PublicTeam[]> {
   return (data ?? []) as PublicTeam[];
 }
 
-export async function getSettings(keys: string[]): Promise<Record<string, any>> {
+export async function getSettings(keys: string[]): Promise<Record<string, Json>> {
   const { data } = await supabase.from("site_settings").select("key, value").in("key", keys);
-  const out: Record<string, any> = {};
-  for (const row of data ?? []) out[row.key as string] = (row as any).value;
+  const out: Record<string, Json> = {};
+  for (const row of data ?? []) out[row.key] = row.value;
   return out;
 }

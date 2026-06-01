@@ -1,8 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
-async function ensureAdmin(supabase: any, userId: string) {
+type AuthedSupabase = SupabaseClient<Database>;
+type DynamicMutationBuilder = {
+  upsert(row: Record<string, unknown>): Promise<{ error: { message: string } | null }>;
+  delete(): {
+    eq(column: string, value: string): Promise<{ error: { message: string } | null }>;
+  };
+};
+type DynamicSupabase = {
+  from(table: string): DynamicMutationBuilder;
+};
+
+async function ensureAdmin(supabase: AuthedSupabase, userId: string) {
   const { data } = await supabase
     .from("user_roles")
     .select("role")
@@ -153,19 +166,22 @@ const ALLOWED_TABLES = [
   "site_settings",
 ] as const;
 
+type CmsTable = (typeof ALLOWED_TABLES)[number];
+
 export const cmsUpsert = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
     z
       .object({
         table: z.enum(ALLOWED_TABLES),
-        row: z.record(z.string(), z.any()),
+        row: z.record(z.string(), z.unknown()),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
-    const { error } = await context.supabase.from(data.table).upsert(data.row);
+    const tableClient = context.supabase as unknown as DynamicSupabase;
+    const { error } = await tableClient.from(data.table).upsert(data.row);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -176,7 +192,11 @@ export const cmsDelete = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
     const col = data.table === "site_settings" ? "key" : "id";
-    const { error } = await (context.supabase.from(data.table) as any).delete().eq(col, data.id);
+    const tableClient = context.supabase as unknown as DynamicSupabase;
+    const { error } = await tableClient
+      .from(data.table as CmsTable)
+      .delete()
+      .eq(col, data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

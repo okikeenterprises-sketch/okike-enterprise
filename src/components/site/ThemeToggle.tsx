@@ -23,7 +23,9 @@ export function ThemeToggle() {
     else root.classList.remove("dark");
     try {
       localStorage.setItem("theme", theme);
-    } catch {}
+    } catch {
+      // localStorage can be unavailable in privacy-restricted browser contexts.
+    }
   }, [theme]);
 
   const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));

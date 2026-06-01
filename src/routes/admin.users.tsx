@@ -15,6 +15,8 @@ type Row = {
   created_at: string;
   role?: string;
 };
+type RoleRow = { user_id: string; role: string };
+type ProfileRow = Omit<Row, "role">;
 
 function AdminUsers() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -31,9 +33,12 @@ function AdminUsers() {
         supabase.from("user_roles").select("user_id, role"),
       ]);
       const roleMap = new Map<string, string>();
-      for (const r of roles ?? []) roleMap.set((r as any).user_id, (r as any).role);
+      for (const r of (roles ?? []) as RoleRow[]) roleMap.set(r.user_id, r.role);
       setRows(
-        (profiles ?? []).map((p: any) => ({ ...p, role: roleMap.get(p.user_id) ?? "client" })),
+        ((profiles ?? []) as ProfileRow[]).map((p) => ({
+          ...p,
+          role: roleMap.get(p.user_id) ?? "client",
+        })),
       );
       setLoading(false);
     }

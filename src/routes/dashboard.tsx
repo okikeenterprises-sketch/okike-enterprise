@@ -660,9 +660,9 @@ function AIView({
   updates,
 }: {
   firstName: string;
-  projects: any[];
-  milestones: any[];
-  updates: any[];
+  projects: Project[];
+  milestones: Milestone[];
+  updates: Update[];
 }) {
   const ask = useServerFn(askAssistant);
   const [messages, setMessages] = useState<ChatMsg[]>([

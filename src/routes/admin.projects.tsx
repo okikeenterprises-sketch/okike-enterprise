@@ -20,6 +20,7 @@ type Project = {
   admin_notes: string | null;
   created_at: string;
 };
+type ProjectStage = Project["stage"];
 type Milestone = {
   id: string;
   project_id: string;
@@ -28,10 +29,15 @@ type Milestone = {
   note: string | null;
   position: number;
 };
+type MilestoneStatus = Milestone["status"];
 type Update = { id: string; project_id: string; message: string; created_at: string };
 
 const STAGES = ["submitted", "reviewing", "accepted", "declined", "in_progress", "completed"];
 const M_STATUS = ["pending", "active", "done"];
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Something went wrong";
+}
 
 function AdminProjects() {
   const [list, setList] = useState<Project[]>([]);
@@ -141,12 +147,14 @@ function AdminProjects() {
                   defaultValue={open.stage}
                   onChange={async (e) => {
                     try {
-                      await updateProj({ data: { id: open.id, stage: e.target.value as any } });
+                      await updateProj({
+                        data: { id: open.id, stage: e.target.value as ProjectStage },
+                      });
                       toast.success("Stage updated");
                       await load();
                       await loadDetail(open.id);
-                    } catch (err: any) {
-                      toast.error(err.message);
+                    } catch (err: unknown) {
+                      toast.error(errorMessage(err));
                     }
                   }}
                   className="bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2"
@@ -169,8 +177,8 @@ function AdminProjects() {
                       await updateProj({ data: { id: open.id, total: v } });
                       toast.success("Saved");
                       await load();
-                    } catch (err: any) {
-                      toast.error(err.message);
+                    } catch (err: unknown) {
+                      toast.error(errorMessage(err));
                     }
                   }}
                   className="bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2"
@@ -191,8 +199,8 @@ function AdminProjects() {
                       data: { id: open.id, admin_notes: e.target.value || null },
                     });
                     toast.success("Notes saved");
-                  } catch (err: any) {
-                    toast.error(err.message);
+                  } catch (err: unknown) {
+                    toast.error(errorMessage(err));
                   }
                 }}
                 className="bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-sm"
@@ -213,11 +221,13 @@ function AdminProjects() {
                         defaultValue={m.status}
                         onChange={async (e) => {
                           try {
-                            await updateMs({ data: { id: m.id, status: e.target.value as any } });
+                            await updateMs({
+                              data: { id: m.id, status: e.target.value as MilestoneStatus },
+                            });
                             toast.success("Saved");
                             await loadDetail(open.id);
-                          } catch (err: any) {
-                            toast.error(err.message);
+                          } catch (err: unknown) {
+                            toast.error(errorMessage(err));
                           }
                         }}
                         className="bg-surface ring-1 ring-ink/10 rounded-lg px-2 py-1 text-sm"
@@ -234,8 +244,8 @@ function AdminProjects() {
                         onBlur={async (e) => {
                           try {
                             await updateMs({ data: { id: m.id, note: e.target.value || null } });
-                          } catch (err: any) {
-                            toast.error(err.message);
+                          } catch (err: unknown) {
+                            toast.error(errorMessage(err));
                           }
                         }}
                         className="flex-1 bg-surface ring-1 ring-ink/10 rounded-lg px-3 py-1 text-sm"
@@ -263,8 +273,8 @@ function AdminProjects() {
                       setNewMsg("");
                       toast.success("Posted");
                       await loadDetail(open.id);
-                    } catch (err: any) {
-                      toast.error(err.message);
+                    } catch (err: unknown) {
+                      toast.error(errorMessage(err));
                     }
                   }}
                   className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium"

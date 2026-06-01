@@ -9,10 +9,51 @@ export const Route = createFileRoute("/admin/content/$type")({
   component: ContentPage,
 });
 
+type CmsTable =
+  | "services"
+  | "packages"
+  | "addons"
+  | "portfolio_items"
+  | "partners"
+  | "team_members"
+  | "site_settings";
+type ContentValue = string | number | boolean | string[] | null | undefined;
+type ContentRow = Record<string, ContentValue> & {
+  id?: string;
+  name?: string;
+  title?: string;
+  slug?: string;
+  position?: number | null;
+  published?: boolean | null;
+};
+type DynamicSelectBuilder = {
+  select(columns: string): {
+    order(column: string, options?: { ascending: boolean }): Promise<{ data: ContentRow[] | null }>;
+  };
+};
+type DynamicSupabase = {
+  from(table: string): DynamicSelectBuilder;
+};
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Something went wrong";
+}
+
+function inputValue(value: ContentValue) {
+  if (value == null || typeof value === "boolean") return "";
+  if (Array.isArray(value)) return value.join("\n");
+  return String(value);
+}
+
+function tagsValue(value: ContentValue) {
+  if (Array.isArray(value)) return value.join(", ");
+  return inputValue(value);
+}
+
 const TABLE_MAP: Record<
   string,
   {
-    table: string;
+    table: CmsTable;
     title: string;
     fields: {
       key: string;
@@ -100,18 +141,19 @@ const TABLE_MAP: Record<
 function ContentPage() {
   const { type } = useParams({ from: "/admin/content/$type" });
   const cfg = TABLE_MAP[type as string];
-  const [rows, setRows] = useState<any[]>([]);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [rows, setRows] = useState<ContentRow[]>([]);
+  const [editing, setEditing] = useState<ContentRow | null>(null);
   const upsert = useServerFn(cmsUpsert);
   const del = useServerFn(cmsDelete);
 
   async function load() {
     if (!cfg) return;
-    const { data } = await supabase
-      .from(cfg.table as any)
+    const tableClient = supabase as unknown as DynamicSupabase;
+    const { data } = await tableClient
+      .from(cfg.table)
       .select("*")
       .order("position", { ascending: true });
-    setRows((data ?? []) as any[]);
+    setRows(data ?? []);
   }
   useEffect(() => {
     load();
@@ -120,7 +162,7 @@ function ContentPage() {
   if (!cfg) return <div>Unknown content type.</div>;
 
   function startNew() {
-    const blank: any = {};
+    const blank: ContentRow = {};
     cfg.fields.forEach((f) => {
       if (f.type === "boolean") blank[f.key] = f.key === "published";
       else if (f.type === "number") blank[f.key] = 0;
@@ -136,23 +178,23 @@ function ContentPage() {
       const row = { ...editing };
       // strip empty id for inserts
       if (!row.id) delete row.id;
-      await upsert({ data: { table: cfg.table as any, row } });
+      await upsert({ data: { table: cfg.table, row } });
       toast.success("Saved");
       setEditing(null);
       await load();
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(errorMessage(e));
     }
   }
 
   async function remove(id: string) {
     if (!confirm("Delete this item?")) return;
     try {
-      await del({ data: { table: cfg.table as any, id } });
+      await del({ data: { table: cfg.table, id } });
       toast.success("Deleted");
       await load();
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(errorMessage(e));
     }
   }
 
@@ -188,7 +230,7 @@ function ContentPage() {
                   <button onClick={() => setEditing(r)} className="text-brand text-sm">
                     Edit
                   </button>
-                  <button onClick={() => remove(r.id)} className="text-red-600 text-sm">
+                  <button onClick={() => r.id && remove(r.id)} className="text-red-600 text-sm">
                     Delete
                   </button>
                 </td>
@@ -223,7 +265,7 @@ function ContentPage() {
                 {f.type === "textarea" ? (
                   <textarea
                     rows={4}
-                    value={editing[f.key] ?? ""}
+                    value={inputValue(editing[f.key])}
                     onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
                     className="bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2"
                   />
@@ -237,7 +279,7 @@ function ContentPage() {
                 ) : f.type === "number" ? (
                   <input
                     type="number"
-                    value={editing[f.key] ?? ""}
+                    value={inputValue(editing[f.key])}
                     onChange={(e) =>
                       setEditing({
                         ...editing,
@@ -249,11 +291,7 @@ function ContentPage() {
                 ) : f.type === "json" ? (
                   <textarea
                     rows={5}
-                    value={
-                      Array.isArray(editing[f.key])
-                        ? editing[f.key].join("\n")
-                        : (editing[f.key] ?? "")
-                    }
+                    value={inputValue(editing[f.key])}
                     onChange={(e) =>
                       setEditing({
                         ...editing,
@@ -264,11 +302,7 @@ function ContentPage() {
                   />
                 ) : f.type === "tags" ? (
                   <input
-                    value={
-                      Array.isArray(editing[f.key])
-                        ? editing[f.key].join(", ")
-                        : (editing[f.key] ?? "")
-                    }
+                    value={tagsValue(editing[f.key])}
                     onChange={(e) =>
                       setEditing({
                         ...editing,
@@ -282,7 +316,7 @@ function ContentPage() {
                   />
                 ) : (
                   <input
-                    value={editing[f.key] ?? ""}
+                    value={inputValue(editing[f.key])}
                     onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
                     className="bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2"
                   />
