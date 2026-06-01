@@ -46,7 +46,7 @@ function PortfolioPage() {
       .eq("published", true)
       .order("position", { ascending: true })
       .then(({ data }) => {
-        setItems((data ?? []) as unknown as PortfolioItem[];
+        setItems((data ?? []) as unknown as PortfolioItem[]);
         setLoading(false);
       });
   }, []);
