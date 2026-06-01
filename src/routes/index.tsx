@@ -54,9 +54,10 @@ function HomePage() {
   }, []);
 
   return (
-    <SiteLayout>
-      {/* Hero — magazine layout with product mockup */}
-      <section className="relative overflow-hidden border-b border-ink/5">
+    <>
+      <SiteLayout>
+        {/* Hero — magazine layout with product mockup */}
+        <section className="relative overflow-hidden border-b border-ink/5">
         {/* Soft brand glow */}
         <div
           aria-hidden
@@ -386,9 +387,10 @@ function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
-    </SiteLayout>
-    <WelcomeAI />
+        </section>
+      </SiteLayout>
+      <WelcomeAI />
+    </>
   );
 }
 
