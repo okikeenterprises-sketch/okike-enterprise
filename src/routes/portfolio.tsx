@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowUpRight, Sparkles, Building, Code2, GraduationCap, Users, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,48 +64,63 @@ function PortfolioPage() {
           className="pointer-events-none absolute -bottom-32 -left-32 size-[500px] rounded-full bg-brand/5 blur-3xl"
         />
 
-        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 md:pt-28 md:pb-24 grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-10 items-center">
-          <div className="flex flex-col gap-8">
+        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 md:pt-28 md:pb-24">
+          {/* Top badge & intro */}
+          <div className="flex flex-col items-center text-center gap-8 mb-12">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-ink/10 bg-surface/60 backdrop-blur px-4 py-2 text-xs font-medium tracking-wide text-ink/80">
               <Sparkles className="size-3.5 text-brand" />
-              Our Work
+              Our Portfolio
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.02] text-ink text-balance">
-              Real products. Real impact.{" "}
-              <span className="text-brand italic font-medium">Built with care.</span>
+              Crafting digital products{" "}
+              <span className="text-brand italic font-medium">that make a difference.</span>
             </h1>
 
-            <p className="text-lg text-ink/65 max-w-[54ch] text-pretty">
-              A curated selection of the platforms, AI tools, mobile apps and digital
-              experiences we&apos;ve built for ambitious teams across Africa and beyond.
+            <p className="text-lg text-ink/65 max-w-[60ch] text-pretty">
+              From SaaS platforms to student portals, we build products that solve real problems
+              for founders, creators and educational institutions.
             </p>
 
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="flex flex-wrap gap-3 justify-center pt-2">
               <Link
                 to="/book"
                 className="group bg-brand text-brand-foreground py-3.5 pl-6 pr-5 inline-flex items-center gap-2 rounded-full font-medium shadow-sm hover:opacity-90 transition"
               >
-                Build something with us
+                Start your project
                 <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                to="/services"
+                className="group bg-ink/5 text-ink py-3.5 pl-6 pr-5 inline-flex items-center gap-2 rounded-full font-medium ring-1 ring-ink/10 hover:bg-ink/10 transition"
+              >
+                Explore our services
               </Link>
             </div>
           </div>
 
-          <div className="relative">
-            <div
-              aria-hidden
-              className="absolute inset-0 -m-6 rounded-[2rem] bg-gradient-to-br from-brand/15 via-brand/5 to-transparent blur-2xl"
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-4xl mx-auto">
+            <StatCard
+              icon={Building}
+              value="30+"
+              label="Organizations served"
             />
-            <div className="relative rounded-2xl overflow-hidden ring-1 ring-ink/10 shadow-[0_30px_80px_-30px_rgba(146,64,14,0.35)] bg-card">
-              <img
-                src={heroDashboard}
-                alt="OKIKE product portfolio"
-                width={1536}
-                height={1152}
-                className="w-full h-auto object-cover"
-              />
-            </div>
+            <StatCard
+              icon={Code2}
+              value="20+"
+              label="Projects launched"
+            />
+            <StatCard
+              icon={GraduationCap}
+              value="3000+"
+              label="Students reached"
+            />
+            <StatCard
+              icon={Zap}
+              value="100%"
+              label="Client satisfaction"
+            />
           </div>
         </div>
       </section>
@@ -119,7 +134,7 @@ function PortfolioPage() {
                 Selected work
               </div>
               <h2 className="text-3xl md:text-4xl font-medium tracking-tight max-w-[24ch] text-balance">
-                Projects we&apos;ve shipped.
+                Projects we've shipped.
               </h2>
             </div>
           </div>
@@ -150,11 +165,11 @@ function PortfolioPage() {
       <section className="py-24 md:py-32 px-6 bg-secondary border-y border-ink/5">
         <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-8">
           <h2 className="text-4xl md:text-6xl font-medium tracking-tight text-balance">
-            Let&apos;s add{" "}
+            Let's add{" "}
             <span className="text-brand italic font-medium">your project</span> next.
           </h2>
           <p className="text-ink/60 max-w-[48ch] text-pretty">
-            Have a project in mind? Tell us what you&apos;re building — we&apos;ll respond
+            Have a project in mind? Tell us what you're building — we'll respond
             within 24 hours with next steps and a quote.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
@@ -236,6 +251,18 @@ function PortfolioGrid({ items }: { items: PortfolioItem[] }) {
             <div key={item.id}>{card}</div>
         );
       })}
+    </div>
+  );
+}
+
+function StatCard({ icon: Icon, value, label }: { icon: any; value: string; label: string }) {
+  return (
+    <div className="bg-card p-6 rounded-2xl ring-1 ring-ink/5 hover:ring-brand/20 transition-colors flex flex-col items-center justify-center text-center gap-2">
+      <div className="p-3 bg-brand/10 rounded-full text-brand mb-1">
+        <Icon className="size-5" />
+      </div>
+      <div className="text-2xl font-semibold text-ink">{value}</div>
+      <div className="text-xs font-medium text-ink/60 uppercase tracking-wide">{label}</div>
     </div>
   );
 }
