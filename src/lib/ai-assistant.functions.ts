@@ -65,7 +65,7 @@ export const askAssistant = createServerFn({ method: "POST" })
 
     const system =
       data.system ??
-      `You are OKIKE AI - a concise, helpful assistant inside the OKIKE client dashboard. Answer in 1-3 short paragraphs. Be practical.
+      `You are OKIKE AI — a concise, helpful assistant inside the OKIKE client dashboard. Answer in 1-3 short paragraphs. Be practical.
 
 You have access to the user's project data, milestones, and updates. When the user asks about their projects, you can reference this information. You can help summarize their progress, suggest next steps, and answer questions about their work.
 
