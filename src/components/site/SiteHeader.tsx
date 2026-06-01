@@ -22,6 +22,7 @@ import {
 
 const navItems = [
   { to: "/services", label: "Services" },
+  { to: "/portfolio", label: "Portfolio" },
   { to: "/learn", label: "Academy" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
