@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, Sparkles, Zap, Bot, ShieldCheck, Users, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { WelcomeAI } from "@/components/site/WelcomeAI";
 
 import { Testimonials } from "@/components/site/Testimonials";
 import {
@@ -387,6 +388,7 @@ function HomePage() {
         </div>
       </section>
     </SiteLayout>
+    <WelcomeAI />
   );
 }
 
