@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { SiteLayout } from "@/components/site/SiteLayout";
@@ -32,6 +33,7 @@ function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -123,18 +125,28 @@ function SignupPage() {
             <label htmlFor="signup-password" className="sr-only">
               Password
             </label>
-            <input
-              id="signup-password"
-              type="password"
-              required
-              minLength={8}
-              placeholder="Password (8+ characters)"
-              aria-label="Password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-surface ring-1 ring-ink/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-brand"
-            />
+            <div className="relative">
+              <input
+                id="signup-password"
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={8}
+                placeholder="Password (8+ characters)"
+                aria-label="Password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-surface ring-1 ring-ink/10 rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-brand w-full"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-ink/50 hover:text-ink transition"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             <button
               disabled={busy}
               className="w-full py-3 rounded-full bg-brand text-brand-foreground text-sm font-medium hover:opacity-90 transition disabled:opacity-50"

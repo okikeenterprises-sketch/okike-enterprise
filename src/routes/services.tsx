@@ -217,68 +217,82 @@ function ServicesPage() {
     <SiteLayout>
       {/* 1. HERO */}
       <section className="relative overflow-hidden border-b border-ink/5">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-40 -right-40 size-[700px] rounded-full bg-brand/10 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-32 -left-32 size-[500px] rounded-full bg-brand/5 blur-3xl"
-        />
-
-        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 md:pt-28 md:pb-24 grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-10 items-center">
-          <div className="flex flex-col gap-8">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-ink/10 bg-surface/60 backdrop-blur px-4 py-2 text-xs font-medium tracking-wide text-ink/80">
-              <Sparkles className="size-3.5 text-brand" />
-              Our Services
+        <div className="absolute -top-24 -left-24 w-[600px] h-[600px] bg-brand/20 rounded-full blur-[120px] opacity-60" />
+        <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-brand/10 rounded-full blur-[100px] opacity-50" />
+        
+        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-24 md:pt-32 md:pb-32">
+          <div className="max-w-4xl mx-auto text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-ink/10 bg-surface/80 backdrop-blur-sm mb-8">
+              <Sparkles className="size-4 text-brand" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink/70">Our Services</span>
             </div>
-
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.02] text-ink text-balance">
-              Building digital systems for{" "}
-              <span className="text-brand italic font-medium">modern businesses.</span>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-tight mb-6">
+              We build the{" "}
+              <span className="relative inline-block">
+                <span className="relative z-10 text-brand">digital foundations</span>
+                <svg className="absolute -bottom-2 left-0 w-full h-3 text-brand/30" viewBox="0 0 200 12" preserveAspectRatio="none">
+                  <path d="M0 6 Q50 0 100 6 T200 6" fill="none" stroke="currentColor" strokeWidth="4" />
+                </svg>
+              </span>{" "}
+              for ambitious teams.
             </h1>
-
-            <p className="text-lg text-ink/65 max-w-[54ch] text-pretty">
-              We design and develop scalable platforms, AI-powered tools and modern digital
-              experiences for startups, creators and organizations — built with the rigor of a
-              studio and the speed of a startup.
+            
+            <p className="text-lg md:text-xl text-ink/65 max-w-2xl mx-auto mb-10 leading-relaxed">
+              From idea to scale — we ship AI tools, scalable platforms, mobile apps and stunning experiences that actually move the needle.
             </p>
-
-            <div className="flex flex-wrap gap-3 pt-2">
+            
+            <div className="flex flex-wrap justify-center gap-4">
               <Link
                 to="/book"
-                className="group bg-brand text-brand-foreground py-3.5 pl-6 pr-5 inline-flex items-center gap-2 rounded-full font-medium shadow-sm hover:opacity-90 transition"
+                className="group bg-brand text-brand-foreground px-8 py-4 rounded-full font-semibold text-lg shadow-lg shadow-brand/20 hover:shadow-brand/30 hover:opacity-90 transition-all duration-300 flex items-center gap-2"
               >
-                Start a project
-                <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                Get started today
+                <ArrowUpRight className="size-5 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
               </Link>
               <a
                 href="#work"
-                className="group bg-ink/[0.04] text-ink py-3.5 pl-6 pr-5 inline-flex items-center gap-2 rounded-full font-medium ring-1 ring-ink/10 hover:bg-ink/[0.07] transition"
+                className="bg-ink/5 text-ink px-8 py-4 rounded-full font-semibold text-lg ring-1 ring-ink/10 hover:bg-ink/10 hover:ring-ink/20 transition-all duration-300"
               >
                 View our work
-                <ArrowUpRight className="size-4" />
               </a>
             </div>
           </div>
-
-          <div className="relative">
-            <div
-              aria-hidden
-              className="absolute inset-0 -m-6 rounded-[2rem] bg-gradient-to-br from-brand/15 via-brand/5 to-transparent blur-2xl"
-            />
-            <div className="relative rounded-2xl overflow-hidden ring-1 ring-ink/10 shadow-[0_30px_80px_-30px_rgba(146,64,14,0.35)] bg-card">
-              <img
-                src={heroDashboard}
-                alt="OKIKE product dashboard preview"
-                width={1536}
-                height={1152}
-                className="w-full h-auto object-cover"
-              />
-            </div>
-            <div className="absolute -bottom-4 -left-4 hidden md:block rounded-xl bg-surface ring-1 ring-ink/10 px-4 py-3 shadow-lg">
-              <div className="text-[10px] uppercase tracking-widest text-ink/40">In production</div>
-              <div className="text-sm font-semibold text-ink">Platforms used by 300+ people</div>
+          
+          {/* Floating Services Badges */}
+          <div className="relative mt-20 max-w-5xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-brand">
+                <div className="flex items-center gap-3 mb-3">
+                  <Bot className="size-6 text-brand" />
+                  <h3 className="font-semibold text-lg">AI & Automation</h3>
+                </div>
+                <p className="text-sm text-ink/60">Intelligent systems that work for you.</p>
+              </div>
+              
+              <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-ink">
+                <div className="flex items-center gap-3 mb-3">
+                  <Code2 className="size-6 text-ink/70" />
+                  <h3 className="font-semibold text-lg">Web Platforms</h3>
+                </div>
+                <p className="text-sm text-ink/60">Scalable, modern web applications.</p>
+              </div>
+              
+              <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-ink/50">
+                <div className="flex items-center gap-3 mb-3">
+                  <Smartphone className="size-6 text-ink/70" />
+                  <h3 className="font-semibold text-lg">Mobile Apps</h3>
+                </div>
+                <p className="text-sm text-ink/60">Native-feeling experiences, one codebase.</p>
+              </div>
+              
+              <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-brand/50">
+                <div className="flex items-center gap-3 mb-3">
+                  <Palette className="size-6 text-brand/70" />
+                  <h3 className="font-semibold text-lg">Design & Branding</h3>
+                </div>
+                <p className="text-sm text-ink/60">Beautiful, intuitive, memorable products.</p>
+              </div>
             </div>
           </div>
         </div>

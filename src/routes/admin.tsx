@@ -37,6 +37,7 @@ const NAV: { to: string; label: string; icon: LucideIcon; exact?: boolean }[] = 
   { to: "/admin/content/services", label: "Services", icon: Package },
   { to: "/admin/content/packages", label: "Packages", icon: Package },
   { to: "/admin/content/portfolio", label: "Portfolio", icon: ImageIcon },
+  { to: "/admin/content/blog", label: "Blog", icon: FileText },
   { to: "/admin/announcements", label: "Messages", icon: Megaphone },
   { to: "/admin/reports", label: "Reports", icon: FileText },
   { to: "/admin/system-health", label: "System Health", icon: HeartPulse },

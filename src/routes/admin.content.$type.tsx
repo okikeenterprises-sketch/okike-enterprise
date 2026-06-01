@@ -16,7 +16,8 @@ type CmsTable =
   | "portfolio_items"
   | "partners"
   | "team_members"
-  | "site_settings";
+  | "site_settings"
+  | "blog_posts";
 type ContentValue = string | number | boolean | string[] | null | undefined;
 type ContentRow = Record<string, ContentValue> & {
   id?: string;
@@ -132,6 +133,21 @@ const TABLE_MAP: Record<
       { key: "role", label: "Role" },
       { key: "bio", label: "Bio", type: "textarea" },
       { key: "image_url", label: "Image URL" },
+      { key: "position", label: "Order", type: "number" },
+      { key: "published", label: "Published", type: "boolean" },
+    ],
+  },
+  blog: {
+    table: "blog_posts",
+    title: "Blog Posts",
+    fields: [
+      { key: "title", label: "Title" },
+      { key: "slug", label: "Slug" },
+      { key: "excerpt", label: "Excerpt", type: "textarea" },
+      { key: "content", label: "Content", type: "textarea" },
+      { key: "image_url", label: "Featured Image URL" },
+      { key: "author", label: "Author" },
+      { key: "tags", label: "Tags (comma-separated)", type: "tags" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
     ],

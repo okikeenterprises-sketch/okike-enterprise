@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Shield,
   ArrowUpRight,
+  ChevronDown,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "./ThemeToggle";
@@ -23,7 +24,11 @@ import {
 const navItems = [
   { to: "/services", label: "Services" },
   { to: "/portfolio", label: "Portfolio" },
+  { to: "/blog", label: "Blog" },
   { to: "/learn", label: "Academy" },
+] as const;
+
+const companyItems = [
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
 ] as const;
@@ -53,6 +58,19 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="text-sm font-medium text-ink/70 hover:text-ink hover:bg-surface px-4 py-1.5 rounded-full transition-colors inline-flex items-center">
+              Company
+              <ChevronDown className="ml-1 h-3 w-3 transition-transform" aria-hidden="true" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {companyItems.map((item) => (
+                <DropdownMenuItem key={item.to} asChild>
+                  <Link to={item.to}>{item.label}</Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
@@ -117,6 +135,16 @@ export function SiteHeader() {
         <div className="md:hidden border-t border-ink/5 bg-surface">
           <nav className="px-6 py-4 flex flex-col gap-4">
             {navItems.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className="text-sm font-medium text-ink hover:text-brand"
+              >
+                {item.label}
+              </Link>
+            ))}
+            {companyItems.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
