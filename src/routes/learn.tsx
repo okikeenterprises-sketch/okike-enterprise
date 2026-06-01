@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { Check, CheckCircle, ChevronRight, BookOpen, Clock, Users, Star } from "lucide-react";
+import { useState } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { CurriculumLead } from "@/components/site/CurriculumLead";
 import { Testimonials } from "@/components/site/Testimonials";
@@ -115,6 +116,9 @@ const curriculum = [
 ];
 
 function LearnPage() {
+  const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
+  const [isCourseSelected, setIsCourseSelected] = useState(false);
+
   return (
     <SiteLayout>
       <section className="py-24 md:py-32 px-6">
@@ -140,32 +144,88 @@ function LearnPage() {
         </div>
       </section>
 
+      {isCourseSelected && selectedTrack && (
+        <section className="py-12 px-6 bg-brand/5 border-y border-brand/20">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-card rounded-2xl p-8 ring-1 ring-brand/20 shadow-lg">
+              <div className="flex items-start justify-between flex-col md:flex-row gap-6">
+                <div>
+                  <div className="text-xs uppercase tracking-widest text-brand font-semibold mb-2">
+                    Selected
+                  </div>
+                  <h3 className="text-3xl font-medium mb-2">{selectedTrack}</h3>
+                  <p className="text-ink/60 mb-6">Great choice! Ready to start your journey?</p>
+                </div>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => setIsCourseSelected(false)} 
+                    className="px-6 py-3 rounded-full border border-ink/20 hover:bg-ink/5 transition"
+                  >
+                    Choose another
+                  </button>
+                  <Link
+                    to="/enroll"
+                    className="px-6 py-3 rounded-full bg-brand text-brand-foreground font-medium hover:opacity-90 transition"
+                  >
+                    Enroll now
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-xs font-semibold tracking-widest uppercase text-brand mb-4">
             Tracks
           </div>
-          <h2 className="text-3xl md:text-4xl font-medium mb-12 max-w-[32ch] text-balance">
+          <h2 className="text-3xl md:text-4xl font-medium mb-4 max-w-[32ch] text-balance">
             Pick the path that fits the career you want.
           </h2>
+          <p className="text-ink/60 mb-12 max-w-[48ch]">
+            Click on any track to learn more and select it for enrollment.
+          </p>
           <div className="grid md:grid-cols-2 gap-6">
             {tracks.map((t) => (
               <div
                 key={t.name}
                 data-reveal
-                className="bg-card rounded-2xl p-8 ring-1 ring-ink/5 flex flex-col gap-4 hover:ring-brand/30 transition"
+                onClick={() => {
+                  setSelectedTrack(t.name);
+                  setIsCourseSelected(true);
+                }}
+                className={`bg-card rounded-2xl p-8 ring-1 transition cursor-pointer ${
+                  selectedTrack === t.name
+                    ? "ring-brand bg-brand/5"
+                    : "ring-ink/5 hover:ring-brand/30 hover:bg-ink/5"
+                }`}
               >
-                <div className="text-xs uppercase tracking-widest text-brand font-semibold">
-                  {t.tag}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-xs uppercase tracking-widest text-brand font-semibold">
+                    {t.tag}
+                  </div>
+                  {selectedTrack === t.name && (
+                    <CheckCircle className="size-6 text-brand" />
+                  )}
                 </div>
-                <h3 className="text-2xl font-medium">{t.name}</h3>
-                <p className="text-ink/60">{t.desc}</p>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <h3 className="text-2xl font-medium mb-2">{t.name}</h3>
+                <p className="text-ink/60 mb-4">{t.desc}</p>
+                <div className="flex flex-wrap gap-2 mb-6">
                   {t.stack.map((s) => (
                     <span key={s} className="text-xs px-3 py-1 rounded-full bg-ink/5 text-ink/70">
                       {s}
                     </span>
                   ))}
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-ink/10">
+                  <div className="flex items-center gap-4 text-sm text-ink/60">
+                    <span className="flex items-center gap-1"><Clock className="size-4" /> 12 weeks</span>
+                    <span className="flex items-center gap-1"><Users className="size-4" /> ≤ 20</span>
+                    <span className="flex items-center gap-1"><Star className="size-4" /> 4.9/5</span>
+                  </div>
+                  <ChevronRight className="size-5 text-brand" />
                 </div>
               </div>
             ))}

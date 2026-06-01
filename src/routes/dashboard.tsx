@@ -27,6 +27,12 @@ import {
   CheckCircle2,
   Loader2,
   Inbox,
+  BookOpen,
+  GraduationCap,
+  Clock,
+  Play,
+  CheckCircle,
+  Award,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -38,6 +44,7 @@ export const Route = createFileRoute("/dashboard")({
 type Section =
   | "dashboard"
   | "projects"
+  | "courses"
   | "ai"
   | "messages"
   | "files"
@@ -48,6 +55,7 @@ type Section =
 const NAV: { key: Section; label: string; icon: LucideIcon }[] = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "projects", label: "Projects", icon: FolderKanban },
+  { key: "courses", label: "My Courses", icon: BookOpen },
   { key: "ai", label: "AI Assistant", icon: Sparkles },
   { key: "messages", label: "Messages", icon: MessageSquare },
   { key: "files", label: "Files", icon: FileText },
@@ -295,6 +303,9 @@ function DashboardPage() {
             )}
             {section === "projects" && (
               <ProjectsView projects={projects} milestones={milestones} loading={dataLoading} />
+            )}
+            {section === "courses" && (
+              <CoursesView />
             )}
             {section === "ai" && (
               <AIView
@@ -770,6 +781,201 @@ function AIView({
         </button>
       </form>
     </section>
+  );
+}
+
+/* ---------------- Courses ---------------- */
+
+type Course = {
+  id: string;
+  name: string;
+  track: string;
+  progress: number;
+  duration: string;
+  status: "enrolled" | "completed" | "available";
+  nextLesson: string;
+  lessonsCompleted: number;
+  totalLessons: number;
+};
+
+const COURSES: Course[] = [
+  {
+    id: "1",
+    name: "Full-Stack Development",
+    track: "Web Development",
+    progress: 35,
+    duration: "12 weeks",
+    status: "enrolled",
+    nextLesson: "React Hooks & State Management",
+    lessonsCompleted: 7,
+    totalLessons: 20,
+  },
+  {
+    id: "2",
+    name: "Cyber Security Fundamentals",
+    track: "Security",
+    progress: 0,
+    duration: "12 weeks",
+    status: "available",
+    nextLesson: "Introduction to Network Security",
+    lessonsCompleted: 0,
+    totalLessons: 24,
+  },
+  {
+    id: "3",
+    name: "Data Analysis with Python",
+    track: "Data Science",
+    progress: 100,
+    duration: "12 weeks",
+    status: "completed",
+    nextLesson: "Capstone Project",
+    lessonsCompleted: 22,
+    totalLessons: 22,
+  },
+];
+
+function CoursesView() {
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+
+  return (
+    <div className="grid gap-5">
+      {/* Header */}
+      <section className="rounded-2xl bg-card ring-1 ring-ink/10 p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <GraduationCap className="size-5 text-brand" />
+              My Learning
+            </h2>
+            <p className="text-ink/60 text-sm mt-1">
+              Track your progress and continue learning
+            </p>
+          </div>
+          <Link
+            to="/learn"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-medium hover:opacity-90"
+          >
+            Browse all courses <ChevronRight className="size-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-5">
+          <div className="flex items-center gap-3 mb-2">
+          <Award className="size-4 text-brand" />
+          <span className="text-[11px] uppercase tracking-widest text-ink/60">
+            Enrolled
+          </span>
+          </div>
+          <div className="text-2xl font-semibold">1</div>
+          <div className="text-xs text-ink/50">active course</div>
+        </div>
+        <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-5">
+          <div className="flex items-center gap-3 mb-2">
+          <CheckCircle className="size-4 text-emerald-500" />
+          <span className="text-[11px] uppercase tracking-widest text-ink/60">
+            Completed
+          </span>
+          </div>
+          <div className="text-2xl font-semibold">1</div>
+          <div className="text-xs text-ink/50">course finished</div>
+        </div>
+        <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-5">
+          <div className="flex items-center gap-3 mb-2">
+          <Clock className="size-4 text-amber-500" />
+          <span className="text-[11px] uppercase tracking-widest text-ink/60">
+            Hours Learned
+          </span>
+          </div>
+          <div className="text-2xl font-semibold">24</div>
+          <div className="text-xs text-ink/50">total hours</div>
+        </div>
+      </div>
+
+      {/* Course Grid */}
+      <div className="grid gap-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-ink/80">Your Courses</h3>
+        </div>
+        <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-4">
+          {COURSES.map((course) => (
+            <div
+              key={course.id}
+              onClick={() => setSelectedCourse(
+                selectedCourse === course.id ? null : course.id
+              )}
+              className={`rounded-2xl bg-card ring-1 transition-all transition-all ring-ink/10 p-6 cursor-pointer ${
+                selectedCourse === course.id ? "ring-brand bg-brand/5" : "hover:ring-brand/20"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-[10px] uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full ${
+                      course.status === "enrolled"
+                        ? "bg-brand/15 text-brand"
+                        : course.status === "completed"
+                        ? "bg-emerald-500/15 text-emerald-600"
+                        : "bg-ink/10 text-ink/60"
+                    }`}>
+                      {course.status}
+                    </span>
+                    <span className="text-xs text-ink/50">• {course.duration}</span>
+                  </div>
+                  <h4 className="font-semibold text-lg mb-1">{course.name}</h4>
+                  <p className="text-sm text-ink/60 mb-4">{course.track}</p>
+
+                  {course.status !== "available" && (
+                    <div className="mb-4">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-ink/60">
+                          {course.lessonsCompleted}/{course.totalLessons} lessons
+                        </span>
+                        <span className="font-semibold text-brand">
+                          {course.progress}%
+                        </span>
+                      </div>
+                      <div className="h-2 bg-ink/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-brand rounded-full"
+                          style={{ width: `${course.progress}%` }}
+                        />
+                      </div>
+                      </div>
+                  )}
+
+                  {course.status === "enrolled" && (
+                    <div className="flex items-center justify-between pt-3 border-t border-ink/10">
+                      <div className="flex items-center gap-2 text-sm text-ink/60">
+                        <Clock className="size-4" />
+                        Next: {course.nextLesson}
+                      </div>
+                      <button className="inline-flex items-center gap-1.5 rounded-xl bg-brand text-brand-foreground px-3 py-1.5 text-xs font-medium hover:opacity-90">
+                        <Play className="size-3" /> Continue
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {course.status === "available" && (
+                  <div className="pt-3 border-t border-ink/10">
+                    <button className="inline-flex items-center gap-1.5 rounded-xl bg-ink/5 text-ink px-3 py-1.5 text-xs font-medium hover:bg-ink/10">
+                      Enroll Now
+                    </button>
+                  </div>
+                )}
+                {course.status === "completed" && (
+                  <div className="pt-3 border-t border-ink/10 flex items-center gap-2 text-sm text-emerald-600">
+                    <CheckCircle className="size-4" /> Certificate earned
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
