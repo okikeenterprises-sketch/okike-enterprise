@@ -17,7 +17,8 @@ type CmsTable =
   | "partners"
   | "team_members"
   | "site_settings"
-  | "blog_posts";
+  | "blog_posts"
+  | "courses";
 type ContentValue = string | number | boolean | string[] | null | undefined;
 type ContentRow = Record<string, ContentValue> & {
   id?: string;
@@ -148,6 +149,22 @@ const TABLE_MAP: Record<
       { key: "image_url", label: "Featured Image URL" },
       { key: "author", label: "Author" },
       { key: "tags", label: "Tags (comma-separated)", type: "tags" },
+      { key: "position", label: "Order", type: "number" },
+      { key: "published", label: "Published", type: "boolean" },
+    ],
+  },
+  courses: {
+    table: "courses",
+    title: "Courses",
+    fields: [
+      { key: "title", label: "Title" },
+      { key: "slug", label: "Slug" },
+      { key: "track", label: "Track" },
+      { key: "description", label: "Description", type: "textarea" },
+      { key: "duration", label: "Duration" },
+      { key: "image_url", label: "Featured Image URL" },
+      { key: "instructor", label: "Instructor" },
+      { key: "lessons", label: "Lessons (one per line)", type: "json" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
     ],
