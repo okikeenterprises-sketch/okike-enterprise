@@ -59,16 +59,7 @@ function SignupPage() {
     }
   }
 
-  async function onGoogle() {
-    setBusy(true);
-    const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (res.error) {
-      setBusy(false);
-      toast.error(res.error.message ?? "Could not sign in with Google");
-    }
-  }
+
 
   return (
     <SiteLayout>
@@ -82,17 +73,7 @@ function SignupPage() {
             <p className="text-sm text-ink/60 mt-2">Track your projects in real time.</p>
           </div>
 
-          <button
-            onClick={onGoogle}
-            disabled={busy}
-            className="w-full py-3 rounded-full bg-ink text-surface text-sm font-medium hover:bg-brand hover:text-brand-foreground transition disabled:opacity-50"
-          >
-            Continue with Google
-          </button>
 
-          <div className="flex items-center gap-3 text-xs text-ink/40">
-            <div className="flex-1 h-px bg-ink/10" /> or <div className="flex-1 h-px bg-ink/10" />
-          </div>
 
           <form onSubmit={onSignup} className="flex flex-col gap-3">
             <label htmlFor="signup-name" className="sr-only">
