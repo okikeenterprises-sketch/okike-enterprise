@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { useServerFn } from "@tanstack/react-start";
 import { askAssistant } from "@/lib/ai-assistant.functions";
@@ -820,9 +821,9 @@ function CoursesView() {
         .order("position", { ascending: true });
       // For now, we'll treat all courses as available. In the future, we'll add user course progress tracking.
       setCourses(
-        (data ?? []).map((course: any) => ({
+        (data ?? []).map((course: Tables<"courses">) => ({
           ...course,
-          lessons: course.lessons ?? [],
+          lessons: (course.lessons as string[]) ?? [],
           status: "available" as const,
           progress: 0,
           lessonsCompleted: 0,
@@ -861,7 +862,7 @@ function CoursesView() {
         <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-5">
           <div className="flex items-center gap-3 mb-2">
             <Award className="size-4 text-brand" />
-            <span className="text-[11px] uppercase tracking-wider text-ink/60">Total Courses</span>
+            <span className="text-[11px] uppercase tracking-widest text-ink/60">Total Courses</span>
           </div>
           <div className="text-2xl font-semibold">{courses.length}</div>
           <div className="text-xs text-ink/50">available courses</div>
@@ -869,7 +870,7 @@ function CoursesView() {
         <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-5">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle className="size-4 text-emerald-500" />
-            <span className="text-[11px] uppercase tracking-wider text-ink/60">Enrolled</span>
+            <span className="text-[11px] uppercase tracking-widest text-ink/60">Enrolled</span>
           </div>
           <div className="text-2xl font-semibold">
             {courses.filter((c) => c.status === "enrolled").length}
@@ -879,10 +880,10 @@ function CoursesView() {
         <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-5">
           <div className="flex items-center gap-3 mb-2">
             <Clock className="size-4 text-amber-500" />
-            <span className="text-[11px] uppercase tracking-wider text-ink/60">Lessons</span>
+            <span className="text-[11px] uppercase tracking-widest text-ink/60">Lessons</span>
           </div>
           <div className="text-2xl font-semibold">
-            {courses.reduce((sum, course) => sum + (course.lessons?.length ?? 0), 0)}
+            {courses.reduce((sum, course) => sum + (course.lessons?.length || 0), 0)}
           </div>
           <div className="text-xs text-ink/50">total lessons</div>
         </div>
@@ -909,7 +910,7 @@ function CoursesView() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span
-                        className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${
+                        className={`text-[10px] uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full ${
                           course.status === "enrolled"
                             ? "bg-brand/15 text-brand"
                             : course.status === "completed"
@@ -930,7 +931,7 @@ function CoursesView() {
                         <div className="mb-4">
                           <div className="flex justify-between text-xs mb-1">
                             <span className="text-ink/60">
-                              {course.lessonsCompleted ?? 0}/{course.lessons.length} lessons
+                              {course.lessonsCompleted || 0}/{course.lessons.length} lessons
                             </span>
                             <span className="font-semibold text-brand">{course.progress}%</span>
                           </div>

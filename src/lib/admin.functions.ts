@@ -164,6 +164,8 @@ const ALLOWED_TABLES = [
   "partners",
   "team_members",
   "site_settings",
+  "blog_posts",
+  "courses",
 ] as const;
 
 type CmsTable = (typeof ALLOWED_TABLES)[number];

@@ -5,6 +5,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { CurriculumLead } from "@/components/site/CurriculumLead";
 import { Testimonials } from "@/components/site/Testimonials";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/learn")({
   head: () => ({
@@ -146,9 +147,9 @@ function LearnPage() {
         .eq("published", true)
         .order("position", { ascending: true });
       setCourses(
-        (data || []).map((course: any) => ({
+        (data || []).map((course: Tables<'courses'>) => ({
           ...course,
-          lessons: course.lessons || [],
+          lessons: (course.lessons as string[]) || [],
         })),
       );
       setLoading(false);
@@ -395,7 +396,7 @@ function LearnPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-xs uppercase tracking-wider text-brand font-semibold mb-2">{label}</div>
+      <div className="text-xs uppercase tracking-widest text-brand font-semibold mb-2">{label}</div>
       <div className="text-3xl font-medium">{value}</div>
     </div>
   );

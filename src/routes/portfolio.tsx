@@ -78,8 +78,8 @@ function PortfolioPage() {
             </h1>
 
             <p className="text-lg text-ink/65 max-w-[60ch] text-pretty">
-              From SaaS platforms to student portals, we build products that solve real problems
-              for founders, creators and educational institutions.
+              From SaaS platforms to student portals, we build products that solve real problems for
+              founders, creators and educational institutions.
             </p>
 
             <div className="flex flex-wrap gap-3 justify-center pt-2">
@@ -101,26 +101,10 @@ function PortfolioPage() {
 
           {/* Stats grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-4xl mx-auto">
-            <StatCard
-              icon={Building}
-              value="30+"
-              label="Organizations served"
-            />
-            <StatCard
-              icon={Code2}
-              value="20+"
-              label="Projects launched"
-            />
-            <StatCard
-              icon={GraduationCap}
-              value="3000+"
-              label="Students reached"
-            />
-            <StatCard
-              icon={Zap}
-              value="100%"
-              label="Client satisfaction"
-            />
+            <StatCard icon={Building} value="30+" label="Organizations served" />
+            <StatCard icon={Code2} value="20+" label="Projects launched" />
+            <StatCard icon={GraduationCap} value="3000+" label="Students reached" />
+            <StatCard icon={Zap} value="100%" label="Client satisfaction" />
           </div>
         </div>
       </section>
@@ -134,15 +118,18 @@ function PortfolioPage() {
                 Selected work
               </div>
               <h2 className="text-3xl md:text-4xl font-medium tracking-tight max-w-[24ch] text-balance">
-                Projects we've shipped.
+                Projects we&apos;ve shipped.
               </h2>
             </div>
           </div>
 
           {loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1,2,3].map((i) => (
-                <div key={i} className="bg-card rounded-2xl ring-1 ring-ink/5 p-8 flex flex-col gap-5">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-card rounded-2xl ring-1 ring-ink/5 p-8 flex flex-col gap-5"
+                >
                   <div className="aspect-[4/3] bg-ink/5 rounded-xl animate-pulse" />
                   <div className="h-6 bg-ink/5 rounded w-3/4 animate-pulse" />
                   <div className="h-4 bg-ink/5 rounded w-1/2 animate-pulse" />
@@ -165,12 +152,11 @@ function PortfolioPage() {
       <section className="py-24 md:py-32 px-6 bg-secondary border-y border-ink/5">
         <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-8">
           <h2 className="text-4xl md:text-6xl font-medium tracking-tight text-balance">
-            Let's add{" "}
-            <span className="text-brand italic font-medium">your project</span> next.
+            Let&apos;s add <span className="text-brand italic font-medium">your project</span> next.
           </h2>
           <p className="text-ink/60 max-w-[48ch] text-pretty">
-            Have a project in mind? Tell us what you're building — we'll respond
-            within 24 hours with next steps and a quote.
+            Have a project in mind? Tell us what you&apos;re building — we&apos;ll respond within 24
+            hours with next steps and a quote.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
@@ -186,7 +172,7 @@ function PortfolioPage() {
               Get in touch
             </Link>
           </div>
-          </div>
+        </div>
       </section>
     </SiteLayout>
   );
@@ -248,7 +234,7 @@ function PortfolioGrid({ items }: { items: PortfolioItem[] }) {
             {card}
           </a>
         ) : (
-            <div key={item.id}>{card}</div>
+          <div key={item.id}>{card}</div>
         );
       })}
     </div>

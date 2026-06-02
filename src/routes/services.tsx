@@ -219,29 +219,41 @@ function ServicesPage() {
       <section className="relative overflow-hidden border-b border-ink/5">
         <div className="absolute -top-24 -left-24 w-[600px] h-[600px] bg-brand/20 rounded-full blur-[120px] opacity-60" />
         <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-brand/10 rounded-full blur-[100px] opacity-50" />
-        
+
         <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-24 md:pt-32 md:pb-32">
           <div className="max-w-4xl mx-auto text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-ink/10 bg-surface/80 backdrop-blur-sm mb-8">
               <Sparkles className="size-4 text-brand" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-ink/70">Our Services</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink/70">
+                Our Services
+              </span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-tight mb-6">
               We build the{" "}
               <span className="relative inline-block">
                 <span className="relative z-10 text-brand">digital foundations</span>
-                <svg className="absolute -bottom-2 left-0 w-full h-3 text-brand/30" viewBox="0 0 200 12" preserveAspectRatio="none">
-                  <path d="M0 6 Q50 0 100 6 T200 6" fill="none" stroke="currentColor" strokeWidth="4" />
+                <svg
+                  className="absolute -bottom-2 left-0 w-full h-3 text-brand/30"
+                  viewBox="0 0 200 12"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M0 6 Q50 0 100 6 T200 6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
                 </svg>
               </span>{" "}
               for ambitious teams.
             </h1>
-            
+
             <p className="text-lg md:text-xl text-ink/65 max-w-2xl mx-auto mb-10 leading-relaxed">
-              From idea to scale — we ship AI tools, scalable platforms, mobile apps and stunning experiences that actually move the needle.
+              From idea to scale — we ship AI tools, scalable platforms, mobile apps and stunning
+              experiences that actually move the needle.
             </p>
-            
+
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 to="/book"
@@ -258,7 +270,7 @@ function ServicesPage() {
               </a>
             </div>
           </div>
-          
+
           {/* Floating Services Badges */}
           <div className="relative mt-20 max-w-5xl mx-auto">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -269,7 +281,7 @@ function ServicesPage() {
                 </div>
                 <p className="text-sm text-ink/60">Intelligent systems that work for you.</p>
               </div>
-              
+
               <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-ink">
                 <div className="flex items-center gap-3 mb-3">
                   <Code2 className="size-6 text-ink/70" />
@@ -277,7 +289,7 @@ function ServicesPage() {
                 </div>
                 <p className="text-sm text-ink/60">Scalable, modern web applications.</p>
               </div>
-              
+
               <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-ink/50">
                 <div className="flex items-center gap-3 mb-3">
                   <Smartphone className="size-6 text-ink/70" />
@@ -285,7 +297,7 @@ function ServicesPage() {
                 </div>
                 <p className="text-sm text-ink/60">Native-feeling experiences, one codebase.</p>
               </div>
-              
+
               <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-brand/50">
                 <div className="flex items-center gap-3 mb-3">
                   <Palette className="size-6 text-brand/70" />

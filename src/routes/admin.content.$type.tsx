@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cmsUpsert, cmsDelete } from "@/lib/admin.functions";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 export const Route = createFileRoute("/admin/content/$type")({
   component: ContentPage,
@@ -60,7 +61,7 @@ const TABLE_MAP: Record<
     fields: {
       key: string;
       label: string;
-      type?: "text" | "textarea" | "number" | "boolean" | "json" | "tags";
+      type?: "text" | "textarea" | "number" | "boolean" | "json" | "tags" | "image";
     }[];
   }
 > = {
@@ -108,7 +109,7 @@ const TABLE_MAP: Record<
     fields: [
       { key: "title", label: "Title" },
       { key: "description", label: "Description", type: "textarea" },
-      { key: "image_url", label: "Image URL" },
+      { key: "image_url", label: "Featured Image", type: "image" },
       { key: "url", label: "Project URL" },
       { key: "tags", label: "Tags (comma-separated)", type: "tags" },
       { key: "position", label: "Order", type: "number" },
@@ -120,7 +121,7 @@ const TABLE_MAP: Record<
     title: "Partners",
     fields: [
       { key: "name", label: "Name" },
-      { key: "logo_url", label: "Logo URL" },
+      { key: "logo_url", label: "Logo", type: "image" },
       { key: "url", label: "Website" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
@@ -133,7 +134,7 @@ const TABLE_MAP: Record<
       { key: "name", label: "Name" },
       { key: "role", label: "Role" },
       { key: "bio", label: "Bio", type: "textarea" },
-      { key: "image_url", label: "Image URL" },
+      { key: "image_url", label: "Photo", type: "image" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
     ],
@@ -146,7 +147,7 @@ const TABLE_MAP: Record<
       { key: "slug", label: "Slug" },
       { key: "excerpt", label: "Excerpt", type: "textarea" },
       { key: "content", label: "Content", type: "textarea" },
-      { key: "image_url", label: "Featured Image URL" },
+      { key: "image_url", label: "Featured Image", type: "image" },
       { key: "author", label: "Author" },
       { key: "tags", label: "Tags (comma-separated)", type: "tags" },
       { key: "position", label: "Order", type: "number" },
@@ -162,7 +163,7 @@ const TABLE_MAP: Record<
       { key: "track", label: "Track" },
       { key: "description", label: "Description", type: "textarea" },
       { key: "duration", label: "Duration" },
-      { key: "image_url", label: "Featured Image URL" },
+      { key: "image_url", label: "Featured Image", type: "image" },
       { key: "instructor", label: "Instructor" },
       { key: "lessons", label: "Lessons (one per line)", type: "json" },
       { key: "position", label: "Order", type: "number" },
@@ -295,7 +296,12 @@ function ContentPage() {
             {cfg.fields.map((f) => (
               <label key={f.key} className="flex flex-col gap-1 text-sm">
                 <span className="text-xs uppercase tracking-wider text-ink/40">{f.label}</span>
-                {f.type === "textarea" ? (
+                {f.type === "image" ? (
+                  <ImageUpload
+                    value={editing[f.key] as string | null}
+                    onChange={(url) => setEditing({ ...editing, [f.key]: url })}
+                  />
+                ) : f.type === "textarea" ? (
                   <textarea
                     rows={4}
                     value={inputValue(editing[f.key])}

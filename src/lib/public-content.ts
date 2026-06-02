@@ -32,6 +32,30 @@ export type PublicTeam = {
   image_url: string | null;
 };
 
+export type PublicBlogPost = {
+  id: string;
+  title: string;
+  slug: string | null;
+  excerpt: string | null;
+  content: string | null;
+  image_url: string | null;
+  author: string | null;
+  tags: string[];
+  created_at: string | null;
+};
+
+export type PublicCourse = {
+  id: string;
+  title: string;
+  slug: string;
+  track: string;
+  description: string | null;
+  duration: string;
+  image_url: string | null;
+  instructor: string | null;
+  lessons: string[];
+};
+
 export async function getServices(): Promise<PublicService[]> {
   const { data } = await supabase
     .from("services")
@@ -76,4 +100,28 @@ export async function getSettings(keys: string[]): Promise<Record<string, Json>>
   const out: Record<string, Json> = {};
   for (const row of data ?? []) out[row.key] = row.value;
   return out;
+}
+
+export async function getBlogPosts(): Promise<PublicBlogPost[]> {
+  const { data } = await supabase
+    .from("blog_posts")
+    .select("id, title, slug, excerpt, content, image_url, author, tags, created_at")
+    .eq("published", true)
+    .order("position", { ascending: true });
+  return ((data ?? []) as unknown as (Omit<PublicBlogPost, "tags"> & { tags: unknown })[]).map((b) => ({
+    ...b,
+    tags: Array.isArray(b.tags) ? (b.tags as string[]) : [],
+  }));
+}
+
+export async function getCourses(): Promise<PublicCourse[]> {
+  const { data } = await supabase
+    .from("courses")
+    .select("id, title, slug, track, description, duration, image_url, instructor, lessons")
+    .eq("published", true)
+    .order("position", { ascending: true });
+  return ((data ?? []) as unknown as (Omit<PublicCourse, "lessons"> & { lessons: unknown })[]).map((c) => ({
+    ...c,
+    lessons: Array.isArray(c.lessons) ? (c.lessons as string[]) : [],
+  }));
 }

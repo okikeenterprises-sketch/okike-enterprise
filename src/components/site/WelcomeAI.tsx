@@ -9,7 +9,8 @@ export function WelcomeAI() {
   const [messages, setMessages] = useState<ChatMsg[]>([
     {
       role: "assistant",
-      content: "Hi there! 👋 Welcome to OKIKE. I'm your AI assistant. I'd love to tell you about what we do. We're a software house and academy — we build great software and teach people to build it too!",
+      content:
+        "Hi there! 👋 Welcome to OKIKE. I'm your AI assistant. I'd love to tell you about what we do. We're a software house and academy — we build great software and teach people to build it too!",
     },
   ]);
   const [input, setInput] = useState("");
@@ -21,11 +22,16 @@ export function WelcomeAI() {
   }, [messages]);
 
   const responses: Record<string, string> = {
-    "What services do you offer?": "We offer custom software development including web applications, mobile apps, AI tools, and SaaS platforms. We also have an academy where we teach full-stack development, UI/UX design, Python, cybersecurity, and data analysis!",
-    "Tell me about the academy": "Our academy offers comprehensive training programs in full-stack development, UI/UX design, Python development, cybersecurity, and data analysis. We provide hands-on projects, mentorship, and career support!",
-    "How do I book a project?": "Great question! You can click the 'Book project' button below or visit /book to start a conversation with us about your project needs.",
-    "What's your pricing like?": "We have transparent packages for every stage! From simple landing pages to custom SaaS solutions. Check out our Services page for more details or click 'Start a project' to get a custom quote.",
-    default: "That's a great question! I'd recommend signing up to explore our services, or booking a project consultation to discuss your needs in detail. Would you like to know more about our software development services or our academy?",
+    "What services do you offer?":
+      "We offer custom software development including web applications, mobile apps, AI tools, and SaaS platforms. We also have an academy where we teach full-stack development, UI/UX design, Python, cybersecurity, and data analysis!",
+    "Tell me about the academy":
+      "Our academy offers comprehensive training programs in full-stack development, UI/UX design, Python development, cybersecurity, and data analysis. We provide hands-on projects, mentorship, and career support!",
+    "How do I book a project?":
+      "Great question! You can click the 'Book project' button below or visit /book to start a conversation with us about your project needs.",
+    "What's your pricing like?":
+      "We have transparent packages for every stage! From simple landing pages to custom SaaS solutions. Check out our Services page for more details or click 'Start a project' to get a custom quote.",
+    default:
+      "That's a great question! I'd recommend signing up to explore our services, or booking a project consultation to discuss your needs in detail. Would you like to know more about our software development services or our academy?",
   };
 
   async function send(text?: string) {
@@ -89,9 +95,7 @@ export function WelcomeAI() {
               >
                 <div
                   className={`size-8 rounded-full flex items-center justify-center shrink-0 ${
-                    msg.role === "user"
-                      ? "bg-ink/10"
-                      : "bg-brand/20"
+                    msg.role === "user" ? "bg-ink/10" : "bg-brand/20"
                   }`}
                 >
                   {msg.role === "user" ? (
