@@ -1,9 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Github } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -59,6 +58,18 @@ function SignupPage() {
     }
   }
 
+  async function onGithub() {
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+    setBusy(false);
+    if (error) toast.error(error.message ?? "Could not sign in with GitHub");
+  }
+
   return (
     <SiteLayout>
       <section className="py-24 px-6">
@@ -69,6 +80,19 @@ function SignupPage() {
             </div>
             <h1 className="text-2xl font-medium mt-2">Create your OKIKE account</h1>
             <p className="text-sm text-ink/60 mt-2">Track your projects in real time.</p>
+          </div>
+
+          <button
+            onClick={onGithub}
+            disabled={busy}
+            className="w-full py-3 rounded-full bg-ink text-surface text-sm font-medium hover:bg-brand hover:text-brand-foreground transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            <Github className="size-4" />
+            Continue with GitHub
+          </button>
+
+          <div className="flex items-center gap-3 text-xs text-ink/40">
+            <div className="flex-1 h-px bg-ink/10" /> or <div className="flex-1 h-px bg-ink/10" />
           </div>
 
           <form onSubmit={onSignup} className="flex flex-col gap-3">
