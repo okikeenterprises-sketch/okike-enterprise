@@ -36,6 +36,8 @@ const NAV: { to: string; label: string; icon: LucideIcon; exact?: boolean }[] = 
   { to: "/admin/payments", label: "Payments", icon: CreditCard },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/admin/content/courses", label: "Courses", icon: BookOpen },
+  { to: "/admin/content/tracks", label: "Learning Paths", icon: BookOpen },
+  { to: "/admin/content/physical-classes", label: "Physical Classes", icon: BookOpen },
   { to: "/admin/content/services", label: "Services", icon: Package },
   { to: "/admin/content/packages", label: "Packages", icon: Package },
   { to: "/admin/content/portfolio", label: "Portfolio", icon: ImageIcon },

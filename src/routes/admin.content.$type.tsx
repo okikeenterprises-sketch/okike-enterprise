@@ -19,7 +19,9 @@ type CmsTable =
   | "team_members"
   | "site_settings"
   | "blog_posts"
-  | "courses";
+  | "courses"
+  | "tracks"
+  | "physical_classes";
 type ContentValue = string | number | boolean | string[] | null | undefined;
 type ContentRow = Record<string, ContentValue> & {
   id?: string;
@@ -165,7 +167,45 @@ const TABLE_MAP: Record<
       { key: "duration", label: "Duration" },
       { key: "image_url", label: "Featured Image", type: "image" },
       { key: "instructor", label: "Instructor" },
+      { key: "price", label: "Price", type: "number" },
+      { key: "original_price", label: "Original Price", type: "number" },
+      { key: "instructor_avatar_url", label: "Instructor Avatar", type: "image" },
+      { key: "instructor_bio", label: "Instructor Bio", type: "textarea" },
+      { key: "rating", label: "Rating", type: "number" },
+      { key: "reviews_count", label: "Reviews Count", type: "number" },
+      { key: "lessons_count", label: "Lessons Count", type: "number" },
+      { key: "modules", label: "Modules (one per line)", type: "json" },
       { key: "lessons", label: "Lessons (one per line)", type: "json" },
+      { key: "position", label: "Order", type: "number" },
+      { key: "published", label: "Published", type: "boolean" },
+    ],
+  },
+  tracks: {
+    table: "tracks",
+    title: "Learning Paths",
+    fields: [
+      { key: "name", label: "Name" },
+      { key: "slug", label: "Slug" },
+      { key: "tagline", label: "Tagline" },
+      { key: "description", label: "Description", type: "textarea" },
+      { key: "stack", label: "Stack (one per line)", type: "json" },
+      { key: "courses_count", label: "Courses Count", type: "number" },
+      { key: "position", label: "Order", type: "number" },
+      { key: "published", label: "Published", type: "boolean" },
+    ],
+  },
+  "physical-classes": {
+    table: "physical_classes",
+    title: "Physical Classes",
+    fields: [
+      { key: "title", label: "Title" },
+      { key: "slug", label: "Slug" },
+      { key: "description", label: "Description", type: "textarea" },
+      { key: "image_url", label: "Featured Image", type: "image" },
+      { key: "date", label: "Date" },
+      { key: "location", label: "Location" },
+      { key: "spots_available", label: "Spots Available", type: "number" },
+      { key: "price", label: "Price", type: "number" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
     ],

@@ -54,6 +54,36 @@ export type PublicCourse = {
   image_url: string | null;
   instructor: string | null;
   lessons: string[];
+  price: number | null;
+  original_price: number | null;
+  instructor_avatar_url: string | null;
+  instructor_bio: string | null;
+  rating: number;
+  reviews_count: number;
+  lessons_count: number;
+  modules: string[];
+};
+
+export type PublicTrack = {
+  id: string;
+  name: string;
+  slug: string | null;
+  tagline: string | null;
+  description: string | null;
+  stack: string[];
+  courses_count: number;
+};
+
+export type PublicPhysicalClass = {
+  id: string;
+  title: string;
+  slug: string | null;
+  description: string | null;
+  image_url: string | null;
+  date: string | null;
+  location: string | null;
+  spots_available: number;
+  price: number | null;
 };
 
 export async function getServices(): Promise<PublicService[]> {
@@ -119,13 +149,40 @@ export async function getBlogPosts(): Promise<PublicBlogPost[]> {
 export async function getCourses(): Promise<PublicCourse[]> {
   const { data } = await supabase
     .from("courses")
-    .select("id, title, slug, track, description, duration, image_url, instructor, lessons")
+    .select("*")
     .eq("published", true)
     .order("position", { ascending: true });
-  return ((data ?? []) as unknown as (Omit<PublicCourse, "lessons"> & { lessons: unknown })[]).map(
-    (c) => ({
-      ...c,
-      lessons: Array.isArray(c.lessons) ? (c.lessons as string[]) : [],
+  return (
+    (data ?? []) as unknown as (Omit<PublicCourse, "lessons" | "modules"> & {
+      lessons: unknown;
+      modules: unknown;
+    })[]
+  ).map((c) => ({
+    ...c,
+    lessons: Array.isArray(c.lessons) ? (c.lessons as string[]) : [],
+    modules: Array.isArray(c.modules) ? (c.modules as string[]) : [],
+  }));
+}
+
+export async function getTracks(): Promise<PublicTrack[]> {
+  const { data } = await supabase
+    .from("tracks")
+    .select("*")
+    .eq("published", true)
+    .order("position", { ascending: true });
+  return ((data ?? []) as unknown as (Omit<PublicTrack, "stack"> & { stack: unknown })[]).map(
+    (t) => ({
+      ...t,
+      stack: Array.isArray(t.stack) ? (t.stack as string[]) : [],
     }),
   );
+}
+
+export async function getPhysicalClasses(): Promise<PublicPhysicalClass[]> {
+  const { data } = await supabase
+    .from("physical_classes")
+    .select("*")
+    .eq("published", true)
+    .order("date", { ascending: true });
+  return (data ?? []) as PublicPhysicalClass[];
 }
