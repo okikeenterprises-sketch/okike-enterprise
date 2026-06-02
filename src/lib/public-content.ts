@@ -108,10 +108,12 @@ export async function getBlogPosts(): Promise<PublicBlogPost[]> {
     .select("id, title, slug, excerpt, content, image_url, author, tags, created_at")
     .eq("published", true)
     .order("position", { ascending: true });
-  return ((data ?? []) as unknown as (Omit<PublicBlogPost, "tags"> & { tags: unknown })[]).map((b) => ({
-    ...b,
-    tags: Array.isArray(b.tags) ? (b.tags as string[]) : [],
-  }));
+  return ((data ?? []) as unknown as (Omit<PublicBlogPost, "tags"> & { tags: unknown })[]).map(
+    (b) => ({
+      ...b,
+      tags: Array.isArray(b.tags) ? (b.tags as string[]) : [],
+    }),
+  );
 }
 
 export async function getCourses(): Promise<PublicCourse[]> {
@@ -120,8 +122,10 @@ export async function getCourses(): Promise<PublicCourse[]> {
     .select("id, title, slug, track, description, duration, image_url, instructor, lessons")
     .eq("published", true)
     .order("position", { ascending: true });
-  return ((data ?? []) as unknown as (Omit<PublicCourse, "lessons"> & { lessons: unknown })[]).map((c) => ({
-    ...c,
-    lessons: Array.isArray(c.lessons) ? (c.lessons as string[]) : [],
-  }));
+  return ((data ?? []) as unknown as (Omit<PublicCourse, "lessons"> & { lessons: unknown })[]).map(
+    (c) => ({
+      ...c,
+      lessons: Array.isArray(c.lessons) ? (c.lessons as string[]) : [],
+    }),
+  );
 }

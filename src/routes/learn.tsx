@@ -147,7 +147,7 @@ function LearnPage() {
         .eq("published", true)
         .order("position", { ascending: true });
       setCourses(
-        (data || []).map((course: Tables<'courses'>) => ({
+        (data || []).map((course: Tables<"courses">) => ({
           ...course,
           lessons: (course.lessons as string[]) || [],
         })),

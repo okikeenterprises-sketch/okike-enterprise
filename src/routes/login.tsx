@@ -49,8 +49,6 @@ function LoginPage() {
     if (error) toast.error(error.message);
   }
 
-
-
   return (
     <SiteLayout>
       <section className="py-24 px-6">
@@ -61,8 +59,6 @@ function LoginPage() {
             </div>
             <h1 className="text-2xl font-medium mt-2">Sign in to OKIKE</h1>
           </div>
-
-
 
           <form onSubmit={onEmail} className="flex flex-col gap-3">
             <label htmlFor="login-email" className="sr-only">

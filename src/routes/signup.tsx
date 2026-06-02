@@ -59,8 +59,6 @@ function SignupPage() {
     }
   }
 
-
-
   return (
     <SiteLayout>
       <section className="py-24 px-6">
@@ -72,8 +70,6 @@ function SignupPage() {
             <h1 className="text-2xl font-medium mt-2">Create your OKIKE account</h1>
             <p className="text-sm text-ink/60 mt-2">Track your projects in real time.</p>
           </div>
-
-
 
           <form onSubmit={onSignup} className="flex flex-col gap-3">
             <label htmlFor="signup-name" className="sr-only">
