@@ -65,6 +65,11 @@ const TABLE_MAP: Record<
       label: string;
       type?: "text" | "textarea" | "number" | "boolean" | "json" | "tags" | "image";
     }[];
+    columns?: {
+      key: string;
+      label: string;
+      render?: (row: ContentRow) => React.ReactNode;
+    }[];
   }
 > = {
   packages: {
@@ -82,6 +87,12 @@ const TABLE_MAP: Record<
       { key: "request_quote", label: "Request quote (no price)", type: "boolean" },
       { key: "published", label: "Published", type: "boolean" },
     ],
+    columns: [
+      { key: "name", label: "Name" },
+      { key: "price", label: "Price" },
+      { key: "featured", label: "Featured", render: (r) => (r.featured ? "✓" : "—") },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
+    ],
   },
   services: {
     table: "services",
@@ -93,6 +104,12 @@ const TABLE_MAP: Record<
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
     ],
+    columns: [
+      { key: "title", label: "Title" },
+      { key: "icon", label: "Icon" },
+      { key: "description", label: "Description", render: (r) => (typeof r.description === "string" ? `${r.description.slice(0, 50)}...` : "—") },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
+    ],
   },
   addons: {
     table: "addons",
@@ -103,6 +120,11 @@ const TABLE_MAP: Record<
       { key: "price", label: "Price", type: "number" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
+    ],
+    columns: [
+      { key: "name", label: "Name" },
+      { key: "price", label: "Price" },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
     ],
   },
   portfolio: {
@@ -117,6 +139,16 @@ const TABLE_MAP: Record<
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
     ],
+    columns: [
+      { 
+        key: "image_url", 
+        label: "Image", 
+        render: (r) => r.image_url ? <img src={r.image_url as string} alt="" className="size-12 object-cover rounded-lg" /> : "—" 
+      },
+      { key: "title", label: "Title" },
+      { key: "tags", label: "Tags", render: (r) => Array.isArray(r.tags) ? r.tags.slice(0, 3).map((t) => <span key={t} className="text-xs bg-ink/5 px-2 py-1 rounded mr-1">{t}</span>) : "—" },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
+    ],
   },
   partners: {
     table: "partners",
@@ -127,6 +159,12 @@ const TABLE_MAP: Record<
       { key: "url", label: "Website" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
+    ],
+    columns: [
+      { key: "logo_url", label: "Logo", render: (r) => r.logo_url ? <img src={r.logo_url as string} alt="" className="size-12 object-contain rounded-lg" /> : "—" },
+      { key: "name", label: "Name" },
+      { key: "url", label: "Website" },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
     ],
   },
   team: {
@@ -139,6 +177,12 @@ const TABLE_MAP: Record<
       { key: "image_url", label: "Photo", type: "image" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
+    ],
+    columns: [
+      { key: "image_url", label: "Photo", render: (r) => r.image_url ? <img src={r.image_url as string} alt="" className="size-12 object-cover rounded-full" /> : "—" },
+      { key: "name", label: "Name" },
+      { key: "role", label: "Role" },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
     ],
   },
   blog: {
@@ -154,6 +198,13 @@ const TABLE_MAP: Record<
       { key: "tags", label: "Tags (comma-separated)", type: "tags" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
+    ],
+    columns: [
+      { key: "image_url", label: "Image", render: (r) => r.image_url ? <img src={r.image_url as string} alt="" className="size-12 object-cover rounded-lg" /> : "—" },
+      { key: "title", label: "Title" },
+      { key: "author", label: "Author" },
+      { key: "tags", label: "Tags", render: (r) => Array.isArray(r.tags) ? r.tags.slice(0, 3).map((t) => <span key={t} className="text-xs bg-ink/5 px-2 py-1 rounded mr-1">{t}</span>) : "—" },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
     ],
   },
   courses: {
@@ -179,6 +230,14 @@ const TABLE_MAP: Record<
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
     ],
+    columns: [
+      { key: "image_url", label: "Image", render: (r) => r.image_url ? <img src={r.image_url as string} alt="" className="size-12 object-cover rounded-lg" /> : "—" },
+      { key: "title", label: "Title" },
+      { key: "track", label: "Track" },
+      { key: "price", label: "Price" },
+      { key: "instructor", label: "Instructor" },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
+    ],
   },
   tracks: {
     table: "tracks",
@@ -192,6 +251,12 @@ const TABLE_MAP: Record<
       { key: "courses_count", label: "Courses Count", type: "number" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
+    ],
+    columns: [
+      { key: "name", label: "Name" },
+      { key: "tagline", label: "Tagline" },
+      { key: "courses_count", label: "Courses" },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
     ],
   },
   "physical-classes": {
@@ -208,6 +273,15 @@ const TABLE_MAP: Record<
       { key: "price", label: "Price", type: "number" },
       { key: "position", label: "Order", type: "number" },
       { key: "published", label: "Published", type: "boolean" },
+    ],
+    columns: [
+      { key: "image_url", label: "Image", render: (r) => r.image_url ? <img src={r.image_url as string} alt="" className="size-12 object-cover rounded-lg" /> : "—" },
+      { key: "title", label: "Title" },
+      { key: "date", label: "Date" },
+      { key: "location", label: "Location" },
+      { key: "spots_available", label: "Spots Left" },
+      { key: "price", label: "Price" },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
     ],
   },
 };
@@ -288,18 +362,32 @@ function ContentPage() {
         <table className="w-full text-sm">
           <thead className="bg-surface text-xs uppercase tracking-wider text-ink/40">
             <tr>
-              <th className="text-left px-4 py-3">Title</th>
-              <th className="text-left px-4 py-3">Order</th>
-              <th className="text-left px-4 py-3">Published</th>
+              {cfg.columns?.map((col) => (
+                <th key={col.key} className="text-left px-4 py-3">{col.label}</th>
+              )) || (
+                <>
+                  <th className="text-left px-4 py-3">Title</th>
+                  <th className="text-left px-4 py-3">Order</th>
+                  <th className="text-left px-4 py-3">Published</th>
+                </>
+              )}
               <th></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-ink/5">
             {rows.map((r) => (
               <tr key={r.id}>
-                <td className="px-4 py-3 font-medium">{r.name || r.title || r.slug}</td>
-                <td className="px-4 py-3">{r.position ?? "—"}</td>
-                <td className="px-4 py-3">{r.published ? "✓" : "—"}</td>
+                {cfg.columns?.map((col) => (
+                  <td key={col.key} className="px-4 py-3">
+                    {col.render ? col.render(r) : (r[col.key] as string) ?? "—"}
+                  </td>
+                )) || (
+                  <>
+                    <td className="px-4 py-3 font-medium">{r.name || r.title || r.slug}</td>
+                    <td className="px-4 py-3">{r.position ?? "—"}</td>
+                    <td className="px-4 py-3">{r.published ? "✓" : "—"}</td>
+                  </>
+                )}
                 <td className="px-4 py-3 text-right space-x-3">
                   <button onClick={() => setEditing(r)} className="text-brand text-sm">
                     Edit
@@ -312,7 +400,7 @@ function ContentPage() {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-ink/40">
+                <td colSpan={(cfg.columns?.length || 3) + 1} className="px-4 py-8 text-center text-ink/40">
                   Empty. Click "+ New".
                 </td>
               </tr>

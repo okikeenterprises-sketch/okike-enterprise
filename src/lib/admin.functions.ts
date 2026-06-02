@@ -204,3 +204,45 @@ export const cmsDelete = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const updateUserRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ userId: z.string(), role: z.enum(["admin", "client"]) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { error: deleteError } = await context.supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.userId);
+    if (deleteError) throw new Error(deleteError.message);
+    const { error: insertError } = await context.supabase
+      .from("user_roles")
+      .insert({ user_id: data.userId, role: data.role });
+    if (insertError) throw new Error(insertError.message);
+    return { ok: true };
+  });
+
+export const updateUserProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        profileId: z.string(),
+        updates: z.object({
+          full_name: z.string().optional(),
+          email: z.string().optional(),
+        }),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    const { error } = await context.supabase
+      .from("profiles")
+      .update(data.updates)
+      .eq("id", data.profileId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
