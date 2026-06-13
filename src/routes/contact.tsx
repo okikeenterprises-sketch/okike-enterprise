@@ -8,10 +8,22 @@ import { submitContact } from "@/lib/forms.functions";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — OKIKE" },
-      { name: "description", content: "Get in touch with OKIKE. We respond within 24 hours." },
-      { property: "og:title", content: "Contact — OKIKE" },
-      { property: "og:description", content: "Reach the OKIKE team." },
+      { title: "Contact OKIKE — Get in Touch With Our Team" },
+      { name: "description", content: "Contact OKIKE for project inquiries, partnerships or general questions. We respond within 24 hours. Based in Nigeria, working globally." },
+      { name: "robots", content: "index, follow" },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://okike-enterprise.lovable.app/contact" },
+      { property: "og:title", content: "Contact OKIKE — Get in Touch With Our Team" },
+      { property: "og:description", content: "We respond within 24 hours. Reach the OKIKE team for project inquiries, partnerships or any questions." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      { property: "og:site_name", content: "OKIKE" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Contact OKIKE — Get in Touch" },
+      { name: "twitter:description", content: "We respond within 24 hours. Get in touch with the OKIKE team." },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://okike-enterprise.lovable.app/contact" },
     ],
   }),
   component: ContactPage,

@@ -79,32 +79,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers.",
+          "OKIKE is a Nigerian software house and tech academy. We build high-performance web platforms, AI tools and mobile apps for startups and businesses, and train the next generation of African engineers.",
       },
       { name: "author", content: "OKIKE" },
+      { name: "robots", content: "index, follow" },
+      { name: "theme-color", content: "#d4a800" },
+      { name: "geo.region", content: "NG" },
+      { name: "geo.placename", content: "Nigeria" },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "OKIKE" },
+      { property: "og:locale", content: "en_NG" },
       { property: "og:title", content: "OKIKE — Build software. Learn to build it." },
       {
         property: "og:description",
-        content:
-          "OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "OKIKE — Build software. Learn to build it." },
-      {
-        name: "twitter:description",
-        content:
-          "OKIKE is a software house and academy. We build high-performance products for ambitious teams and train the next generation of African engineers.",
+        content: "Nigerian software studio and tech academy. We build for ambitious teams and train the engineers behind African tech.",
       },
       {
         property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png",
+        content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png",
+      },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@okikeenterprises" },
+      { name: "twitter:title", content: "OKIKE — Build software. Learn to build it." },
+      {
+        name: "twitter:description",
+        content: "Nigerian software studio and tech academy. Build with us or learn to build it yourself.",
       },
       {
         name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png",
+        content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png",
       },
     ],
     links: [

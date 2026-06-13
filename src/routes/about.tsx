@@ -5,14 +5,27 @@ import founderImg from "@/assets/founder.jpg";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About — OKIKE" },
+      { title: "About OKIKE — Nigerian Software Studio & Tech Academy" },
       {
         name: "description",
         content:
-          "OKIKE was founded to bridge African tech talent with global opportunity. Build with us. Learn from us.",
+          "OKIKE is a founder-led Nigerian software house and tech academy. We build world-class digital products and train the next generation of African engineers. Founded in 2023.",
       },
-      { property: "og:title", content: "About — OKIKE" },
-      { property: "og:description", content: "Founder story and mission behind OKIKE." },
+      { name: "robots", content: "index, follow" },
+      { name: "keywords", content: "about OKIKE, Nigerian software studio, tech academy Africa, African engineers, software house Nigeria, OKIKE founder" },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://okike-enterprise.lovable.app/about" },
+      { property: "og:title", content: "About OKIKE — Nigerian Software Studio & Tech Academy" },
+      { property: "og:description", content: "OKIKE is a founder-led Nigerian software house and academy. We build for ambitious teams and train the engineers behind the next decade of African tech." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      { property: "og:site_name", content: "OKIKE" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "About OKIKE — Nigerian Software Studio & Tech Academy" },
+      { name: "twitter:description", content: "Founder story and mission behind OKIKE — built in Africa, engineered for the world." },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://okike-enterprise.lovable.app/about" },
     ],
   }),
   component: AboutPage,

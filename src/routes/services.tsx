@@ -31,18 +31,27 @@ type PortfolioItem = {
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Services — OKIKE" },
+      { title: "Software Development Services — OKIKE Nigeria" },
       {
         name: "description",
         content:
-          "OKIKE designs and builds scalable platforms, AI tools, mobile apps and student-focused digital systems for startups, creators and organizations.",
+          "OKIKE builds AI tools, web platforms, mobile apps, dashboards and student systems for startups, businesses and educational institutions across Africa and globally.",
       },
-      { property: "og:title", content: "Services — OKIKE" },
-      {
-        property: "og:description",
-        content:
-          "Scalable platforms, AI tools, mobile apps and modern digital experiences — engineered by OKIKE.",
-      },
+      { name: "robots", content: "index, follow" },
+      { name: "keywords", content: "software development Nigeria, AI development Africa, web app development, mobile app Nigeria, SaaS development, student portal Nigeria, OKIKE services" },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://okike-enterprise.lovable.app/services" },
+      { property: "og:title", content: "Software Development Services — OKIKE Nigeria" },
+      { property: "og:description", content: "AI automation, scalable web platforms, mobile apps and UI/UX design for ambitious teams across Africa and globally." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      { property: "og:site_name", content: "OKIKE" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Software Development Services — OKIKE Nigeria" },
+      { name: "twitter:description", content: "AI tools, web platforms, mobile apps and dashboards built for startups and businesses across Africa." },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://okike-enterprise.lovable.app/services" },
     ],
     scripts: [
       {

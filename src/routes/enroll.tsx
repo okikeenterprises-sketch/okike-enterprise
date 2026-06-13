@@ -9,10 +9,23 @@ import { Field, TextArea, Select } from "./contact";
 export const Route = createFileRoute("/enroll")({
   head: () => ({
     meta: [
-      { title: "Apply to the academy — OKIKE" },
-      { name: "description", content: "Apply to OKIKE's 12-week engineering cohort. We review every application personally." },
-      { property: "og:title", content: "Apply to the academy — OKIKE" },
-      { property: "og:description", content: "Enrollment form for OKIKE Academy." },
+      { title: "Apply to OKIKE Academy — Tech Courses in Nigeria" },
+      { name: "description", content: "Apply to OKIKE's software development cohort. Hands-on training in fullstack web development, UI/UX and more. We review every application personally." },
+      { name: "robots", content: "index, follow" },
+      { name: "keywords", content: "apply coding bootcamp Nigeria, enroll tech course Africa, software development training Nigeria, OKIKE academy application" },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://okike-enterprise.lovable.app/enroll" },
+      { property: "og:title", content: "Apply to OKIKE Academy — Tech Courses in Nigeria" },
+      { property: "og:description", content: "Apply to OKIKE's hands-on software development cohort. Real projects, real mentorship, real results." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      { property: "og:site_name", content: "OKIKE" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Apply to OKIKE Academy — Tech Courses in Nigeria" },
+      { name: "twitter:description", content: "Hands-on software development training in Nigeria. Apply to join the next cohort." },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://okike-enterprise.lovable.app/enroll" },
     ],
   }),
   component: EnrollPage,

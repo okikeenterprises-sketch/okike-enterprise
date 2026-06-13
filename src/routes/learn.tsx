@@ -9,11 +9,27 @@ import type { PublicCourse, PublicTrack, PublicPhysicalClass } from "@/lib/publi
 export const Route = createFileRoute("/learn")({
   head: () => ({
     meta: [
-      { title: "Academy — OKIKE" },
+      { title: "Tech Academy — Learn Software Development in Nigeria | OKIKE" },
       {
         name: "description",
-        content: "Join hands-on courses online or in our physical classes and become part of Africa's next generation of innovators.",
+        content:
+          "OKIKE Academy offers hands-on software development courses in Nigeria — fullstack web development, UI/UX design, data analysis and more. Online and physical classes. Build real projects from day one.",
       },
+      { name: "robots", content: "index, follow" },
+      { name: "keywords", content: "software development course Nigeria, coding bootcamp Africa, tech academy Nigeria, learn web development Nigeria, UI UX course Nigeria, OKIKE academy" },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://okike-enterprise.lovable.app/learn" },
+      { property: "og:title", content: "Tech Academy — Learn Software Development in Nigeria | OKIKE" },
+      { property: "og:description", content: "Hands-on tech courses built for employability. Fullstack, UI/UX, data analysis and more — online and in-person across Nigeria." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      { property: "og:site_name", content: "OKIKE" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Tech Academy — Learn Software Development in Nigeria | OKIKE" },
+      { name: "twitter:description", content: "Hands-on tech courses built for employability — fullstack, UI/UX, data analysis. Online and in-person." },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://okike-enterprise.lovable.app/learn" },
     ],
   }),
   component: LearnPage,
