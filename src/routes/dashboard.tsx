@@ -159,19 +159,13 @@ function DashboardPage() {
   return (
     <div className="min-h-screen bg-background text-ink">
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="sticky top-0 h-screen w-14 sm:w-16 lg:w-60 shrink-0 flex flex-col border-r border-ink/10 bg-card px-2 lg:px-4 py-5 transition-[width]">
-          <div className="px-1 lg:px-2">
-            <Link
-              to="/"
-              className="flex items-center justify-center lg:justify-start"
-              aria-label="OKIKE home"
-            >
-              <img src={okikeLogo} alt="OKIKE" className="h-7 w-auto lg:h-8" />
+        {/* ── SIDEBAR (desktop only) ── */}
+        <aside className="hidden lg:flex sticky top-0 h-screen w-60 shrink-0 flex-col border-r border-ink/10 bg-card px-4 py-5">
+          <div className="px-2">
+            <Link to="/" className="flex items-center" aria-label="OKIKE home">
+              <img src={okikeLogo} alt="OKIKE" className="h-8 w-auto" />
             </Link>
-            <div className="hidden lg:block text-[11px] text-ink/50 mt-0.5">
-              Your Digital Ecosystem
-            </div>
+            <div className="text-[11px] text-ink/50 mt-0.5">Your Digital Ecosystem</div>
           </div>
 
           <nav className="mt-7 flex-1 flex flex-col gap-1 overflow-y-auto">
@@ -182,15 +176,13 @@ function DashboardPage() {
                 <button
                   key={t.key}
                   onClick={() => setSection(t.key)}
-                  title={t.label}
-                  className={`w-full flex items-center gap-3 rounded-xl px-2 lg:px-3 py-2.5 text-sm font-medium transition text-left justify-center lg:justify-start ${
-                    active
-                      ? "bg-brand/15 text-brand ring-1 ring-brand/25"
-                      : "text-ink/70 hover:text-ink hover:bg-ink/5"
-                  }`}
+                  className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition text-left ${active
+                    ? "bg-brand/15 text-brand ring-1 ring-brand/25"
+                    : "text-ink/70 hover:text-ink hover:bg-ink/5"
+                    }`}
                 >
                   <Icon className="size-4 shrink-0" />
-                  <span className="hidden lg:inline flex-1">{t.label}</span>
+                  <span className="flex-1">{t.label}</span>
                 </button>
               );
             })}
@@ -198,45 +190,41 @@ function DashboardPage() {
             {role === "admin" && (
               <Link
                 to="/admin"
-                title="Admin panel"
-                className="mt-3 flex items-center gap-3 rounded-xl px-2 lg:px-3 py-2.5 text-sm font-medium text-ink/70 hover:text-brand hover:bg-ink/5 ring-1 ring-ink/10 justify-center lg:justify-start"
+                className="mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 hover:text-brand hover:bg-ink/5 ring-1 ring-ink/10"
               >
                 <Shield className="size-4 shrink-0" />
-                <span className="hidden lg:inline">Admin panel</span>
+                <span>Admin panel</span>
               </Link>
             )}
           </nav>
 
           <Link
             to="/book"
-            className="mt-4 rounded-2xl p-2 lg:p-3 bg-gradient-to-br from-brand/25 to-brand/5 ring-1 ring-brand/25 flex items-center gap-3 hover:from-brand/35 transition justify-center lg:justify-start"
+            className="mt-4 rounded-2xl p-3 bg-gradient-to-br from-brand/25 to-brand/5 ring-1 ring-brand/25 flex items-center gap-3 hover:from-brand/35 transition"
           >
             <div className="size-9 rounded-xl bg-brand/25 ring-1 ring-brand/40 grid place-items-center text-brand shrink-0">
               <Crown className="size-4" />
             </div>
-            <div className="hidden lg:block flex-1 min-w-0">
+            <div className="flex-1 min-w-0">
               <div className="text-sm font-medium">Start a project</div>
               <div className="text-[11px] text-ink/60">Tell us what to build</div>
             </div>
           </Link>
 
-          <div className="mt-3 flex items-center gap-3 px-1 lg:px-2 py-2 rounded-xl justify-center lg:justify-start">
+          <div className="mt-3 flex items-center gap-3 px-2 py-2 rounded-xl">
             <div className="relative shrink-0">
-              <div className="size-9 lg:size-10 rounded-full bg-brand/20 ring-2 ring-brand/30 grid place-items-center text-sm font-semibold text-brand">
+              <div className="size-10 rounded-full bg-brand/20 ring-2 ring-brand/30 grid place-items-center text-sm font-semibold text-brand">
                 {initial}
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-emerald-400 ring-2 ring-card" />
             </div>
-            <div className="hidden lg:block flex-1 min-w-0">
+            <div className="flex-1 min-w-0">
               <div className="text-sm font-medium truncate capitalize">{fullName}</div>
               <div className="text-[11px] text-ink/50 capitalize">{role || "Client"}</div>
             </div>
             <button
-              onClick={async () => {
-                await signOut();
-                navigate({ to: "/" });
-              }}
-              className="hidden lg:inline-flex text-ink/40 hover:text-brand p-1 rounded"
+              onClick={async () => { await signOut(); navigate({ to: "/" }); }}
+              className="text-ink/40 hover:text-brand p-1 rounded"
               aria-label="Sign out"
             >
               <LogOut className="size-4" />
@@ -246,10 +234,18 @@ function DashboardPage() {
 
         {/* Main */}
         <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-          <header className="sticky top-0 z-30 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-3 bg-background/80 backdrop-blur border-b border-ink/10">
+          {/* ── MOBILE HEADER ── */}
+          <header className="sticky top-0 z-30 flex items-center gap-2 sm:gap-3 px-4 py-3 bg-background/90 backdrop-blur border-b border-ink/10">
+            {/* Mobile: logo + greeting */}
+            <Link to="/" className="lg:hidden shrink-0" aria-label="OKIKE home">
+              <img src={okikeLogo} alt="OKIKE" className="h-6 w-auto" />
+            </Link>
             <div className="flex-1 min-w-0">
-              <h2 className="text-sm font-medium capitalize text-ink/80">
+              <h2 className="text-sm font-medium capitalize text-ink/80 lg:block hidden">
                 {section === "dashboard" ? "Overview" : section}
+              </h2>
+              <h2 className="text-sm font-medium text-ink/80 lg:hidden">
+                {greeting}, <span className="capitalize">{firstName}</span>
               </h2>
             </div>
             <button
@@ -289,7 +285,7 @@ function DashboardPage() {
             </button>
           </header>
 
-          <main className="flex-1 px-3 sm:px-4 md:px-6 py-5 min-w-0">
+          <main className="flex-1 px-3 sm:px-4 md:px-6 py-5 min-w-0 pb-24 lg:pb-5">
             {section === "dashboard" && (
               <DashboardOverview
                 firstName={firstName}
@@ -342,6 +338,30 @@ function DashboardPage() {
           </main>
         </div>
       </div>
+
+      {/* ── MOBILE BOTTOM NAV ── */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-ink/10 flex items-stretch">
+        {[
+          { key: "dashboard" as Section, icon: LayoutDashboard, label: "Home" },
+          { key: "projects" as Section, icon: FolderKanban, label: "Projects" },
+          { key: "ai" as Section, icon: Sparkles, label: "AI" },
+          { key: "courses" as Section, icon: BookOpen, label: "Courses" },
+          { key: "settings" as Section, icon: Settings, label: "Account" },
+        ].map(({ key, icon: Icon, label }) => {
+          const active = section === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setSection(key)}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 text-[10px] font-semibold uppercase tracking-wide transition ${active ? "text-brand" : "text-ink/45 hover:text-ink/70"
+                }`}
+            >
+              <Icon className={`size-5 ${active ? "text-brand" : ""}`} />
+              {label}
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
@@ -590,13 +610,12 @@ function ProjectsView({
                 {own.map((m) => (
                   <li
                     key={m.id}
-                    className={`rounded-lg p-3 text-xs ring-1 ${
-                      m.status === "done"
-                        ? "bg-emerald-500/10 ring-emerald-500/20 text-emerald-600"
-                        : m.status === "active"
-                          ? "bg-brand/10 ring-brand/25 text-brand"
-                          : "bg-ink/5 ring-ink/10 text-ink/60"
-                    }`}
+                    className={`rounded-lg p-3 text-xs ring-1 ${m.status === "done"
+                      ? "bg-emerald-500/10 ring-emerald-500/20 text-emerald-600"
+                      : m.status === "active"
+                        ? "bg-brand/10 ring-brand/25 text-brand"
+                        : "bg-ink/5 ring-ink/10 text-ink/60"
+                      }`}
                   >
                     <div className="font-medium">{m.name}</div>
                     <div className="text-[10px] capitalize mt-0.5 opacity-80">{m.status}</div>
@@ -639,13 +658,12 @@ function MilestonesView({
               {own.map((m) => (
                 <li
                   key={m.id}
-                  className={`rounded-xl p-4 ring-1 ${
-                    m.status === "done"
-                      ? "bg-emerald-500/10 ring-emerald-500/20"
-                      : m.status === "active"
-                        ? "bg-brand/10 ring-brand/25"
-                        : "bg-ink/5 ring-ink/10"
-                  }`}
+                  className={`rounded-xl p-4 ring-1 ${m.status === "done"
+                    ? "bg-emerald-500/10 ring-emerald-500/20"
+                    : m.status === "active"
+                      ? "bg-brand/10 ring-brand/25"
+                      : "bg-ink/5 ring-ink/10"
+                    }`}
                 >
                   <div className="text-xs uppercase tracking-wider text-ink/50">{m.position}</div>
                   <div className="font-medium">{m.name}</div>
@@ -902,21 +920,19 @@ function CoursesView() {
               <div
                 key={course.id}
                 onClick={() => setSelectedCourse(selectedCourse === course.id ? null : course.id)}
-                className={`rounded-2xl bg-card ring-1 transition-all transition-all ring-ink/10 p-6 cursor-pointer ${
-                  selectedCourse === course.id ? "ring-brand bg-brand/5" : "hover:ring-brand/20"
-                }`}
+                className={`rounded-2xl bg-card ring-1 transition-all transition-all ring-ink/10 p-6 cursor-pointer ${selectedCourse === course.id ? "ring-brand bg-brand/5" : "hover:ring-brand/20"
+                  }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span
-                        className={`text-[10px] uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full ${
-                          course.status === "enrolled"
-                            ? "bg-brand/15 text-brand"
-                            : course.status === "completed"
-                              ? "bg-emerald-500/15 text-emerald-600"
-                              : "bg-ink/10 text-ink/60"
-                        }`}
+                        className={`text-[10px] uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full ${course.status === "enrolled"
+                          ? "bg-brand/15 text-brand"
+                          : course.status === "completed"
+                            ? "bg-emerald-500/15 text-emerald-600"
+                            : "bg-ink/10 text-ink/60"
+                          }`}
                       >
                         {course.status}
                       </span>

@@ -4,29 +4,55 @@ import { Moon, Sun } from "lucide-react";
 type Theme = "light" | "dark";
 
 function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   const stored = localStorage.getItem("theme") as Theme | null;
   if (stored === "light" || stored === "dark") return stored;
-  return document.documentElement.classList.contains("dark") ? "dark" : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function applyTheme(theme: Theme) {
+  const root = document.documentElement;
+  if (theme === "dark") {
+    root.classList.add("dark");
+  } else {
+    root.classList.remove("dark");
+  }
+  try {
+    localStorage.setItem("theme", theme);
+  } catch {
+    // localStorage can be unavailable in privacy-restricted browser contexts.
+  }
+}
+
+// Apply theme immediately when this file loads (prevents flicker)
+if (typeof window !== "undefined") {
+  applyTheme(getInitialTheme());
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>(getInitialTheme());
 
   useEffect(() => {
-    setTheme(getInitialTheme());
+    applyTheme(theme);
+  }, [theme]);
+
+  // Also apply the theme on mount in case something went wrong
+  useEffect(() => {
+    applyTheme(getInitialTheme());
   }, []);
 
+  // Listen to storage events to sync theme across tabs
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "dark") root.classList.add("dark");
-    else root.classList.remove("dark");
-    try {
-      localStorage.setItem("theme", theme);
-    } catch {
-      // localStorage can be unavailable in privacy-restricted browser contexts.
+    function handleStorageChange(e: StorageEvent) {
+      if (e.key === "theme") {
+        const newTheme = (e.newValue as Theme) || getInitialTheme();
+        setTheme(newTheme);
+        applyTheme(newTheme);
+      }
     }
-  }, [theme]);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 

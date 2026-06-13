@@ -40,50 +40,50 @@ const PACKAGES: {
   desc: string;
   includes: string[];
 }[] = [
-  {
-    id: "starter",
-    name: "Starter Site",
-    base: 150000,
-    timeline: "1 week",
-    desc: "A polished single-page site that converts visitors into leads.",
-    includes: [
-      "Custom design",
-      "Mobile-responsive",
-      "Contact form + analytics",
-      "Hosting setup",
-      "1 round of revisions",
-    ],
-  },
-  {
-    id: "business",
-    name: "Business Site",
-    base: 400000,
-    timeline: "2–3 weeks",
-    desc: "Multi-page marketing site with CMS so you can edit content yourself.",
-    includes: [
-      "Up to 8 pages",
-      "Editable CMS",
-      "Email + WhatsApp",
-      "SEO foundation",
-      "2 rounds of revisions",
-      "30 days of support",
-    ],
-  },
-  {
-    id: "custom",
-    name: "Custom Software",
-    base: null,
-    timeline: "From 4 weeks",
-    desc: "Dashboards, internal tools, SaaS MVPs — scoped around your business.",
-    includes: [
-      "Discovery workshop",
-      "Product design",
-      "Database + auth",
-      "Admin dashboard",
-      "Ongoing partnership",
-    ],
-  },
-];
+    {
+      id: "starter",
+      name: "Starter Site",
+      base: 150000,
+      timeline: "1 week",
+      desc: "A polished single-page site that converts visitors into leads.",
+      includes: [
+        "Custom design",
+        "Mobile-responsive",
+        "Contact form + analytics",
+        "Hosting setup",
+        "1 round of revisions",
+      ],
+    },
+    {
+      id: "business",
+      name: "Business Site",
+      base: 400000,
+      timeline: "2–3 weeks",
+      desc: "Multi-page marketing site with CMS so you can edit content yourself.",
+      includes: [
+        "Up to 8 pages",
+        "Editable CMS",
+        "Email + WhatsApp",
+        "SEO foundation",
+        "2 rounds of revisions",
+        "30 days of support",
+      ],
+    },
+    {
+      id: "custom",
+      name: "Custom Software",
+      base: null,
+      timeline: "From 4 weeks",
+      desc: "Dashboards, internal tools, SaaS MVPs — scoped around your business.",
+      includes: [
+        "Discovery workshop",
+        "Product design",
+        "Database + auth",
+        "Admin dashboard",
+        "Ongoing partnership",
+      ],
+    },
+  ];
 
 type AddOn = { id: string; label: string; price: number; desc: string; for: PackageId[] };
 
@@ -216,18 +216,18 @@ function BookPage() {
   // Custom skips add-ons (step 2)
   const STEPS = isCustom
     ? [
-        { key: "package", label: "Package" },
-        { key: "scope", label: "Scope" },
-        { key: "timeline", label: "Timeline" },
-        { key: "review", label: "Review" },
-      ]
+      { key: "package", label: "Package" },
+      { key: "scope", label: "Scope" },
+      { key: "timeline", label: "Timeline" },
+      { key: "review", label: "Review" },
+    ]
     : [
-        { key: "package", label: "Package" },
-        { key: "scope", label: "Scope" },
-        { key: "addons", label: "Add-ons" },
-        { key: "timeline", label: "Timeline" },
-        { key: "review", label: "Review" },
-      ];
+      { key: "package", label: "Package" },
+      { key: "scope", label: "Scope" },
+      { key: "addons", label: "Add-ons" },
+      { key: "timeline", label: "Timeline" },
+      { key: "review", label: "Review" },
+    ];
 
   const currentKey = STEPS[step]?.key;
 
@@ -306,21 +306,23 @@ function BookPage() {
 
   return (
     <SiteLayout>
-      <section className="py-16 md:py-24 px-6">
-        <div className="max-w-4xl mx-auto flex flex-col gap-6">
-          <div className="text-xs font-semibold tracking-widest uppercase text-brand">
-            Project builder
+      <section className="border-b border-ink/10">
+        <div className="max-w-7xl mx-auto px-6 pt-20 pb-12 md:pt-28">
+          <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-8">
+            <span className="h-px w-8 bg-brand" />
+            <span>Project Builder</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-medium tracking-tight max-w-[22ch] text-balance">
-            Scope your project. See your price. Lock it in.
+          <h1 className="font-display text-[clamp(3rem,8vw,7rem)] leading-[0.92] tracking-wide uppercase text-ink max-w-3xl mb-4">
+            Scope it. Price it.{" "}
+            <span className="text-brand">Lock it in.</span>
           </h1>
-          <p className="text-ink/60 max-w-[52ch]">
+          <p className="text-ink/60 max-w-[48ch] text-base">
             Five quick steps. We'll send a written proposal within 24 hours of submission.
           </p>
         </div>
       </section>
 
-      <section className="px-6 pb-24">
+      <section className="px-6 py-12 pb-24">
         <div className="max-w-4xl mx-auto">
           {/* Stepper */}
           <ol className="flex flex-wrap items-center gap-2 mb-8 text-xs">
@@ -329,13 +331,12 @@ function BookPage() {
                 <button
                   type="button"
                   onClick={() => i < step && setStep(i)}
-                  className={`px-3 py-1.5 rounded-full font-medium transition ${
-                    i === step
-                      ? "bg-ink text-surface"
-                      : i < step
-                        ? "bg-brand/10 text-brand hover:bg-brand/20"
-                        : "bg-card text-ink/40"
-                  }`}
+                  className={`px-3 py-1.5 rounded-full font-medium transition ${i === step
+                    ? "bg-contrast text-contrast-foreground"
+                    : i < step
+                      ? "bg-brand/10 text-brand hover:bg-brand/20"
+                      : "bg-card text-ink/40"
+                    }`}
                 >
                   {i + 1}. {s.label}
                 </button>
@@ -360,11 +361,10 @@ function BookPage() {
                         key={p.id}
                         type="button"
                         onClick={() => setPkg(p.id)}
-                        className={`text-left p-5 rounded-2xl ring-1 transition flex flex-col gap-3 ${
-                          active
-                            ? "ring-brand bg-brand/5"
-                            : "ring-ink/10 hover:ring-ink/30 bg-surface"
-                        }`}
+                        className={`text-left p-5 rounded-2xl ring-1 transition flex flex-col gap-3 ${active
+                          ? "ring-brand bg-brand/5"
+                          : "ring-ink/10 hover:ring-ink/30 bg-surface"
+                          }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="font-medium">{p.name}</div>
@@ -456,9 +456,8 @@ function BookPage() {
                         key={a.id}
                         type="button"
                         onClick={() => setAddons({ ...addons, [a.id]: !on })}
-                        className={`text-left p-4 rounded-2xl ring-1 transition flex items-start gap-3 ${
-                          on ? "ring-brand bg-brand/5" : "ring-ink/10 hover:ring-ink/30 bg-surface"
-                        }`}
+                        className={`text-left p-4 rounded-2xl ring-1 transition flex items-start gap-3 ${on ? "ring-brand bg-brand/5" : "ring-ink/10 hover:ring-ink/30 bg-surface"
+                          }`}
                       >
                         <div
                           className={`size-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${on ? "bg-brand text-brand-foreground" : "ring-1 ring-ink/20"}`}
@@ -495,11 +494,10 @@ function BookPage() {
                         key={t.id}
                         type="button"
                         onClick={() => setTimeline(t.id)}
-                        className={`p-5 rounded-2xl ring-1 transition text-left flex flex-col gap-2 ${
-                          active
-                            ? "ring-brand bg-brand/5"
-                            : "ring-ink/10 hover:ring-ink/30 bg-surface"
-                        }`}
+                        className={`p-5 rounded-2xl ring-1 transition text-left flex flex-col gap-2 ${active
+                          ? "ring-brand bg-brand/5"
+                          : "ring-ink/10 hover:ring-ink/30 bg-surface"
+                          }`}
                       >
                         <div className="font-medium">{t.label}</div>
                         <div className="text-xs text-ink/50">{t.note}</div>
@@ -556,7 +554,7 @@ function BookPage() {
                   type="button"
                   onClick={() => submit(isCustom ? "save" : "deposit")}
                   disabled={busy || !user?.id}
-                  className="w-full bg-ink text-surface py-3 px-6 rounded-full font-medium hover:bg-ink/90 transition disabled:opacity-50"
+                  className="w-full bg-contrast text-contrast-foreground py-3 px-6 rounded-full font-medium hover:bg-contrast/90 transition disabled:opacity-50"
                 >
                   {busy ? "Submitting…" : "Submit Project"}
                 </button>
@@ -630,11 +628,10 @@ function RadioGroup({
               key={o}
               type="button"
               onClick={() => onChange(o)}
-              className={`px-4 py-2 rounded-full text-sm ring-1 transition ${
-                active
-                  ? "bg-ink text-surface ring-ink"
-                  : "bg-surface ring-ink/15 hover:ring-ink/40 text-ink/80"
-              }`}
+              className={`px-4 py-2 rounded-full text-sm ring-1 transition ${active
+                ? "bg-contrast text-contrast-foreground ring-contrast"
+                : "bg-surface ring-ink/15 hover:ring-ink/40 text-ink/80"
+                }`}
             >
               {o}
             </button>
