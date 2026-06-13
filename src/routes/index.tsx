@@ -119,24 +119,6 @@ function HomePage() {
             </div>
           </div>
 
-          {partners.length > 0 && (
-            <div className="relative max-w-7xl mx-auto px-6 py-10">
-              <div className="text-[10px] font-semibold tracking-[0.22em] uppercase text-ink/35 mb-5">
-                Trusted by students, startups &amp; businesses
-              </div>
-              <div className="flex flex-wrap items-center gap-x-10 gap-y-4 text-ink/50">
-                {partners.map((p) =>
-                  p.logo_url ? (
-                    <a key={p.id} href={p.url ?? "#"} target={p.url ? "_blank" : undefined} rel="noreferrer" className="opacity-60 hover:opacity-100 transition">
-                      <img src={p.logo_url} alt={p.name} className="h-7 w-auto object-contain" />
-                    </a>
-                  ) : (
-                    <span key={p.id} className="text-base font-semibold tracking-tight hover:text-ink/80 transition">{p.name}</span>
-                  ),
-                )}
-              </div>
-            </div>
-          )}
         </section>
 
         {/* ─── PARTNERS ─── */}
