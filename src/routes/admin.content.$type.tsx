@@ -140,10 +140,10 @@ const TABLE_MAP: Record<
       { key: "published", label: "Published", type: "boolean" },
     ],
     columns: [
-      { 
-        key: "image_url", 
-        label: "Image", 
-        render: (r) => r.image_url ? <img src={r.image_url as string} alt="" className="size-12 object-cover rounded-lg" /> : "—" 
+      {
+        key: "image_url",
+        label: "Image",
+        render: (r) => r.image_url ? <img src={r.image_url as string} alt="" className="size-12 object-cover rounded-lg" /> : "—"
       },
       { key: "title", label: "Title" },
       { key: "tags", label: "Tags", render: (r) => Array.isArray(r.tags) ? r.tags.slice(0, 3).map((t) => <span key={t} className="text-xs bg-ink/5 px-2 py-1 rounded mr-1">{t}</span>) : "—" },
@@ -284,6 +284,37 @@ const TABLE_MAP: Record<
       { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
     ],
   },
+  events: {
+    table: "events",
+    title: "Events",
+    fields: [
+      { key: "title", label: "Title" },
+      { key: "slug", label: "Slug" },
+      { key: "description", label: "Description", type: "textarea" },
+      { key: "image_url", label: "Cover Image", type: "image" },
+      { key: "event_type", label: "Type (e.g. Workshop, Talk, Bootcamp)" },
+      { key: "date", label: "Start Date & Time (ISO)" },
+      { key: "end_date", label: "End Date & Time (ISO, optional)" },
+      { key: "venue", label: "Venue Name" },
+      { key: "location", label: "Location / City" },
+      { key: "registration_url", label: "Registration URL" },
+      { key: "is_free", label: "Free event", type: "boolean" },
+      { key: "price", label: "Price (if paid)", type: "number" },
+      { key: "spots_available", label: "Spots Available", type: "number" },
+      { key: "tags", label: "Tags (comma-separated)", type: "tags" },
+      { key: "position", label: "Order", type: "number" },
+      { key: "published", label: "Published", type: "boolean" },
+    ],
+    columns: [
+      { key: "image_url", label: "Image", render: (r) => r.image_url ? <img src={r.image_url as string} alt="" className="size-12 object-cover rounded-lg" /> : "—" },
+      { key: "title", label: "Title" },
+      { key: "event_type", label: "Type" },
+      { key: "date", label: "Date" },
+      { key: "location", label: "Location" },
+      { key: "is_free", label: "Free", render: (r) => (r.is_free ? "Free" : `₦${r.price ?? "—"}`) },
+      { key: "published", label: "Published", render: (r) => (r.published ? "✓" : "—") },
+    ],
+  },
 };
 
 function ContentPage() {
@@ -365,12 +396,12 @@ function ContentPage() {
               {cfg.columns?.map((col) => (
                 <th key={col.key} className="text-left px-4 py-3">{col.label}</th>
               )) || (
-                <>
-                  <th className="text-left px-4 py-3">Title</th>
-                  <th className="text-left px-4 py-3">Order</th>
-                  <th className="text-left px-4 py-3">Published</th>
-                </>
-              )}
+                  <>
+                    <th className="text-left px-4 py-3">Title</th>
+                    <th className="text-left px-4 py-3">Order</th>
+                    <th className="text-left px-4 py-3">Published</th>
+                  </>
+                )}
               <th></th>
             </tr>
           </thead>
@@ -382,12 +413,12 @@ function ContentPage() {
                     {col.render ? col.render(r) : (r[col.key] as string) ?? "—"}
                   </td>
                 )) || (
-                  <>
-                    <td className="px-4 py-3 font-medium">{r.name || r.title || r.slug}</td>
-                    <td className="px-4 py-3">{r.position ?? "—"}</td>
-                    <td className="px-4 py-3">{r.published ? "✓" : "—"}</td>
-                  </>
-                )}
+                    <>
+                      <td className="px-4 py-3 font-medium">{r.name || r.title || r.slug}</td>
+                      <td className="px-4 py-3">{r.position ?? "—"}</td>
+                      <td className="px-4 py-3">{r.published ? "✓" : "—"}</td>
+                    </>
+                  )}
                 <td className="px-4 py-3 text-right space-x-3">
                   <button onClick={() => setEditing(r)} className="text-brand text-sm">
                     Edit

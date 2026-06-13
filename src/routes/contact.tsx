@@ -4,7 +4,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { submitContact } from "@/lib/forms.functions";
-import { Mail } from "lucide-react";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -49,29 +48,30 @@ function ContactPage() {
 
   return (
     <SiteLayout>
-      <section className="py-24 md:py-32 px-6">
-        <div className="max-w-3xl mx-auto flex flex-col gap-8">
-          <div className="text-xs font-semibold tracking-widest uppercase text-brand">Contact</div>
-          <h1 className="text-4xl md:text-5xl font-medium tracking-tight max-w-[20ch] text-balance">
-            Tell us what you need. We'll reply within 24 hours.
-          </h1>
-          <div className="flex items-center gap-3 text-ink/60">
-            <Mail className="size-4 text-brand" />
-            <span>
-              For project inquiries, use the{" "}
-              <a href="/book" className="text-brand underline-offset-2 hover:underline">
-                project form
-              </a>
-              .
-            </span>
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-ink/10">
+        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 md:pt-28 md:pb-20">
+          <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-8">
+            <span className="h-px w-8 bg-brand" />
+            <span>Get in Touch</span>
           </div>
+          <h1 className="font-display text-[clamp(3rem,8vw,7rem)] leading-[0.92] tracking-wide uppercase text-ink max-w-3xl mb-6">
+            Tell us what you need.
+          </h1>
+          <p className="text-base md:text-lg text-ink/65 max-w-[44ch] leading-relaxed mb-4">
+            We reply within 24 hours. For project inquiries, use the{" "}
+            <a href="/book" className="text-brand hover:underline underline-offset-2">
+              project form
+            </a>
+            .
+          </p>
         </div>
       </section>
 
-      <section className="px-6 pb-24">
+      <section className="px-6 py-16 md:py-24">
         <form
           onSubmit={onSubmit}
-          className="max-w-3xl mx-auto bg-card rounded-3xl p-8 md:p-12 ring-1 ring-ink/5 flex flex-col gap-6"
+          className="max-w-3xl mx-auto flex flex-col gap-6"
         >
           <Field label="Name" name="name" required />
           <Field label="Email" name="email" type="email" required />
@@ -79,7 +79,7 @@ function ContactPage() {
           <button
             type="submit"
             disabled={busy}
-            className="bg-brand text-brand-foreground py-3 px-6 rounded-full font-medium hover:opacity-90 transition disabled:opacity-50 self-start"
+            className="bg-brand text-brand-foreground py-3.5 pl-7 pr-5 font-semibold text-sm uppercase tracking-widest hover:opacity-90 transition disabled:opacity-50 self-start"
           >
             {busy ? "Sending…" : "Send message"}
           </button>
@@ -103,7 +103,7 @@ export function Field({
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-widest text-ink/60">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
         {label}
         {required && <span className="text-brand"> *</span>}
       </span>
@@ -111,7 +111,7 @@ export function Field({
         name={name}
         type={type}
         required={required}
-        className="bg-surface border border-ink/10 rounded-lg px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition"
+        className="bg-surface border border-ink/10 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition"
         {...rest}
       />
     </label>
@@ -130,14 +130,14 @@ export function TextArea({
 } & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-widest text-ink/60">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
         {label}
         {required && <span className="text-brand"> *</span>}
       </span>
       <textarea
         name={name}
         required={required}
-        className="bg-surface border border-ink/10 rounded-lg px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition resize-y"
+        className="bg-surface border border-ink/10 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition resize-y"
         {...rest}
       />
     </label>
@@ -157,7 +157,7 @@ export function Select({
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-widest text-ink/60">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
         {label}
         {required && <span className="text-brand"> *</span>}
       </span>
@@ -165,15 +165,11 @@ export function Select({
         name={name}
         required={required}
         defaultValue=""
-        className="bg-surface border border-ink/10 rounded-lg px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition"
+        className="bg-surface border border-ink/10 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition"
       >
-        <option value="" disabled>
-          Choose…
-        </option>
+        <option value="" disabled>Choose…</option>
         {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
+          <option key={o} value={o}>{o}</option>
         ))}
       </select>
     </label>

@@ -10,11 +10,7 @@ export const Route = createFileRoute("/enroll")({
   head: () => ({
     meta: [
       { title: "Apply to the academy — OKIKE" },
-      {
-        name: "description",
-        content:
-          "Apply to OKIKE's 12-week engineering cohort. We review every application personally.",
-      },
+      { name: "description", content: "Apply to OKIKE's 12-week engineering cohort. We review every application personally." },
       { property: "og:title", content: "Apply to the academy — OKIKE" },
       { property: "og:description", content: "Enrollment form for OKIKE Academy." },
     ],
@@ -52,25 +48,33 @@ function EnrollPage() {
 
   return (
     <SiteLayout>
-      <section className="py-24 md:py-32 px-6">
-        <div className="max-w-3xl mx-auto flex flex-col gap-6">
-          <div className="text-xs font-semibold tracking-widest uppercase text-brand">
-            Apply to the academy
+
+      {/* ─── HERO ─── */}
+      <section className="relative overflow-hidden border-b border-ink/10">
+        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-0 md:pt-28 min-h-[56vh] flex flex-col justify-between">
+          <div className="flex flex-col gap-6 max-w-2xl">
+            <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50">
+              <span className="h-px w-8 bg-brand" />
+              <span>Apply to the Academy</span>
+            </div>
+
+            <h1 className="font-display text-[clamp(3rem,9vw,7.5rem)] leading-[0.92] tracking-wide uppercase text-ink">
+              Become the{" "}
+              <span className="text-brand">engineer</span>{" "}
+              behind what's next.
+            </h1>
+
+            <p className="text-base md:text-lg text-ink/65 max-w-[44ch] leading-relaxed">
+              We review every application personally. Be honest — that's how we find the right fit.
+            </p>
           </div>
-          <h1 className="text-4xl md:text-5xl font-medium tracking-tight max-w-[22ch] text-balance">
-            Become the engineer behind the next generation of African software.
-          </h1>
-          <p className="text-ink/60 max-w-[52ch]">
-            We review every application personally. Be honest — that's how we find the right fit.
-          </p>
+          <div className="h-12" />
         </div>
       </section>
 
-      <section className="px-6 pb-24">
-        <form
-          onSubmit={onSubmit}
-          className="max-w-3xl mx-auto bg-card rounded-3xl p-8 md:p-12 ring-1 ring-ink/5 flex flex-col gap-6"
-        >
+      {/* ─── FORM ─── */}
+      <section className="px-6 py-16 md:py-24">
+        <form onSubmit={onSubmit} className="max-w-3xl mx-auto flex flex-col gap-6">
           <div className="grid md:grid-cols-2 gap-6">
             <Field label="Full name" name="name" required />
             <Field label="Email" name="email" type="email" required />
@@ -100,12 +104,13 @@ function EnrollPage() {
           <button
             type="submit"
             disabled={busy}
-            className="bg-brand text-brand-foreground py-3 px-6 rounded-full font-medium hover:opacity-90 transition disabled:opacity-50 self-start"
+            className="bg-brand text-brand-foreground py-3.5 pl-7 pr-5 font-semibold text-sm uppercase tracking-widest hover:opacity-90 transition disabled:opacity-50 self-start"
           >
             {busy ? "Sending…" : "Submit application"}
           </button>
         </form>
       </section>
+
     </SiteLayout>
   );
 }
