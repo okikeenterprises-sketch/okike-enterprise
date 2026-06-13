@@ -151,12 +151,10 @@ function HomePage() {
                 {partners.map((p) =>
                   p.logo_url ? (
                     <a key={p.id} href={p.url ?? "#"} target={p.url ? "_blank" : undefined} rel="noreferrer" className="opacity-50 hover:opacity-100 grayscale hover:grayscale-0 transition">
-                      <img src={p.logo_url} alt={p.name} className="h-8 w-auto object-contain" />
+                      <img src={p.logo_url} alt={p.name} className="h-12 w-auto object-contain max-w-[160px]" />
                     </a>
                   ) : (
-                    <span key={p.id} className="font-display text-2xl tracking-wide uppercase text-ink/40 hover:text-ink/70 transition">
-                      {p.name}
-                    </span>
+                    <span key={p.id} className="font-display text-3xl tracking-wide uppercase text-ink/40 hover:text-ink/70 transition">{p.name}</span>
                   ),
                 )}
               </div>
