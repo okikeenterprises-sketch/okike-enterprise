@@ -41,7 +41,9 @@ const NAV: { to: string; label: string; icon: LucideIcon; exact?: boolean }[] = 
   { to: "/admin/content/services", label: "Services", icon: Package },
   { to: "/admin/content/packages", label: "Packages", icon: Package },
   { to: "/admin/content/portfolio", label: "Portfolio", icon: ImageIcon },
+  { to: "/admin/content/partners", label: "Partners", icon: Users },
   { to: "/admin/content/blog", label: "Blog", icon: FileText },
+  { to: "/admin/content/events", label: "Events", icon: Megaphone },
   { to: "/admin/announcements", label: "Messages", icon: Megaphone },
   { to: "/admin/reports", label: "Reports", icon: FileText },
   { to: "/admin/system-health", label: "System Health", icon: HeartPulse },
@@ -94,11 +96,10 @@ function AdminLayout() {
             <Link
               key={t.to}
               to={t.to}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-                active
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${active
                   ? "bg-brand/15 text-brand ring-1 ring-brand/30"
                   : "text-foreground/70 hover:text-foreground hover:bg-foreground/5"
-              }`}
+                }`}
             >
               <Icon className="size-4" />
               <span className="flex-1">{t.label}</span>

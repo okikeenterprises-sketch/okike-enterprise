@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowUpRight,
-  Bot,
   Code2,
   Smartphone,
   Palette,
   GraduationCap,
+  Bot,
   Sparkles,
   Search,
   Compass,
@@ -216,95 +216,56 @@ function ServicesPage() {
   return (
     <SiteLayout>
       {/* 1. HERO */}
-      <section className="relative overflow-hidden border-b border-ink/5">
-        <div className="absolute -top-24 -left-24 w-[600px] h-[600px] bg-brand/20 rounded-full blur-[120px] opacity-60" />
-        <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-brand/10 rounded-full blur-[100px] opacity-50" />
-
-        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-24 md:pt-32 md:pb-32">
-          <div className="max-w-4xl mx-auto text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-ink/10 bg-surface/80 backdrop-blur-sm mb-8">
-              <Sparkles className="size-4 text-brand" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-ink/70">
-                Our Services
-              </span>
+      <section className="relative overflow-hidden border-b border-ink/10">
+        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-0 md:pt-28 min-h-[72vh] flex flex-col justify-between">
+          <div className="flex flex-col gap-6 max-w-3xl">
+            <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50">
+              <span className="h-px w-8 bg-brand" />
+              <span>What We Build</span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-tight mb-6">
-              We build the{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10 text-brand">digital foundations</span>
-                <svg
-                  className="absolute -bottom-2 left-0 w-full h-3 text-brand/30"
-                  viewBox="0 0 200 12"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0 6 Q50 0 100 6 T200 6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                </svg>
-              </span>{" "}
-              for ambitious teams.
+            <h1 className="font-display text-[clamp(3.5rem,9vw,7.5rem)] leading-[0.92] tracking-wide uppercase text-ink">
+              Digital foundations for{" "}
+              <span className="text-brand">ambitious</span> teams.
             </h1>
 
-            <p className="text-lg md:text-xl text-ink/65 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-base md:text-lg text-ink/65 max-w-[48ch] leading-relaxed">
               From idea to scale — we ship AI tools, scalable platforms, mobile apps and stunning
               experiences that actually move the needle.
             </p>
 
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
                 to="/book"
-                className="group bg-brand text-brand-foreground px-8 py-4 rounded-full font-semibold text-lg shadow-lg shadow-brand/20 hover:shadow-brand/30 hover:opacity-90 transition-all duration-300 flex items-center gap-2"
+                className="group bg-brand text-brand-foreground py-3.5 pl-7 pr-5 inline-flex items-center gap-2 font-semibold text-sm uppercase tracking-widest hover:opacity-90 transition"
               >
-                Get started today
-                <ArrowUpRight className="size-5 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+                Start a project
+                <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </Link>
               <a
                 href="#work"
-                className="bg-ink/5 text-ink px-8 py-4 rounded-full font-semibold text-lg ring-1 ring-ink/10 hover:bg-ink/10 hover:ring-ink/20 transition-all duration-300"
+                className="bg-transparent text-ink py-3.5 pl-7 pr-5 inline-flex items-center gap-2 font-semibold text-sm uppercase tracking-widest ring-1 ring-ink/20 hover:ring-ink/40 transition"
               >
                 View our work
               </a>
             </div>
           </div>
 
-          {/* Floating Services Badges */}
-          <div className="relative mt-20 max-w-5xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-brand">
-                <div className="flex items-center gap-3 mb-3">
-                  <Bot className="size-6 text-brand" />
-                  <h3 className="font-semibold text-lg">AI & Automation</h3>
+          {/* Stats bar */}
+          <div className="relative mt-16 -mx-6 border-t border-ink/10 bg-surface/80 backdrop-blur overflow-hidden">
+            <div className="flex divide-x divide-ink/10 overflow-x-auto scrollbar-none">
+              {[
+                { value: "12+", label: "Products shipped" },
+                { value: "6", label: "Service areas" },
+                { value: "4–6 wks", label: "Avg. delivery" },
+                { value: "AI-first", label: "By default" },
+                { value: "30 days", label: "Post-launch support" },
+              ].map(({ value, label }) => (
+                <div key={label} className="flex-shrink-0 px-8 py-5 flex flex-col gap-0.5 min-w-[160px]">
+                  <span className="font-display text-3xl leading-none tracking-wide uppercase text-ink">{value}</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/45">{label}</span>
                 </div>
-                <p className="text-sm text-ink/60">Intelligent systems that work for you.</p>
-              </div>
-
-              <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-ink">
-                <div className="flex items-center gap-3 mb-3">
-                  <Code2 className="size-6 text-ink/70" />
-                  <h3 className="font-semibold text-lg">Web Platforms</h3>
-                </div>
-                <p className="text-sm text-ink/60">Scalable, modern web applications.</p>
-              </div>
-
-              <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-ink/50">
-                <div className="flex items-center gap-3 mb-3">
-                  <Smartphone className="size-6 text-ink/70" />
-                  <h3 className="font-semibold text-lg">Mobile Apps</h3>
-                </div>
-                <p className="text-sm text-ink/60">Native-feeling experiences, one codebase.</p>
-              </div>
-
-              <div className="bg-card rounded-2xl p-6 ring-1 ring-ink/10 shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 border-t-4 border-t-brand/50">
-                <div className="flex items-center gap-3 mb-3">
-                  <Palette className="size-6 text-brand/70" />
-                  <h3 className="font-semibold text-lg">Design & Branding</h3>
-                </div>
-                <p className="text-sm text-ink/60">Beautiful, intuitive, memorable products.</p>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -313,31 +274,25 @@ function ServicesPage() {
       {/* 2. CORE SERVICES GRID */}
       <section className="py-24 md:py-32 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col items-center text-center gap-4 mb-16">
-            <div className="text-xs font-semibold tracking-widest uppercase text-brand">
-              What we do
+          <div className="mb-16">
+            <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-6">
+              <span className="h-px w-8 bg-brand" />
+              <span>What we do</span>
             </div>
-            <h2 className="text-3xl md:text-5xl font-medium tracking-tight max-w-[22ch] text-balance">
+            <h2 className="font-display text-5xl md:text-6xl leading-[0.92] tracking-wide uppercase text-ink">
               Our core services.
             </h2>
-            <p className="text-ink/60 max-w-[52ch] text-pretty">
-              End-to-end digital solutions tailored to your goals — from a single landing page to a
-              full AI-powered platform.
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-ink/10 border border-ink/10">
             {coreServices.map(({ icon: Icon, title, blurb, bullets }) => (
-              <div
-                key={title}
-                className="group p-8 bg-card rounded-2xl ring-1 ring-ink/5 flex flex-col gap-5 hover:ring-brand/30 hover:-translate-y-1 transition-all"
-              >
-                <div className="inline-flex size-11 items-center justify-center rounded-lg bg-brand/10 text-brand ring-1 ring-brand/15">
+              <div key={title} className="p-8 bg-surface flex flex-col gap-5 hover:bg-secondary transition-colors">
+                <div className="inline-flex size-10 items-center justify-center bg-brand/10 text-brand">
                   <Icon className="size-5" />
                 </div>
-                <h3 className="text-xl font-medium leading-snug">{title}</h3>
+                <h3 className="font-display text-2xl leading-none tracking-wide uppercase text-ink">{title}</h3>
                 <p className="text-sm text-ink/60">{blurb}</p>
-                <ul className="space-y-2 text-sm text-ink/80 mt-auto">
+                <ul className="space-y-2 text-sm text-ink/80 mt-auto pt-4 border-t border-ink/5">
                   {bullets.map((b) => (
                     <li key={b} className="flex items-start gap-2">
                       <Check className="size-4 text-brand mt-0.5 shrink-0" />
@@ -352,13 +307,14 @@ function ServicesPage() {
       </section>
 
       {/* 3. HOW WE WORK */}
-      <section className="py-24 bg-secondary border-y border-ink/5 px-6">
+      <section className="py-24 bg-secondary border-y border-ink/10 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-[42ch] mb-16">
-            <div className="text-xs font-semibold tracking-widest uppercase text-brand mb-4">
-              Our process
+            <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-6">
+              <span className="h-px w-8 bg-brand" />
+              <span>Our process</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-medium tracking-tight">
+            <h2 className="font-display text-5xl md:text-6xl leading-[0.92] tracking-wide uppercase text-ink">
               A simple, transparent and collaborative way of working.
             </h2>
           </div>
@@ -384,26 +340,23 @@ function ServicesPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
-              <div className="text-xs font-semibold tracking-widest uppercase text-brand mb-3">
-                Featured results
+              <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-6">
+                <span className="h-px w-8 bg-brand" />
+                <span>Featured results</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-medium tracking-tight max-w-[24ch] text-balance">
+              <h2 className="font-display text-5xl md:text-6xl leading-[0.92] tracking-wide uppercase text-ink">
                 Real systems. Real impact.
               </h2>
             </div>
             <p className="text-ink/60 max-w-[40ch]">
-              A few outcomes from products we&apos;ve shipped for students, founders and
-              organizations.
+              A few outcomes from products we&apos;ve shipped for students, founders and organisations.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 mb-16">
+          <div className="grid md:grid-cols-3 gap-px bg-ink/10 border border-ink/10 mb-16">
             {results.map((r) => (
-              <div
-                key={r.label}
-                className="p-8 bg-card rounded-2xl ring-1 ring-ink/5 flex flex-col gap-4"
-              >
-                <div className="text-xs uppercase tracking-widest text-ink/40">{r.tag}</div>
-                <div className="text-5xl font-medium text-brand">{r.metric}</div>
+              <div key={r.label} className="p-8 bg-surface flex flex-col gap-4">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-ink/40 font-semibold">{r.tag}</div>
+                <div className="font-display text-7xl leading-none tracking-wide text-brand">{r.metric}</div>
                 <div className="text-sm text-ink/70">{r.label}</div>
               </div>
             ))}
@@ -415,20 +368,21 @@ function ServicesPage() {
 
       {/* 5. TECH STACK */}
       <section className="py-24 bg-contrast text-contrast-foreground px-6">
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center gap-10">
-          <div className="flex flex-col gap-4 items-center">
-            <div className="text-xs font-semibold tracking-widest uppercase text-brand">
-              Technology we use
+        <div className="max-w-7xl mx-auto flex flex-col gap-10">
+          <div>
+            <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-brand mb-6">
+              <span className="h-px w-8 bg-brand" />
+              <span>Technology we use</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-medium tracking-tight max-w-[28ch] text-balance">
+            <h2 className="font-display text-5xl md:text-6xl leading-[0.92] tracking-wide uppercase text-contrast-foreground">
               Built on the stack the best teams ship on.
             </h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap gap-3">
             {stack.map((s) => (
               <span
                 key={s}
-                className="px-5 py-2.5 rounded-full bg-contrast-foreground/5 ring-1 ring-contrast-foreground/10 text-sm font-medium text-contrast-foreground/90 hover:bg-contrast-foreground/10 transition"
+                className="px-5 py-2.5 bg-contrast-foreground/5 ring-1 ring-contrast-foreground/10 text-sm font-semibold uppercase tracking-widest text-contrast-foreground/90 hover:bg-contrast-foreground/10 transition"
               >
                 {s}
               </span>
@@ -441,20 +395,18 @@ function ServicesPage() {
       <section className="py-24 md:py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-[42ch] mb-16">
-            <div className="text-xs font-semibold tracking-widest uppercase text-brand mb-4">
-              Who we help
+            <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-6">
+              <span className="h-px w-8 bg-brand" />
+              <span>Who we help</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-medium tracking-tight">
+            <h2 className="font-display text-5xl md:text-6xl leading-[0.92] tracking-wide uppercase text-ink">
               Built for the people building what&apos;s next.
             </h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-ink/10 border border-ink/10">
             {industries.map((i) => (
-              <div
-                key={i.t}
-                className="p-6 rounded-2xl ring-1 ring-ink/5 bg-card hover:ring-brand/30 transition"
-              >
-                <div className="text-lg font-medium mb-1">{i.t}</div>
+              <div key={i.t} className="p-6 bg-surface hover:bg-secondary transition-colors">
+                <div className="font-display text-xl tracking-wide uppercase text-ink mb-2">{i.t}</div>
                 <div className="text-sm text-ink/60">{i.d}</div>
               </div>
             ))}
@@ -463,13 +415,14 @@ function ServicesPage() {
       </section>
 
       {/* 7. ENGAGEMENT MODEL */}
-      <section className="py-24 bg-secondary border-y border-ink/5 px-6">
+      <section className="py-24 bg-secondary border-y border-ink/10 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-[42ch] mb-16">
-            <div className="text-xs font-semibold tracking-widest uppercase text-brand mb-4">
-              How we engage
+            <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-6">
+              <span className="h-px w-8 bg-brand" />
+              <span>How we engage</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-medium tracking-tight">
+            <h2 className="font-display text-5xl md:text-6xl leading-[0.92] tracking-wide uppercase text-ink">
               Flexible engagement models.
             </h2>
             <p className="text-ink/60 mt-4">
@@ -477,10 +430,10 @@ function ServicesPage() {
               hours of your inquiry.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-ink/10 border border-ink/10">
             {engagement.map((e) => (
-              <div key={e.t} className="p-6 rounded-2xl bg-card ring-1 ring-ink/5">
-                <div className="text-base font-medium mb-2">{e.t}</div>
+              <div key={e.t} className="p-6 bg-surface hover:bg-card transition-colors">
+                <div className="font-display text-xl tracking-wide uppercase text-ink mb-2">{e.t}</div>
                 <div className="text-sm text-ink/60">{e.d}</div>
               </div>
             ))}
@@ -491,11 +444,12 @@ function ServicesPage() {
       {/* 8. FAQ */}
       <section className="py-24 md:py-32 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="text-xs font-semibold tracking-widest uppercase text-brand mb-3">
-              Frequently asked
+          <div className="mb-12">
+            <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-6">
+              <span className="h-px w-8 bg-brand" />
+              <span>Frequently asked</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-medium tracking-tight">
+            <h2 className="font-display text-5xl md:text-6xl leading-[0.92] tracking-wide uppercase text-ink">
               Questions, answered.
             </h2>
           </div>
@@ -508,32 +462,30 @@ function ServicesPage() {
       </section>
 
       {/* 9. FINAL CTA */}
-      <section className="py-24 md:py-32 px-6">
-        <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-8">
-          <h2 className="text-4xl md:text-6xl font-medium tracking-tight text-balance">
+      <section className="py-24 md:py-32 px-6 border-t border-ink/10">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-8">
+            <span className="h-px w-8 bg-brand" />
+            <span>Get Started</span>
+          </div>
+          <h2 className="font-display text-[clamp(2.5rem,7vw,6rem)] leading-[0.92] tracking-wide uppercase text-ink mb-8 max-w-4xl">
             Let&apos;s build something{" "}
-            <span className="text-brand italic font-medium">meaningful</span>.
+            <span className="text-brand">meaningful.</span>
           </h2>
-          <p className="text-ink/60 max-w-[48ch] text-pretty">
+          <p className="text-ink/60 max-w-[48ch] text-pretty mb-10">
             Have a project in mind? Tell us what you&apos;re building — we&apos;ll respond within 24
             hours with next steps and a quote.
           </p>
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-3">
             <Link
               to="/book"
-              className="bg-brand text-brand-foreground py-3 px-6 rounded-full font-medium hover:opacity-90 transition"
+              className="bg-brand text-brand-foreground py-3.5 pl-7 pr-5 inline-flex items-center gap-2 font-semibold text-sm uppercase tracking-widest hover:opacity-90 transition"
             >
               Book a call
             </Link>
             <Link
-              to="/book"
-              className="bg-ink text-surface py-3 px-6 rounded-full font-medium hover:bg-ink/90 transition"
-            >
-              Start a project
-            </Link>
-            <Link
               to="/contact"
-              className="bg-ink/5 text-ink py-3 px-6 rounded-full font-medium ring-1 ring-ink/10 hover:bg-ink/10 transition"
+              className="bg-transparent text-ink py-3.5 pl-7 pr-5 inline-flex items-center gap-2 font-semibold text-sm uppercase tracking-widest ring-1 ring-ink/20 hover:ring-ink/40 transition"
             >
               Send an inquiry
             </Link>
@@ -564,54 +516,41 @@ function PortfolioGrid() {
   if (items.length === 0) return null;
 
   return (
-    <div className="mt-8 pt-16 border-t border-ink/5">
+    <div className="mt-8 pt-16 border-t border-ink/10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
-          <div className="text-xs font-semibold tracking-widest uppercase text-brand mb-3">
-            Selected work
+          <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-4">
+            <span className="h-px w-8 bg-brand" />
+            <span>Selected work</span>
           </div>
-          <h3 className="text-3xl md:text-4xl font-medium tracking-tight max-w-[24ch] text-balance">
+          <h3 className="font-display text-5xl md:text-6xl leading-[0.92] tracking-wide uppercase text-ink">
             Projects we&apos;ve shipped.
           </h3>
         </div>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-ink/10 border border-ink/10">
         {items.map((item) => {
           const card = (
-            <div className="group h-full bg-card rounded-2xl ring-1 ring-ink/5 overflow-hidden flex flex-col hover:ring-brand/30 hover:-translate-y-1 transition-all">
+            <div className="group h-full bg-surface flex flex-col hover:bg-secondary transition-colors">
               {item.image_url ? (
                 <div className="aspect-[4/3] overflow-hidden bg-ink/5">
-                  <img
-                    src={item.image_url}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
+                  <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 </div>
               ) : (
-                <div className="aspect-[4/3] bg-gradient-to-br from-brand/10 to-brand/5 flex items-center justify-center text-brand/40 text-4xl font-semibold">
+                <div className="aspect-[4/3] bg-brand/5 flex items-center justify-center font-display text-6xl text-brand/30">
                   {item.title[0]}
                 </div>
               )}
               <div className="p-6 flex flex-col gap-3 flex-1">
                 <div className="flex items-start justify-between gap-3">
-                  <h4 className="text-lg font-medium leading-snug">{item.title}</h4>
-                  {item.url && (
-                    <ArrowUpRight className="size-4 text-ink/40 group-hover:text-brand transition shrink-0 mt-1" />
-                  )}
+                  <h4 className="font-display text-xl tracking-wide uppercase text-ink">{item.title}</h4>
+                  {item.url && <ArrowUpRight className="size-4 text-ink/40 group-hover:text-brand transition shrink-0 mt-1" />}
                 </div>
-                {item.description && (
-                  <p className="text-sm text-ink/60 line-clamp-3">{item.description}</p>
-                )}
+                {item.description && <p className="text-sm text-ink/60 line-clamp-3">{item.description}</p>}
                 {item.tags?.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
                     {item.tags.slice(0, 4).map((t) => (
-                      <span
-                        key={t}
-                        className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-ink/5 text-ink/60"
-                      >
-                        {t}
-                      </span>
+                      <span key={t} className="text-[10px] uppercase tracking-wider px-2 py-1 bg-ink/5 text-ink/60">{t}</span>
                     ))}
                   </div>
                 )}
@@ -619,15 +558,7 @@ function PortfolioGrid() {
             </div>
           );
           return item.url ? (
-            <a
-              key={item.id}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
-              {card}
-            </a>
+            <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="block">{card}</a>
           ) : (
             <div key={item.id}>{card}</div>
           );
@@ -645,14 +576,12 @@ function FaqItem({ q, a, defaultOpen = false }: { q: string; a: string; defaultO
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between gap-6 text-left group"
       >
-        <span className="text-lg font-medium text-ink group-hover:text-brand transition">{q}</span>
-        <span
-          className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand transition-transform ${open ? "rotate-45" : ""}`}
-        >
+        <span className="text-base font-semibold uppercase tracking-wide text-ink group-hover:text-brand transition">{q}</span>
+        <span className={`inline-flex size-7 shrink-0 items-center justify-center bg-brand/10 text-brand transition-transform ${open ? "rotate-45" : ""}`}>
           <Plus className="size-4" />
         </span>
       </button>
-      {open && <p className="mt-4 text-ink/65 text-pretty max-w-[68ch]">{a}</p>}
+      {open && <p className="mt-4 text-ink/65 max-w-[68ch] leading-relaxed">{a}</p>}
     </div>
   );
 }
