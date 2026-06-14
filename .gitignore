@@ -17,6 +17,11 @@ dist-ssr
 *.local
 .vercel
 
+# Environment variables — never commit these
+.env
+.env.local
+.env.*.local
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
