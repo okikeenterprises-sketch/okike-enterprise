@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Bot, Send, X, Sparkles, ArrowUpRight, User, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { askPublicAI } from "@/lib/public-ai.functions";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
 export function WelcomeAI() {
+  const askAI = useServerFn(askPublicAI);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([
     {
@@ -21,37 +24,40 @@ export function WelcomeAI() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const responses: Record<string, string> = {
-    "What services do you offer?":
-      "We offer custom software development including web applications, mobile apps, AI tools, and SaaS platforms. We also have an academy where we teach full-stack development, UI/UX design, Python, cybersecurity, and data analysis!",
-    "Tell me about the academy":
-      "Our academy offers comprehensive training programs in full-stack development, UI/UX design, Python development, cybersecurity, and data analysis. We provide hands-on projects, mentorship, and career support!",
-    "How do I book a project?":
-      "Great question! You can click the 'Book project' button below or visit /book to start a conversation with us about your project needs.",
-    "What's your pricing like?":
-      "We have transparent packages for every stage! From simple landing pages to custom SaaS solutions. Check out our Services page for more details or click 'Start a project' to get a custom quote.",
-    default:
-      "That's a great question! I'd recommend signing up to explore our services, or booking a project consultation to discuss your needs in detail. Would you like to know more about our software development services or our academy?",
-  };
-
   async function send(text?: string) {
     const content = (text ?? input).trim();
     if (!content || busy) return;
 
-    const next = [...messages, { role: "user" as const, content }];
+    const next: ChatMsg[] = [...messages, { role: "user" as const, content }];
     setMessages(next);
     setInput("");
     setBusy(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      let response = responses[content];
-      if (!response) {
-        response = responses.default;
+    try {
+      const history = next.slice(-20);
+      const result = await askAI({ data: { messages: history } });
+      if (result.ok) {
+        setMessages([...next, { role: "assistant", content: result.text }]);
+      } else {
+        setMessages([
+          ...next,
+          {
+            role: "assistant",
+            content: "Sorry, I couldn't process that request. Please try again.",
+          },
+        ]);
       }
-      setMessages([...next, { role: "assistant", content: response }]);
+    } catch {
+      setMessages([
+        ...next,
+        {
+          role: "assistant",
+          content: "Sorry, I couldn't process that request. Please try again.",
+        },
+      ]);
+    } finally {
       setBusy(false);
-    }, 800);
+    }
   }
 
   const quickQuestions = [
@@ -94,9 +100,8 @@ export function WelcomeAI() {
                 className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
               >
                 <div
-                  className={`size-8 rounded-full flex items-center justify-center shrink-0 ${
-                    msg.role === "user" ? "bg-ink/10" : "bg-brand/20"
-                  }`}
+                  className={`size-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-ink/10" : "bg-brand/20"
+                    }`}
                 >
                   {msg.role === "user" ? (
                     <User className="size-4 text-ink/70" />
@@ -105,11 +110,10 @@ export function WelcomeAI() {
                   )}
                 </div>
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    msg.role === "user"
-                      ? "bg-brand text-brand-foreground"
-                      : "bg-ink/[0.04] text-ink"
-                  }`}
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === "user"
+                    ? "bg-brand text-brand-foreground"
+                    : "bg-ink/[0.04] text-ink"
+                    }`}
                 >
                   <p className="text-sm leading-relaxed">{msg.content}</p>
                 </div>
@@ -170,6 +174,7 @@ export function WelcomeAI() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && send()}
                 placeholder="Ask me anything..."
+                maxLength={8000}
                 className="flex-1 bg-ink/[0.03] border-0 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
               />
               <button

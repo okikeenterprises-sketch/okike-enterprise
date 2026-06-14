@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { useServerFn } from "@tanstack/react-start";
-import { askAssistant } from "@/lib/ai-assistant.functions";
+import { askAssistant, generateInsights } from "@/lib/ai-assistant.functions";
 import { toast } from "sonner";
 import heroImg from "@/assets/dashboard-hero.jpg";
 import okikeLogo from "@/assets/okike-logo.png";
@@ -521,6 +521,7 @@ function DashboardOverview({
 
       {/* Right rail */}
       <aside className="flex flex-col gap-5">
+        <AIInsightsCard projects={projects} milestones={milestones} updates={updates} />
         <section className="rounded-2xl bg-card ring-1 ring-ink/10 p-5">
           <h3 className="font-semibold text-sm mb-1">Next up</h3>
           <p className="text-xs text-ink/60 mb-4">Your active milestone.</p>
@@ -1015,6 +1016,136 @@ function SettingsView({ email, fullName }: { email: string; fullName: string }) 
         </div>
       </section>
     </div>
+  );
+}
+
+/* ---------------- AIInsightsCard ---------------- */
+
+type InsightItem = {
+  id: string;
+  severity: "warning" | "info";
+  title: string;
+  message: string;
+};
+
+function AIInsightsCard({
+  projects,
+  milestones,
+  updates,
+}: {
+  projects: Project[];
+  milestones: Milestone[];
+  updates: Update[];
+}) {
+  const getInsights = useServerFn(generateInsights);
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "hidden">("idle");
+  const [insights, setInsights] = useState<InsightItem[]>([]);
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (projects.length === 0) return;
+    setStatus("loading");
+
+    let aborted = false;
+    const timeoutId = setTimeout(() => {
+      aborted = true;
+      setStatus("hidden");
+    }, 10_000);
+
+    getInsights({
+      data: {
+        projects,
+        milestones: milestones.map((m) => ({
+          id: m.id,
+          project_id: m.project_id,
+          name: m.name,
+          status: m.status,
+          created_at: m.updated_at ?? new Date().toISOString(),
+        })),
+        updates,
+      },
+    })
+      .then((result) => {
+        if (aborted) return;
+        clearTimeout(timeoutId);
+        if (result.ok) {
+          // Sort: warning first, then info; within each severity by id (deterministic)
+          const sorted = [...result.insights].sort((a, b) => {
+            if (a.severity === b.severity) return a.id.localeCompare(b.id);
+            return a.severity === "warning" ? -1 : 1;
+          });
+          setInsights(sorted);
+          setStatus("done");
+        } else {
+          setStatus("hidden");
+        }
+      })
+      .catch(() => {
+        if (!aborted) {
+          clearTimeout(timeoutId);
+          setStatus("hidden");
+        }
+      });
+
+    return () => {
+      aborted = true;
+      clearTimeout(timeoutId);
+    };
+  }, []); // intentionally run once on mount
+
+  const visible = insights.filter((i) => !dismissed.has(i.id)).slice(0, 3);
+
+  if (status === "hidden") return null;
+  if (status === "done" && visible.length === 0) return null;
+
+  return (
+    <section className="rounded-2xl bg-card ring-1 ring-ink/10 p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Sparkles className="size-4 text-brand" />
+        <h3 className="font-semibold text-sm">AI Insights</h3>
+      </div>
+
+      {status === "loading" && (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-14 rounded-xl bg-ink/5 animate-pulse" />
+          ))}
+        </div>
+      )}
+
+      {status === "done" && (
+        <ul className="space-y-3">
+          {visible.map((insight) => (
+            <li
+              key={insight.id}
+              className={`rounded-xl p-3 ring-1 flex items-start gap-3 ${insight.severity === "warning"
+                  ? "bg-amber-50 ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/20"
+                  : "bg-brand/5 ring-brand/15"
+                }`}
+            >
+              <div className="shrink-0 mt-0.5">
+                {insight.severity === "warning" ? (
+                  <Flag className="size-4 text-amber-500" />
+                ) : (
+                  <Sparkles className="size-4 text-brand" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold truncate">{insight.title}</div>
+                <div className="text-xs text-ink/60 mt-0.5">{insight.message}</div>
+              </div>
+              <button
+                onClick={() => setDismissed((d) => new Set([...d, insight.id]))}
+                className="shrink-0 text-ink/30 hover:text-ink/60 transition"
+                aria-label="Dismiss insight"
+              >
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 

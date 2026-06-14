@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { Sparkles, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { updateProject, updateMilestone, postProjectUpdate } from "@/lib/admin.functions";
+import { updateProject, updateMilestone, postProjectUpdate, draftProjectUpdate, generateMilestonePlan } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin/projects")({
   component: AdminProjects,
@@ -19,6 +20,7 @@ type Project = {
   stage: string;
   admin_notes: string | null;
   created_at: string;
+  inquiry_id: string | null;
 };
 type ProjectStage = Project["stage"];
 type Milestone = {
@@ -48,11 +50,17 @@ function AdminProjects() {
   const updateProj = useServerFn(updateProject);
   const updateMs = useServerFn(updateMilestone);
   const postUp = useServerFn(postProjectUpdate);
+  const draftUpdate = useServerFn(draftProjectUpdate);
+  const genMilestones = useServerFn(generateMilestonePlan);
+  const [aiDraftBusy, setAiDraftBusy] = useState(false);
+  const [milestonePlan, setMilestonePlan] = useState<string[] | null>(null);
+  const [milestonePlanBusy, setMilestonePlanBusy] = useState(false);
+  const [inquiryDetails, setInquiryDetails] = useState<string>("");
 
   async function load() {
     const { data } = await supabase
       .from("client_projects")
-      .select("*")
+      .select("id, title, client_email, package_name, total, deposit, stage, admin_notes, created_at, inquiry_id")
       .order("created_at", { ascending: false });
     setList((data ?? []) as Project[]);
   }
@@ -73,7 +81,22 @@ function AdminProjects() {
     load();
   }, []);
   useEffect(() => {
-    if (open) loadDetail(open.id);
+    if (open) {
+      loadDetail(open.id);
+      // Fetch linked inquiry details for AI milestone generation
+      if (open.inquiry_id) {
+        supabase
+          .from("project_inquiries")
+          .select("details")
+          .eq("id", open.inquiry_id)
+          .maybeSingle()
+          .then(({ data: inq }) => {
+            setInquiryDetails(inq?.details ?? "");
+          });
+      } else {
+        setInquiryDetails("");
+      }
+    }
   }, [open]);
 
   return (
@@ -207,6 +230,91 @@ function AdminProjects() {
               />
             </label>
 
+            {ms.length === 0 && (
+              <div>
+                <div className="text-xs uppercase tracking-wider text-ink/40 mb-2">Milestones</div>
+                {milestonePlan ? (
+                  <div className="flex flex-col gap-3">
+                    <div className="text-sm font-medium text-ink/70">AI suggested milestones:</div>
+                    <ol className="flex flex-col gap-1.5">
+                      {milestonePlan.map((name, i) => (
+                        <li key={i} className="text-sm flex items-center gap-2 bg-brand/5 rounded-lg px-3 py-2">
+                          <span className="text-xs font-semibold text-brand">{i + 1}.</span>
+                          <span>{name}</span>
+                        </li>
+                      ))}
+                    </ol>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          if (!open || !milestonePlan) return;
+                          try {
+                            for (let i = 0; i < milestonePlan.length; i++) {
+                              const { error } = await supabase.from("project_milestones").insert({
+                                project_id: open.id,
+                                name: milestonePlan[i],
+                                status: "pending",
+                                position: i + 1,
+                              });
+                              if (error) throw new Error(error.message);
+                            }
+                            toast.success("Milestones created");
+                            setMilestonePlan(null);
+                            await loadDetail(open.id);
+                          } catch (err: unknown) {
+                            toast.error(errorMessage(err));
+                          }
+                        }}
+                        className="flex-1 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium"
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        onClick={() => setMilestonePlan(null)}
+                        className="flex-1 py-2 rounded-xl bg-surface ring-1 ring-ink/10 text-sm font-medium"
+                      >
+                        Discard
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      if (!open) return;
+                      setMilestonePlanBusy(true);
+                      try {
+                        const result = await genMilestones({
+                          data: {
+                            projectTitle: open.title,
+                            packageName: open.package_name,
+                            stage: open.stage,
+                            inquiryDetails: inquiryDetails || "No additional details provided.",
+                          },
+                        });
+                        if (result.ok) {
+                          setMilestonePlan(result.milestones);
+                        } else {
+                          toast.error("Couldn't generate a milestone plan. Check the inquiry details.");
+                        }
+                      } catch {
+                        toast.error("Couldn't generate a milestone plan. Check the inquiry details.");
+                      } finally {
+                        setMilestonePlanBusy(false);
+                      }
+                    }}
+                    disabled={milestonePlanBusy}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand/10 text-brand text-sm font-medium hover:bg-brand/20 transition disabled:opacity-50"
+                  >
+                    {milestonePlanBusy ? (
+                      <><Loader2 className="size-3.5 animate-spin" /> Generating…</>
+                    ) : (
+                      <><Sparkles className="size-3.5" /> Generate Milestones with AI</>
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
+
             {ms.length > 0 && (
               <div>
                 <div className="text-xs uppercase tracking-wider text-ink/40 mb-2">Milestones</div>
@@ -258,13 +366,49 @@ function AdminProjects() {
 
             <div>
               <div className="text-xs uppercase tracking-wider text-ink/40 mb-2">Post update</div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center flex-wrap">
                 <input
                   value={newMsg}
                   onChange={(e) => setNewMsg(e.target.value)}
                   placeholder="What should the client know?"
-                  className="flex-1 bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-sm"
+                  className="flex-1 min-w-0 bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-sm"
                 />
+                <button
+                  onClick={async () => {
+                    if (!open) return;
+                    setAiDraftBusy(true);
+                    try {
+                      const result = await draftUpdate({
+                        data: {
+                          projectTitle: open.title,
+                          stage: open.stage,
+                          packageName: open.package_name,
+                          milestones: ms.map((m) => ({ name: m.name, status: m.status })),
+                          recentUpdates: up.slice(0, 3).map((u) => u.message),
+                        },
+                      });
+                      if (result.ok) {
+                        setNewMsg(result.draft);
+                      } else {
+                        toast.error("AI draft failed. Try writing the update manually.");
+                      }
+                    } catch {
+                      toast.error("AI draft failed. Try writing the update manually.");
+                    } finally {
+                      setAiDraftBusy(false);
+                    }
+                  }}
+                  disabled={aiDraftBusy}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-brand/10 text-brand text-sm font-medium hover:bg-brand/20 transition disabled:opacity-50 whitespace-nowrap"
+                  title="Draft with AI"
+                >
+                  {aiDraftBusy ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="size-3.5" />
+                  )}
+                  <span className="hidden sm:inline">{aiDraftBusy ? "" : "Draft with AI"}</span>
+                </button>
                 <button
                   onClick={async () => {
                     if (!newMsg.trim()) return;
@@ -277,7 +421,7 @@ function AdminProjects() {
                       toast.error(errorMessage(err));
                     }
                   }}
-                  className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium"
+                  className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium whitespace-nowrap"
                 >
                   Post
                 </button>

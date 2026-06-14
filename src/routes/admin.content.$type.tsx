@@ -2,8 +2,9 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { cmsUpsert, cmsDelete } from "@/lib/admin.functions";
+import { cmsUpsert, cmsDelete, publishAIBlogPost } from "@/lib/admin.functions";
 import { ImageUpload } from "@/components/ui/image-upload";
 
 export const Route = createFileRoute("/admin/content/$type")({
@@ -324,6 +325,9 @@ function ContentPage() {
   const [editing, setEditing] = useState<ContentRow | null>(null);
   const upsert = useServerFn(cmsUpsert);
   const del = useServerFn(cmsDelete);
+  const publishAIPost = useServerFn(publishAIBlogPost);
+  const [publishBusy, setPublishBusy] = useState(false);
+  const [lastAiPost, setLastAiPost] = useState<string | null>(null);
 
   async function load() {
     if (!cfg) return;
@@ -336,6 +340,18 @@ function ContentPage() {
   }
   useEffect(() => {
     load();
+    if (type === "blog") {
+      supabase
+        .from("blog_posts")
+        .select("created_at")
+        .eq("author", "OKIKE AI")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+        .then(({ data: aiPost }) => {
+          setLastAiPost(aiPost?.created_at ?? null);
+        });
+    }
   }, [type]);
 
   if (!cfg) return <div>Unknown content type.</div>;
@@ -380,13 +396,60 @@ function ContentPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-medium">{cfg.title}</h1>
-        <button
-          onClick={startNew}
-          className="px-4 py-2 rounded-full bg-brand text-brand-foreground text-sm font-medium"
-        >
-          + New
-        </button>
+        <div>
+          <h1 className="text-3xl font-medium">{cfg.title}</h1>
+          {(type === "blog" || type === "blog_posts") && lastAiPost && (
+            <p className="text-xs text-ink/50 mt-1">
+              Last AI post: {new Date(lastAiPost).toLocaleString()}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {(type === "blog" || type === "blog_posts") && (
+            <button
+              onClick={async () => {
+                setPublishBusy(true);
+                try {
+                  const result = await publishAIPost({ data: {} });
+                  if (result.ok) {
+                    toast.success(`Published: "${result.title}" · /${result.slug}`);
+                    // Reload the list
+                    load();
+                    // Refresh last AI post timestamp
+                    const { data: aiPost } = await supabase
+                      .from("blog_posts")
+                      .select("created_at")
+                      .eq("author", "OKIKE AI")
+                      .order("created_at", { ascending: false })
+                      .limit(1)
+                      .maybeSingle();
+                    setLastAiPost(aiPost?.created_at ?? null);
+                  } else {
+                    toast.error(result.error);
+                  }
+                } catch (e: unknown) {
+                  toast.error(e instanceof Error ? e.message : "Failed to publish AI post");
+                } finally {
+                  setPublishBusy(false);
+                }
+              }}
+              disabled={publishBusy}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand/10 text-brand text-sm font-medium hover:bg-brand/20 transition disabled:opacity-50"
+            >
+              {publishBusy ? (
+                <><Loader2 className="size-3.5 animate-spin" /> Publishing…</>
+              ) : (
+                <><Sparkles className="size-3.5" /> Publish AI Post</>
+              )}
+            </button>
+          )}
+          <button
+            onClick={startNew}
+            className="px-4 py-2 rounded-full bg-brand text-brand-foreground text-sm font-medium"
+          >
+            + New
+          </button>
+        </div>
       </div>
 
       <div className="bg-card rounded-2xl ring-1 ring-ink/5 overflow-hidden">

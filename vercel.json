@@ -1,5 +1,11 @@
 {
   "framework": "vite",
   "buildCommand": "npm run build",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/cron/publish-blog",
+      "schedule": "0 7 * * *"
+    }
+  ]
 }

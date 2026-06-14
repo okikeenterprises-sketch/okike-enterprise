@@ -2,9 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, ArrowLeft, ArrowRight, Lock } from "lucide-react";
+import { Check, ArrowLeft, ArrowRight, Lock, Sparkles, Loader2 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { submitInquiry } from "@/lib/forms.functions";
+import { askProjectAssistant } from "@/lib/ai-assistant.functions";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/book")({
@@ -169,6 +170,7 @@ const SCOPE_QUESTIONS = {
 function BookPage() {
   const navigate = useNavigate();
   const send = useServerFn(submitInquiry);
+  const askProjectAI = useServerFn(askProjectAssistant);
   const { session, loading, user } = useAuth();
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -176,6 +178,14 @@ function BookPage() {
   const [scope, setScope] = useState({ goal: "", pages: "", brand: "", description: "" });
   const [addons, setAddons] = useState<Record<string, boolean>>({});
   const [timeline, setTimeline] = useState<string>("standard");
+
+  // AI Assistant Mode state
+  const [aiMode, setAiMode] = useState(false);
+  const [aiDescription, setAiDescription] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiClarificationCount, setAiClarificationCount] = useState(0);
+  const [clarificationQuestion, setClarificationQuestion] = useState<string | null>(null);
+  const [aiSuggested, setAiSuggested] = useState<Record<string, boolean>>({});
 
   const selectedPkg = PACKAGES.find((p) => p.id === pkg) ?? null;
   const isCustom = pkg === "custom";
@@ -244,6 +254,92 @@ function BookPage() {
       return !!scope.goal && (isCustom ? scope.description.length >= 10 : !!scope.pages);
     if (currentKey === "timeline") return !!timeline;
     return true;
+  }
+
+  // Placeholder — task 4.2 will implement this
+  async function handleAISubmit() {
+    if (aiDescription.trim().length < 20 || aiLoading) return;
+    setAiLoading(true);
+    try {
+      const result = await askProjectAI({
+        data: {
+          description: aiDescription,
+          packages: PACKAGES.map((p) => ({ id: p.id, name: p.name, base: p.base, timeline: p.timeline })),
+          addons: ADDONS.map((a) => ({ id: a.id, label: a.label, price: a.price })),
+          timelineOptions: TIMELINE_OPTIONS.map((t) => t.id),
+        },
+      });
+
+      if (!result.ok) {
+        toast.error("AI couldn't parse your description. Please fill in the form manually.");
+        return;
+      }
+
+      const rec = result.recommendation;
+
+      if (rec.needs_clarification === true) {
+        // Clarification needed
+        const newCount = aiClarificationCount + 1;
+        if (newCount >= 2) {
+          // Max rounds reached — fall back to manual
+          setAiMode(false);
+          setAiDescription("");
+          setAiClarificationCount(0);
+          setClarificationQuestion(null);
+          setAiSuggested({});
+          toast.error("Couldn't gather enough detail. Please fill in the form manually.");
+        } else {
+          setAiClarificationCount(newCount);
+          setClarificationQuestion(rec.clarification_question);
+        }
+        return;
+      }
+
+      // Full recommendation — pre-populate builder state
+      const newSuggested: Record<string, boolean> = {};
+
+      if (rec.pkg) {
+        setPkg(rec.pkg as PackageId);
+        newSuggested["pkg"] = true;
+      }
+      if (rec.scopeGoal) {
+        setScope((s) => ({ ...s, goal: rec.scopeGoal }));
+        newSuggested["scope.goal"] = true;
+      }
+      if (rec.scopePages) {
+        setScope((s) => ({ ...s, pages: rec.scopePages }));
+        newSuggested["scope.pages"] = true;
+      }
+      if (rec.scopeBrand) {
+        setScope((s) => ({ ...s, brand: rec.scopeBrand }));
+        newSuggested["scope.brand"] = true;
+      }
+      // Pre-fill description with the original plain-English input
+      setScope((s) => ({ ...s, description: aiDescription }));
+
+      if (rec.addons && rec.addons.length > 0) {
+        const newAddons: Record<string, boolean> = {};
+        for (const id of rec.addons) {
+          newAddons[id] = true;
+          newSuggested[`addon.${id}`] = true;
+        }
+        setAddons(newAddons);
+      }
+      if (rec.timeline) {
+        setTimeline(rec.timeline);
+        newSuggested["timeline"] = true;
+      }
+
+      setAiSuggested(newSuggested);
+      // Close AI panel and jump to step 0 so user sees pre-filled package
+      setAiMode(false);
+      setClarificationQuestion(null);
+      setAiClarificationCount(0);
+    } catch {
+      toast.error("AI couldn't parse your description. Please fill in the form manually.");
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   async function submit(intent: "deposit" | "save") {
@@ -324,6 +420,86 @@ function BookPage() {
 
       <section className="px-6 py-12 pb-24">
         <div className="max-w-4xl mx-auto">
+          {/* AI Assistant toggle button */}
+          <div className="mb-6 flex items-center">
+            <button
+              type="button"
+              onClick={() => {
+                if (aiMode) {
+                  setAiMode(false);
+                  setAiDescription("");
+                  setAiClarificationCount(0);
+                  setClarificationQuestion(null);
+                  setAiSuggested({});
+                  // Reset builder fields (req 2.8)
+                  setPkg(null);
+                  setScope({ goal: "", pages: "", brand: "", description: "" });
+                  setAddons({});
+                  setTimeline("standard");
+                } else {
+                  setAiMode(true);
+                }
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ring-1 transition ${aiMode
+                ? "bg-brand text-brand-foreground ring-brand hover:opacity-90"
+                : "bg-card text-ink ring-ink/15 hover:ring-brand hover:text-brand"
+                }`}
+            >
+              {aiMode ? (
+                <>✕ Exit AI Mode</>
+              ) : (
+                <>✦ Use AI Assistant</>
+              )}
+            </button>
+          </div>
+
+          {/* AI Assistant panel */}
+          {aiMode && (
+            <div className="bg-card rounded-3xl p-6 md:p-10 ring-1 ring-ink/5 mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="size-5 text-brand" />
+                <h2 className="text-xl font-medium tracking-tight">
+                  Describe what you want to build
+                </h2>
+              </div>
+              <div className="flex flex-col gap-4">
+                <textarea
+                  value={aiDescription}
+                  onChange={(e) => setAiDescription(e.target.value)}
+                  placeholder="e.g. I need an e-commerce site for my clothing brand, with product listings, a cart, and Instagram integration..."
+                  rows={4}
+                  maxLength={2000}
+                  className="bg-surface ring-1 ring-ink/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-brand transition resize-none"
+                />
+                {clarificationQuestion !== null && (
+                  <div className="rounded-xl bg-brand/5 ring-1 ring-brand/20 px-4 py-3">
+                    <p className="text-sm text-ink/80">{clarificationQuestion}</p>
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs text-ink/40">
+                    {aiDescription.length}/2000
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAISubmit}
+                    disabled={aiDescription.trim().length < 20 || aiLoading}
+                    className="flex items-center gap-2 bg-brand text-brand-foreground py-2.5 px-5 rounded-full text-sm font-medium hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {aiLoading ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        Analysing…
+                      </>
+                    ) : (
+                      "Get AI Recommendation →"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Stepper */}
           <ol className="flex flex-wrap items-center gap-2 mb-8 text-xs">
             {STEPS.map((s, i) => (
