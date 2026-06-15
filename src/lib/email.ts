@@ -53,7 +53,9 @@ function baseTemplate(content: string): string {
     <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-top:4px solid #eab308;">
       <tr>
         <td style="padding:28px 40px 20px;">
-          <span style="font-size:26px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:#111111;">OKI</span><span style="font-size:26px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:#eab308;">KE</span>
+          <a href="https://okikeenterprises.com" style="text-decoration:none;display:inline-block;">
+            <img src="https://res.cloudinary.com/djzsrfc6h/image/upload/v1781531660/Asset_40_q7oeri.png" alt="OKIKE" width="120" height="auto" style="display:block;border:0;max-width:120px;" />
+          </a>
           <br/>
           <span style="font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#999999;">Your Digital Ecosystem</span>
         </td>
