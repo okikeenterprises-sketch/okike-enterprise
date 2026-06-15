@@ -72,10 +72,12 @@ function HomePage() {
 
         {/* ─── HERO ─── */}
         <section className="relative overflow-hidden border-b border-ink/10">
-          <div className="absolute inset-y-0 right-0 w-full lg:w-[55%] pointer-events-none">
-            <img src={heroDashboard} alt="" aria-hidden className="w-full h-full object-cover object-center" />
-            <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/90 to-surface/10" />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-surface to-transparent" />
+          <div className="absolute inset-y-0 right-0 w-full lg:w-[65%] pointer-events-none">
+            <img src="/background.png" alt="" aria-hidden className="w-full h-full object-cover object-left-top opacity-100" />
+            <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/85 to-surface/5" />
+            <div className="absolute inset-0 bg-gradient-to-l from-surface/20 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-surface to-transparent" />
+            <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-surface to-transparent" />
           </div>
 
           <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-0 md:pt-28 min-h-[88vh] flex flex-col justify-between">
