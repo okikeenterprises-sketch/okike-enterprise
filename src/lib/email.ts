@@ -130,12 +130,82 @@ function featureRow(icon: string, title: string, desc: string): string {
 
 export function welcomeEmail(data: { name: string; email: string }): EmailPayload {
   const firstName = data.name.split(" ")[0];
+  const year = new Date().getFullYear();
   return {
     to: data.email,
     subject: `Welcome to OKIKE, ${firstName} 👋`,
-    // Use the Resend template — passes {{name}} variable for personalisation
-    template_id: "a9c12921-ec7b-45f4-84dc-2dfbaff3dd8a",
-    data: { name: firstName },
+    html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Welcome to OKIKE</title>
+</head>
+<body style="margin:0;padding:0;background-color:#111111;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#111111">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#0a0a0a;border-top:4px solid #eab308;">
+      <tr>
+        <td align="center" style="padding:36px 40px 24px;">
+          <a href="https://okikeenterprises.com" style="text-decoration:none;display:inline-block;">
+            <img src="https://res.cloudinary.com/djzsrfc6h/image/upload/v1781531660/Asset_40_q7oeri.png" alt="OKIKE" width="130" height="auto" style="display:block;border:0;" />
+          </a>
+        </td>
+      </tr>
+      <tr><td style="padding:0 40px;"><div style="height:2px;background-color:#eab308;"></div></td></tr>
+      <tr>
+        <td style="padding:40px 40px 24px;text-align:center;">
+          <p style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#eab308;margin:0 0 12px;">Welcome</p>
+          <h1 style="font-size:34px;font-weight:900;color:#ffffff;margin:0 0 16px;line-height:1.1;">Good to have you,<br/><span style="color:#eab308;">${firstName}.</span></h1>
+          <p style="font-size:15px;line-height:1.7;color:#888888;margin:0;max-width:420px;display:inline-block;">Your OKIKE account is ready. You can now scope projects, track progress in real time, and work directly with our team.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 40px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#111111;border-left:4px solid #eab308;">
+            <tr><td style="padding:20px 24px;">
+              <p style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#eab308;margin:0 0 16px;">Here's what you can do</p>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:14px;"><tr>
+                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#eab308;text-align:center;line-height:30px;font-size:16px;">🚀</div></td>
+                <td style="padding-left:14px;vertical-align:top;"><p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Start a project</p><p style="font-size:13px;color:#777777;margin:0;">Describe what you want to build and get a fixed-price proposal within 24 hours.</p></td>
+              </tr></table>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:14px;"><tr>
+                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#eab308;text-align:center;line-height:30px;font-size:16px;">📊</div></td>
+                <td style="padding-left:14px;vertical-align:top;"><p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Track your project</p><p style="font-size:13px;color:#777777;margin:0;">See milestones, updates, and your project stage in real time from your dashboard.</p></td>
+              </tr></table>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:14px;"><tr>
+                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#eab308;text-align:center;line-height:30px;font-size:16px;">🤖</div></td>
+                <td style="padding-left:14px;vertical-align:top;"><p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Ask OKIKE AI</p><p style="font-size:13px;color:#777777;margin:0;">Your AI assistant answers questions, summarises progress and suggests next steps.</p></td>
+              </tr></table>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#eab308;text-align:center;line-height:30px;font-size:16px;">🎓</div></td>
+                <td style="padding-left:14px;vertical-align:top;"><p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Explore the Academy</p><p style="font-size:13px;color:#777777;margin:0;">Learn fullstack development, UI/UX design, and more through our structured courses.</p></td>
+              </tr></table>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="padding:8px 40px 40px;">
+          <table cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="background-color:#eab308;">
+              <a href="https://okikeenterprises.com/dashboard" style="display:inline-block;padding:16px 40px;font-size:12px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:#000000;text-decoration:none;">Go to Dashboard &rarr;</a>
+            </td></tr>
+          </table>
+          <p style="font-size:13px;color:#555555;margin:20px 0 0;">Questions? <a href="mailto:support@okikeenterprises.com" style="color:#eab308;text-decoration:none;">support@okikeenterprises.com</a></p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:20px 40px 32px;border-top:1px solid #1a1a1a;text-align:center;">
+          <p style="font-size:12px;color:#444444;margin:0;">&copy; ${year} OKIKE Enterprises &nbsp;&middot;&nbsp; <a href="https://okikeenterprises.com" style="color:#eab308;text-decoration:none;">okikeenterprises.com</a></p>
+          <p style="font-size:11px;color:#333333;margin:6px 0 0;">You're receiving this because you created an OKIKE account.</p>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`,
   };
 }
 
