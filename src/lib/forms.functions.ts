@@ -1,6 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import {
+  sendEmail,
+  inquiryAdminEmail,
+  inquiryClientEmail,
+  contactAdminEmail,
+  contactClientEmail,
+  enrollmentAdminEmail,
+  enrollmentClientEmail,
+} from "@/lib/email";
 
 const inquirySchema = z.object({
   name: z.string().min(1).max(120),
@@ -45,8 +54,6 @@ export const submitInquiry = createServerFn({ method: "POST" })
       return { ok: false as const, error: inquiryError.message };
     }
 
-    console.log("Created project inquiry with id:", inquiry.id);
-
     // Step 2: Insert client project
     const { data: project, error: projectError } = await supabaseAdmin
       .from("client_projects")
@@ -70,6 +77,23 @@ export const submitInquiry = createServerFn({ method: "POST" })
     }
 
     console.log("Created client project:", project);
+
+    // Step 3: Send emails (non-blocking — don't fail the request if email fails)
+    await Promise.allSettled([
+      sendEmail(inquiryAdminEmail({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        company: data.company,
+        project_type: data.project_type,
+        budget: data.budget,
+        timeline: data.timeline,
+        details: data.details,
+        package_name: data.package_name,
+        total: data.total,
+      })),
+      sendEmail({ ...inquiryClientEmail({ name: data.name, project_type: data.project_type }), to: data.email }),
+    ]);
 
     return { ok: true as const };
   });
@@ -96,6 +120,19 @@ export const submitEnrollment = createServerFn({ method: "POST" })
       console.error("submitEnrollment error:", error);
       return { ok: false as const, error: "Could not submit. Please try again." };
     }
+
+    // Send emails (non-blocking)
+    await Promise.allSettled([
+      sendEmail(enrollmentAdminEmail({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        experience_level: data.experience_level,
+        goals: data.goals,
+      })),
+      sendEmail({ ...enrollmentClientEmail({ name: data.name }), to: data.email }),
+    ]);
+
     return { ok: true as const };
   });
 
@@ -117,5 +154,12 @@ export const submitContact = createServerFn({ method: "POST" })
       console.error("submitContact error:", error);
       return { ok: false as const, error: "Could not submit. Please try again." };
     }
+
+    // Send emails (non-blocking)
+    await Promise.allSettled([
+      sendEmail(contactAdminEmail({ name: data.name, email: data.email, message: data.message })),
+      sendEmail({ ...contactClientEmail({ name: data.name }), to: data.email }),
+    ]);
+
     return { ok: true as const };
   });
