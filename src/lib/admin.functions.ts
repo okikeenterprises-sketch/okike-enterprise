@@ -411,9 +411,10 @@ export async function publishAIBlogPostCore(
     return { ok: false, error: "Could not generate a unique slug after 10 attempts." };
   }
 
-  // Step 5: Construct Pollinations image URL
-  const imagePrompt = `${title}, tech illustration, professional, clean, modern`;
-  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1200&height=630&nologo=true`;
+  // Step 5: Construct image URL using Picsum Photos (free, no API key, reliable)
+  // Use slug as seed so each post always gets the same consistent image
+  const seed = slug.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const imageUrl = `https://picsum.photos/seed/${seed}/1200/630`;
 
   // Step 6: Insert to blog_posts
   const supabaseTyped = supabase as unknown as DynamicSupabase;
