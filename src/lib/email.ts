@@ -2,10 +2,13 @@ const RESEND_API_URL = "https://api.resend.com/emails";
 const FROM = "OKIKE <noreply@okikeenterprises.com>";
 const ADMIN_EMAIL = "okikeenterprises@gmail.com"; // update to your preferred admin inbox
 
+// Supports both raw HTML emails and Resend template-based emails
 interface EmailPayload {
   to: string | string[];
   subject: string;
-  html: string;
+  html?: string;
+  template_id?: string;
+  data?: Record<string, string>;
 }
 
 export async function sendEmail(payload: EmailPayload): Promise<void> {
@@ -15,18 +18,26 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
     return;
   }
 
+  const body: Record<string, unknown> = {
+    from: FROM,
+    to: Array.isArray(payload.to) ? payload.to : [payload.to],
+    subject: payload.subject,
+  };
+
+  if (payload.template_id) {
+    body.template_id = payload.template_id;
+    if (payload.data) body.data = payload.data;
+  } else {
+    body.html = payload.html;
+  }
+
   const res = await fetch(RESEND_API_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: FROM,
-      to: Array.isArray(payload.to) ? payload.to : [payload.to],
-      subject: payload.subject,
-      html: payload.html,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
@@ -122,24 +133,9 @@ export function welcomeEmail(data: { name: string; email: string }): EmailPayloa
   return {
     to: data.email,
     subject: `Welcome to OKIKE, ${firstName} 👋`,
-    html: baseTemplate(`
-      <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#eab308;margin:0 0 8px;">Welcome</p>
-      ${h1(`Good to have you, ${firstName}.`)}
-      ${para("Your OKIKE account is ready. You can now scope projects, track progress in real time, and work directly with our team.")}
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fafafa;border-left:4px solid #eab308;margin:20px 0;">
-        <tr><td style="padding:16px 20px;">
-          <p style="font-size:13px;font-weight:700;color:#111;margin:0 0 12px;">Here's what you can do:</p>
-          <table cellpadding="0" cellspacing="0" border="0" width="100%">
-            ${featureRow("🚀", "Start a project", "Describe what you want to build and get a fixed-price proposal within 24 hours.")}
-            ${featureRow("📊", "Track progress", "See milestones, updates, and your project stage in real time from your dashboard.")}
-            ${featureRow("🤖", "Ask OKIKE AI", "Your AI assistant can answer questions about your projects and suggest next steps.")}
-            ${featureRow("🎓", "Explore the Academy", "Learn fullstack development, UI/UX, and more through our structured courses.")}
-          </table>
-        </td></tr>
-      </table>
-      ${ctaButton("Go to Dashboard", "https://okikeenterprises.com/dashboard")}
-      ${para(`Questions? We're always here — <a href="mailto:support@okikeenterprises.com" style="color:#eab308;">support@okikeenterprises.com</a>`)}
-    `),
+    // Use the Resend template — passes {{name}} variable for personalisation
+    template_id: "a9c12921-ec7b-45f4-84dc-2dfbaff3dd8a",
+    data: { name: firstName },
   };
 }
 
