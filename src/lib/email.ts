@@ -36,9 +36,6 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
 }
 
 // ─── Base template ────────────────────────────────────────────────────────────
-// Uses a white/light design that renders correctly in Gmail, Outlook, Apple Mail.
-// OKIKE brand is expressed through yellow accents on white — avoids the dark
-// background stripping issue Gmail has with body/wrapper background-color.
 
 function baseTemplate(content: string): string {
   const year = new Date().getFullYear();
@@ -54,32 +51,21 @@ function baseTemplate(content: string): string {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;">
   <tr><td align="center" style="padding:32px 16px;">
     <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-top:4px solid #eab308;">
-
-      <!-- HEADER -->
       <tr>
         <td style="padding:28px 40px 20px;">
-          <span style="font-size:26px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;text-decoration:none;color:#111111;">OKI</span><span style="font-size:26px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:#eab308;">KE</span>
+          <span style="font-size:26px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:#111111;">OKI</span><span style="font-size:26px;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;color:#eab308;">KE</span>
           <br/>
           <span style="font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#999999;">Your Digital Ecosystem</span>
         </td>
       </tr>
-
-      <!-- YELLOW DIVIDER -->
       <tr><td style="padding:0 40px;"><div style="height:2px;background-color:#eab308;"></div></td></tr>
-
-      <!-- CONTENT -->
-      <tr><td style="padding:32px 40px;">
-        ${content}
-      </td></tr>
-
-      <!-- FOOTER -->
+      <tr><td style="padding:32px 40px;">${content}</td></tr>
       <tr>
         <td style="padding:20px 40px 32px;border-top:1px solid #f0f0f0;text-align:center;">
           <p style="font-size:12px;color:#999999;margin:0;">&copy; ${year} OKIKE Enterprises &nbsp;&middot;&nbsp; <a href="https://okikeenterprises.com" style="color:#eab308;text-decoration:none;">okikeenterprises.com</a></p>
           <p style="font-size:11px;color:#bbbbbb;margin:6px 0 0;">You're receiving this because you interacted with OKIKE.</p>
         </td>
       </tr>
-
     </table>
   </td></tr>
 </table>
@@ -91,9 +77,7 @@ function baseTemplate(content: string): string {
 
 function infoCard(rows: string[]): string {
   return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fafafa;border-left:4px solid #eab308;margin:20px 0;">
-    <tr><td style="padding:16px 20px;">
-      ${rows.join("\n")}
-    </td></tr>
+    <tr><td style="padding:16px 20px;">${rows.join("\n")}</td></tr>
   </table>`;
 }
 
@@ -117,7 +101,45 @@ function para(text: string): string {
   return `<p style="font-size:15px;line-height:1.7;color:#555555;margin:0 0 14px;">${text}</p>`;
 }
 
+function featureRow(icon: string, title: string, desc: string): string {
+  return `<tr>
+    <td style="padding:10px 0;vertical-align:top;width:32px;">
+      <div style="width:28px;height:28px;background-color:#eab308;display:inline-flex;align-items:center;justify-content:center;font-size:14px;">${icon}</div>
+    </td>
+    <td style="padding:10px 0 10px 12px;vertical-align:top;">
+      <p style="font-size:14px;font-weight:700;color:#111111;margin:0 0 2px;">${title}</p>
+      <p style="font-size:13px;color:#666666;margin:0;">${desc}</p>
+    </td>
+  </tr>`;
+}
+
 // ─── Email templates ──────────────────────────────────────────────────────────
+
+export function welcomeEmail(data: { name: string; email: string }): EmailPayload {
+  const firstName = data.name.split(" ")[0];
+  return {
+    to: data.email,
+    subject: `Welcome to OKIKE, ${firstName} 👋`,
+    html: baseTemplate(`
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#eab308;margin:0 0 8px;">Welcome</p>
+      ${h1(`Good to have you, ${firstName}.`)}
+      ${para("Your OKIKE account is ready. You can now scope projects, track progress in real time, and work directly with our team.")}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fafafa;border-left:4px solid #eab308;margin:20px 0;">
+        <tr><td style="padding:16px 20px;">
+          <p style="font-size:13px;font-weight:700;color:#111;margin:0 0 12px;">Here's what you can do:</p>
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            ${featureRow("🚀", "Start a project", "Describe what you want to build and get a fixed-price proposal within 24 hours.")}
+            ${featureRow("📊", "Track progress", "See milestones, updates, and your project stage in real time from your dashboard.")}
+            ${featureRow("🤖", "Ask OKIKE AI", "Your AI assistant can answer questions about your projects and suggest next steps.")}
+            ${featureRow("🎓", "Explore the Academy", "Learn fullstack development, UI/UX, and more through our structured courses.")}
+          </table>
+        </td></tr>
+      </table>
+      ${ctaButton("Go to Dashboard", "https://okikeenterprises.com/dashboard")}
+      ${para(`Questions? We're always here — <a href="mailto:support@okikeenterprises.com" style="color:#eab308;">support@okikeenterprises.com</a>`)}
+    `),
+  };
+}
 
 export function inquiryAdminEmail(data: {
   name: string;

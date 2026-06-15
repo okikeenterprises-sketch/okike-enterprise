@@ -5,6 +5,8 @@ import { Eye, EyeOff, Github } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { useAuth } from "@/hooks/use-auth";
+import { useServerFn } from "@tanstack/react-start";
+import { sendWelcomeEmailFn } from "@/lib/forms.functions";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -22,6 +24,7 @@ export const Route = createFileRoute("/signup")({
 function SignupPage() {
   const navigate = useNavigate();
   const { session } = useAuth();
+  const sendWelcome = useServerFn(sendWelcomeEmailFn);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,6 +50,8 @@ function SignupPage() {
     if (error) {
       toast.error(error.message);
     } else {
+      // Send welcome email (non-blocking — don't fail signup if email fails)
+      sendWelcome({ data: { name: fullName, email } }).catch(() => { });
       toast.success("Check your email to confirm your account.");
     }
   }
