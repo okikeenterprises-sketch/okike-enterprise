@@ -373,6 +373,12 @@ function ContentPage() {
       const row = { ...editing };
       // strip empty id for inserts
       if (!row.id) delete row.id;
+      // convert empty strings to null for timestamp/numeric fields to avoid DB type errors
+      for (const key of Object.keys(row)) {
+        if (row[key] === "") {
+          row[key] = null;
+        }
+      }
       await upsert({ data: { table: cfg.table, row } });
       toast.success("Saved");
       setEditing(null);
