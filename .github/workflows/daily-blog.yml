@@ -1,0 +1,23 @@
+name: Daily AI Blog Post
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 07:00 UTC every day
+  workflow_dispatch:         # allows manual trigger from GitHub Actions UI
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger AI blog publisher
+        run: |
+          response=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -X GET https://okikeenterprises.com/api/cron/publish-blog \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "HTTP status: $response"
+          echo "Response body:"
+          cat /tmp/response.json
+          if [ "$response" != "200" ]; then
+            echo "Blog publisher failed with status $response"
+            exit 1
+          fi
