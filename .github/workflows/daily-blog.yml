@@ -11,8 +11,8 @@ jobs:
     steps:
       - name: Trigger AI blog publisher
         run: |
-          response=$(curl -s -o /tmp/response.json -w "%{http_code}" \
-            -X GET https://okikeenterprises.com/api/cron/publish-blog \
+          response=$(curl -s -o /tmp/response.json -w "%{http_code}" -L \
+            -X GET https://www.okikeenterprises.com/api/cron/publish-blog \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
           echo "HTTP status: $response"
           echo "Response body:"
