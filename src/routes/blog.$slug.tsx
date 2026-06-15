@@ -103,8 +103,13 @@ function BlogPostPage() {
         </header>
 
         {post.image_url && (
-          <div className="mb-12">
-            <img src={post.image_url} alt={post.title} className="w-full aspect-video object-cover" />
+          <div className="mb-12 bg-ink/5 rounded-lg overflow-hidden">
+            <img
+              src={post.image_url}
+              alt={post.title}
+              className="w-full max-h-[600px] object-contain"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+            />
           </div>
         )}
 
