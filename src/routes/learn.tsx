@@ -147,11 +147,11 @@ function LearnPage() {
               {courses.slice(0, 4).map((course) => (
                 <div key={course.id} className="bg-surface flex flex-col hover:bg-secondary transition-colors">
                   {course.image_url ? (
-                    <div className="aspect-video overflow-hidden bg-ink/5">
-                      <img src={course.image_url} alt={course.title} className="w-full h-full object-contain" loading="lazy" />
+                    <div className="aspect-square overflow-hidden bg-ink/5">
+                      <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" loading="lazy" />
                     </div>
                   ) : (
-                    <div className="aspect-video bg-brand/5 flex items-center justify-center font-display text-5xl text-brand/30">
+                    <div className="aspect-square bg-brand/5 flex items-center justify-center font-display text-5xl text-brand/30">
                       {course.title.charAt(0)}
                     </div>
                   )}
