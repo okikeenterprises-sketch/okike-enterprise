@@ -14,7 +14,6 @@ import {
 import servicesImg from "@/assets/services-image.jpg";
 import learnImg from "@/assets/learn-image.jpg";
 import founderImg from "@/assets/founder.jpg";
-import heroDashboard from "@/assets/hero-dashboard.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -171,6 +170,24 @@ function HomePage() {
             <p className="text-sm md:text-base font-semibold tracking-[0.12em] uppercase text-ink/60">
               Now open for projects — built from the ground up, with intention.
             </p>
+          </div>
+        </section>
+
+        {/* ─── UPCOMING BOOTCAMP BANNER ─── */}
+        <section className="bg-brand border-b border-brand">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-black/60 bg-black/10 px-2 py-0.5">Upcoming</span>
+              <p className="text-sm font-bold text-black uppercase tracking-wider">
+                Computing Synergy Summit — 1st July 2025
+              </p>
+            </div>
+            <Link
+              to="/bootcamp"
+              className="shrink-0 bg-black text-brand px-5 py-2 text-xs font-bold uppercase tracking-widest hover:bg-black/80 transition whitespace-nowrap"
+            >
+              Register Now →
+            </Link>
           </div>
         </section>
 

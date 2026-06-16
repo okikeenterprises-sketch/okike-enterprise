@@ -155,3 +155,122 @@ export const sendWelcomeEmailFn = createServerFn({ method: "POST" })
     await sendEmail(welcomeEmail({ name: data.name, email: data.email }));
     return { ok: true as const };
   });
+
+// ─── Bootcamp registration ────────────────────────────────────────────────────
+
+const bootcampSchema = z.object({
+  name: z.string().min(1).max(120),
+  email: z.string().email().max(200),
+  phone: z.string().min(1).max(40),
+  department: z.string().min(1).max(120),
+  level: z.string().min(1).max(40),
+  is_department_student: z.boolean(),
+});
+
+export const submitBootcampRegistration = createServerFn({ method: "POST" })
+  .inputValidator((data) => bootcampSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { error } = await supabaseAdmin
+      .from("bootcamp_registrations" as never)
+      .insert({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        department: data.department,
+        level: data.level,
+        is_department_student: data.is_department_student,
+      } as never);
+
+    if (error) {
+      console.error("bootcamp registration error:", error);
+      return { ok: false as const, error: "Could not complete registration. Please try again." };
+    }
+
+    // Send confirmation to registrant
+    const confirmHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Summit Registration Confirmed</title></head>
+<body style="margin:0;padding:0;background:#111;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#111">
+<tr><td align="center" style="padding:40px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#0a0a0a;border-top:4px solid #eab308;">
+<tr><td align="center" style="padding:32px 40px 20px;"><a href="https://okikeenterprises.com"><img src="https://res.cloudinary.com/djzsrfc6h/image/upload/v1781531660/Asset_40_q7oeri.png" alt="OKIKE" width="120" style="display:block;border:0;"/></a></td></tr>
+<tr><td style="padding:0 40px;"><div style="height:2px;background:#eab308;"></div></td></tr>
+<tr><td style="padding:36px 40px 24px;text-align:center;">
+<p style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#eab308;margin:0 0 10px;">Registration Confirmed</p>
+<h1 style="font-size:32px;font-weight:900;color:#fff;margin:0 0 14px;line-height:1.1;">You're in, <span style="color:#eab308;">${data.name.split(" ")[0]}!</span></h1>
+<p style="font-size:15px;color:#888;margin:0 0 0;line-height:1.7;">Your registration for the <strong style="color:#fff;">Computing Synergy Summit</strong> on <strong style="color:#fff;">1st July 2025</strong> has been received.</p>
+</td></tr>
+<tr><td style="padding:8px 40px 32px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#111;border-left:4px solid #eab308;">
+<tr><td style="padding:18px 22px;">
+<p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 12px;">Your registration details:</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Name:</strong> ${data.name}</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Department:</strong> ${data.department}</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Level:</strong> ${data.level}</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Admission:</strong> ${data.is_department_student ? "Free (Department student)" : "₦2,000 — payment link coming shortly"}</p>
+</td></tr>
+</table>
+</td></tr>
+${!data.is_department_student ? `<tr><td style="padding:0 40px 24px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#1a1200;border-left:4px solid #eab308;">
+<tr><td style="padding:16px 22px;">
+<p style="font-size:13px;font-weight:700;color:#eab308;margin:0 0 6px;">Payment required</p>
+<p style="font-size:13px;color:#999;margin:0;line-height:1.6;">Since you're not in the CS/IT department, a payment link of <strong style="color:#fff;">₦2,000</strong> will be sent to this email shortly. Your spot is reserved until you receive it.</p>
+</td></tr>
+</table>
+</td></tr>` : ""}
+<tr><td style="padding:8px 40px 36px;text-align:center;">
+<p style="font-size:13px;color:#555;margin:0;">Questions? <a href="mailto:support@okikeenterprises.com" style="color:#eab308;text-decoration:none;">support@okikeenterprises.com</a></p>
+</td></tr>
+<tr><td style="padding:16px 40px 28px;border-top:1px solid #1a1a1a;text-align:center;">
+<p style="font-size:12px;color:#444;margin:0;">&copy; ${new Date().getFullYear()} OKIKE Enterprises &nbsp;&middot;&nbsp; <a href="https://okikeenterprises.com" style="color:#eab308;text-decoration:none;">okikeenterprises.com</a></p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+    // Admin notification
+    const adminHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f4">
+<tr><td align="center" style="padding:32px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#fff;border-top:4px solid #eab308;">
+<tr><td style="padding:28px 40px 16px;">
+<span style="font-size:22px;font-weight:900;color:#111;">OKI</span><span style="font-size:22px;font-weight:900;color:#eab308;">KE</span>
+</td></tr>
+<tr><td style="padding:0 40px;"><div style="height:2px;background:#eab308;"></div></td></tr>
+<tr><td style="padding:28px 40px;">
+<p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#eab308;margin:0 0 8px;">New Registration</p>
+<h1 style="font-size:24px;font-weight:800;color:#111;margin:0 0 16px;">Computing Synergy Summit</h1>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fafafa;border-left:4px solid #eab308;">
+<tr><td style="padding:16px 20px;">
+<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Name:</strong> ${data.name}</p>
+<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Email:</strong> <a href="mailto:${data.email}" style="color:#eab308;">${data.email}</a></p>
+<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Phone:</strong> ${data.phone}</p>
+<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Department:</strong> ${data.department}</p>
+<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Level:</strong> ${data.level}</p>
+<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Dept student:</strong> ${data.is_department_student ? "✅ Yes (Free)" : "❌ No (₦2,000 due)"}</p>
+</td></tr>
+</table>
+${!data.is_department_student ? `<p style="font-size:13px;color:#e67e00;margin:16px 0 0;font-weight:600;">⚠️ This registrant requires a ₦2,000 payment link — send it manually to ${data.email}</p>` : ""}
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+    await Promise.allSettled([
+      sendEmail({
+        to: data.email,
+        subject: "You're registered — Computing Synergy Summit",
+        html: confirmHtml,
+      }),
+      sendEmail({
+        to: "okikeenterprises@gmail.com",
+        subject: `New summit registration — ${data.name} (${data.is_department_student ? "Free" : "₦2,000 due"})`,
+        html: adminHtml,
+      }),
+    ]);
+
+    return { ok: true as const };
+  });
