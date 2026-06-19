@@ -293,7 +293,7 @@ export async function publishAIBlogPostCore(
           {
             role: "user",
             content:
-              "Select one relevant tech topic for a blog post focused on software, AI, or the Nigerian tech ecosystem. Return only the topic as a short phrase.",
+              "Select one current, relevant tech topic for a blog post. Choose from global technology trends — this could be about AI, software development, cybersecurity, cloud computing, web technologies, mobile, developer tools, open source, big tech news, startups, or any other tech topic making waves globally right now. Occasionally you may cover African or Nigerian tech if the story is significant, but default to global tech news. Return only the topic as a short phrase.",
           },
         ],
       }),
