@@ -34,6 +34,8 @@ import {
   Play,
   CheckCircle,
   Award,
+  MoreHorizontal,
+  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -244,8 +246,8 @@ function DashboardPage() {
               <h2 className="text-sm font-medium capitalize text-ink/80 lg:block hidden">
                 {section === "dashboard" ? "Overview" : section}
               </h2>
-              <h2 className="text-sm font-medium text-ink/80 lg:hidden">
-                {greeting}, <span className="capitalize">{firstName}</span>
+              <h2 className="text-sm font-medium text-ink/80 lg:hidden capitalize">
+                {section === "dashboard" ? "Overview" : section}
               </h2>
             </div>
             <button
@@ -340,28 +342,7 @@ function DashboardPage() {
       </div>
 
       {/* ── MOBILE BOTTOM NAV ── */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-ink/10 flex items-stretch">
-        {[
-          { key: "dashboard" as Section, icon: LayoutDashboard, label: "Home" },
-          { key: "projects" as Section, icon: FolderKanban, label: "Projects" },
-          { key: "ai" as Section, icon: Sparkles, label: "AI" },
-          { key: "courses" as Section, icon: BookOpen, label: "Courses" },
-          { key: "settings" as Section, icon: Settings, label: "Account" },
-        ].map(({ key, icon: Icon, label }) => {
-          const active = section === key;
-          return (
-            <button
-              key={key}
-              onClick={() => setSection(key)}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 text-[10px] font-semibold uppercase tracking-wide transition ${active ? "text-brand" : "text-ink/45 hover:text-ink/70"
-                }`}
-            >
-              <Icon className={`size-5 ${active ? "text-brand" : ""}`} />
-              {label}
-            </button>
-          );
-        })}
-      </nav>
+      <MobileBottomNav section={section} setSection={setSection} />
     </div>
   );
 }
@@ -1060,7 +1041,7 @@ function AIInsightsCard({
           project_id: m.project_id,
           name: m.name,
           status: m.status,
-          created_at: m.updated_at ?? new Date().toISOString(),
+          created_at: new Date().toISOString(),
         })),
         updates,
       },
@@ -1119,8 +1100,8 @@ function AIInsightsCard({
             <li
               key={insight.id}
               className={`rounded-xl p-3 ring-1 flex items-start gap-3 ${insight.severity === "warning"
-                  ? "bg-amber-50 ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/20"
-                  : "bg-brand/5 ring-brand/15"
+                ? "bg-amber-50 ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-500/20"
+                : "bg-brand/5 ring-brand/15"
                 }`}
             >
               <div className="shrink-0 mt-0.5">
@@ -1186,5 +1167,109 @@ function EmptyView({
         </Link>
       )}
     </div>
+  );
+}
+
+/* ---------------- Mobile Bottom Nav with More drawer ---------------- */
+
+function MobileBottomNav({
+  section,
+  setSection,
+}: {
+  section: Section;
+  setSection: (s: Section) => void;
+}) {
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const primary: { key: Section; icon: LucideIcon; label: string }[] = [
+    { key: "dashboard", icon: LayoutDashboard, label: "Home" },
+    { key: "projects", icon: FolderKanban, label: "Projects" },
+    { key: "ai", icon: Sparkles, label: "AI" },
+    { key: "courses", icon: BookOpen, label: "Courses" },
+  ];
+
+  const more: { key: Section; icon: LucideIcon; label: string }[] = [
+    { key: "messages", icon: MessageSquare, label: "Messages" },
+    { key: "files", icon: FileText, label: "Files" },
+    { key: "calendar", icon: Calendar, label: "Calendar" },
+    { key: "milestones", icon: Flag, label: "Milestones" },
+    { key: "settings", icon: Settings, label: "Settings" },
+  ];
+
+  // Is the active section one of the "more" items?
+  const moreIsActive = more.some((m) => m.key === section);
+
+  function pick(key: Section) {
+    setSection(key);
+    setMoreOpen(false);
+  }
+
+  return (
+    <>
+      {/* More drawer overlay */}
+      {moreOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-ink/50"
+          onClick={() => setMoreOpen(false)}
+        />
+      )}
+
+      {/* More drawer */}
+      {moreOpen && (
+        <div className="lg:hidden fixed bottom-[60px] inset-x-0 z-50 bg-card border border-ink/10 rounded-t-2xl shadow-2xl px-4 pt-4 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold uppercase tracking-widest text-ink/50">More</span>
+            <button onClick={() => setMoreOpen(false)} className="p-1 text-ink/50 hover:text-ink">
+              <X className="size-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {more.map(({ key, icon: Icon, label }) => {
+              const active = section === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => pick(key)}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl transition ${active
+                    ? "bg-brand/15 text-brand ring-1 ring-brand/25"
+                    : "bg-ink/5 text-ink/60 hover:bg-ink/10 hover:text-ink"
+                    }`}
+                >
+                  <Icon className="size-5" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wide">{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom bar */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-ink/10 flex items-stretch">
+        {primary.map(({ key, icon: Icon, label }) => {
+          const active = section === key;
+          return (
+            <button
+              key={key}
+              onClick={() => { setMoreOpen(false); setSection(key); }}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 text-[10px] font-semibold uppercase tracking-wide transition ${active ? "text-brand" : "text-ink/45 hover:text-ink/70"
+                }`}
+            >
+              <Icon className={`size-5 ${active ? "text-brand" : ""}`} />
+              {label}
+            </button>
+          );
+        })}
+        {/* More button */}
+        <button
+          onClick={() => setMoreOpen((v) => !v)}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 text-[10px] font-semibold uppercase tracking-wide transition ${moreIsActive || moreOpen ? "text-brand" : "text-ink/45 hover:text-ink/70"
+            }`}
+        >
+          <MoreHorizontal className={`size-5 ${moreIsActive || moreOpen ? "text-brand" : ""}`} />
+          More
+        </button>
+      </nav>
+    </>
   );
 }
