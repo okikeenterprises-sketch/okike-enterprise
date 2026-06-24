@@ -19,6 +19,7 @@ import { Route as LearnRouteImport } from './routes/learn'
 import { Route as EnrollRouteImport } from './routes/enroll'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BootcampRouteImport } from './routes/bootcamp'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -36,6 +37,7 @@ import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminInquiriesRouteImport } from './routes/admin.inquiries'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as ApiCronPublishBlogRouteImport } from './routes/api.cron.publish-blog'
 import { Route as AdminContentTypeRouteImport } from './routes/admin.content.$type'
 
 const ThankYouRoute = ThankYouRouteImport.update({
@@ -86,6 +88,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BootcampRoute = BootcampRouteImport.update({
+  id: '/bootcamp',
+  path: '/bootcamp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookRoute = BookRouteImport.update({
@@ -173,6 +180,11 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiCronPublishBlogRoute = ApiCronPublishBlogRouteImport.update({
+  id: '/api/cron/publish-blog',
+  path: '/api/cron/publish-blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminContentTypeRoute = AdminContentTypeRouteImport.update({
   id: '/content/$type',
   path: '/content/$type',
@@ -185,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/book': typeof BookRoute
+  '/bootcamp': typeof BootcampRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/enroll': typeof EnrollRoute
@@ -208,11 +221,13 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/admin/content/$type': typeof AdminContentTypeRoute
+  '/api/cron/publish-blog': typeof ApiCronPublishBlogRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
+  '/bootcamp': typeof BootcampRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/enroll': typeof EnrollRoute
@@ -236,6 +251,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/admin/content/$type': typeof AdminContentTypeRoute
+  '/api/cron/publish-blog': typeof ApiCronPublishBlogRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -244,6 +260,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/book': typeof BookRoute
+  '/bootcamp': typeof BootcampRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/enroll': typeof EnrollRoute
@@ -267,6 +284,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/admin/content/$type': typeof AdminContentTypeRoute
+  '/api/cron/publish-blog': typeof ApiCronPublishBlogRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -276,6 +294,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/blog'
     | '/book'
+    | '/bootcamp'
     | '/contact'
     | '/dashboard'
     | '/enroll'
@@ -299,11 +318,13 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/blog/'
     | '/admin/content/$type'
+    | '/api/cron/publish-blog'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/book'
+    | '/bootcamp'
     | '/contact'
     | '/dashboard'
     | '/enroll'
@@ -327,6 +348,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/blog'
     | '/admin/content/$type'
+    | '/api/cron/publish-blog'
   id:
     | '__root__'
     | '/'
@@ -334,6 +356,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/blog'
     | '/book'
+    | '/bootcamp'
     | '/contact'
     | '/dashboard'
     | '/enroll'
@@ -357,6 +380,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/blog/'
     | '/admin/content/$type'
+    | '/api/cron/publish-blog'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -365,6 +389,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   BookRoute: typeof BookRoute
+  BootcampRoute: typeof BootcampRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
   EnrollRoute: typeof EnrollRoute
@@ -375,6 +400,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ThankYouRoute: typeof ThankYouRoute
+  ApiCronPublishBlogRoute: typeof ApiCronPublishBlogRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -447,6 +473,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bootcamp': {
+      id: '/bootcamp'
+      path: '/bootcamp'
+      fullPath: '/bootcamp'
+      preLoaderRoute: typeof BootcampRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/book': {
@@ -568,6 +601,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/cron/publish-blog': {
+      id: '/api/cron/publish-blog'
+      path: '/api/cron/publish-blog'
+      fullPath: '/api/cron/publish-blog'
+      preLoaderRoute: typeof ApiCronPublishBlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/content/$type': {
       id: '/admin/content/$type'
       path: '/content/$type'
@@ -626,6 +666,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   BookRoute: BookRoute,
+  BootcampRoute: BootcampRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
   EnrollRoute: EnrollRoute,
@@ -636,6 +677,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ThankYouRoute: ThankYouRoute,
+  ApiCronPublishBlogRoute: ApiCronPublishBlogRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
