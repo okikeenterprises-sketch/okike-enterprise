@@ -61,7 +61,7 @@ function baseTemplate(content: string): string {
 <body style="margin:0;padding:0;background-color:#f4f4f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f4;">
   <tr><td align="center" style="padding:32px 16px;">
-    <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-top:4px solid #eab308;">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-top:4px solid #E0EB32;">
       <tr>
         <td style="padding:28px 40px 20px;">
           <a href="https://okikeenterprises.com" style="text-decoration:none;display:inline-block;">
@@ -71,11 +71,11 @@ function baseTemplate(content: string): string {
           <span style="font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#999999;">Your Digital Ecosystem</span>
         </td>
       </tr>
-      <tr><td style="padding:0 40px;"><div style="height:2px;background-color:#eab308;"></div></td></tr>
+      <tr><td style="padding:0 40px;"><div style="height:2px;background-color:#E0EB32;"></div></td></tr>
       <tr><td style="padding:32px 40px;">${content}</td></tr>
       <tr>
         <td style="padding:20px 40px 32px;border-top:1px solid #f0f0f0;text-align:center;">
-          <p style="font-size:12px;color:#999999;margin:0;">&copy; ${year} OKIKE Enterprises &nbsp;&middot;&nbsp; <a href="https://okikeenterprises.com" style="color:#eab308;text-decoration:none;">okikeenterprises.com</a></p>
+          <p style="font-size:12px;color:#999999;margin:0;">&copy; ${year} OKIKE Enterprises &nbsp;&middot;&nbsp; <a href="https://okikeenterprises.com" style="color:#E0EB32;text-decoration:none;">okikeenterprises.com</a></p>
           <p style="font-size:11px;color:#bbbbbb;margin:6px 0 0;">You're receiving this because you interacted with OKIKE.</p>
         </td>
       </tr>
@@ -89,7 +89,7 @@ function baseTemplate(content: string): string {
 // ─── Reusable snippet helpers ─────────────────────────────────────────────────
 
 function infoCard(rows: string[]): string {
-  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fafafa;border-left:4px solid #eab308;margin:20px 0;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fafafa;border-left:4px solid #E0EB32;margin:20px 0;">
     <tr><td style="padding:16px 20px;">${rows.join("\n")}</td></tr>
   </table>`;
 }
@@ -100,7 +100,7 @@ function infoRow(label: string, value: string): string {
 
 function ctaButton(text: string, href: string): string {
   return `<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0 8px;">
-    <tr><td style="background-color:#eab308;">
+    <tr><td style="background-color:#E0EB32;">
       <a href="${href}" style="display:inline-block;padding:14px 32px;font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#000000;text-decoration:none;">${text} &rarr;</a>
     </td></tr>
   </table>`;
@@ -117,7 +117,7 @@ function para(text: string): string {
 function featureRow(icon: string, title: string, desc: string): string {
   return `<tr>
     <td style="padding:10px 0;vertical-align:top;width:32px;">
-      <div style="width:28px;height:28px;background-color:#eab308;display:inline-flex;align-items:center;justify-content:center;font-size:14px;">${icon}</div>
+      <div style="width:28px;height:28px;background-color:#E0EB32;display:inline-flex;align-items:center;justify-content:center;font-size:14px;">${icon}</div>
     </td>
     <td style="padding:10px 0 10px 12px;vertical-align:top;">
       <p style="font-size:14px;font-weight:700;color:#111111;margin:0 0 2px;">${title}</p>
@@ -144,7 +144,7 @@ export function welcomeEmail(data: { name: string; email: string }): EmailPayloa
 <body style="margin:0;padding:0;background-color:#111111;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#111111">
   <tr><td align="center" style="padding:40px 16px;">
-    <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#0a0a0a;border-top:4px solid #eab308;">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#0a0a0a;border-top:4px solid #E0EB32;">
       <tr>
         <td align="center" style="padding:36px 40px 24px;">
           <a href="https://okikeenterprises.com" style="text-decoration:none;display:inline-block;">
@@ -152,33 +152,33 @@ export function welcomeEmail(data: { name: string; email: string }): EmailPayloa
           </a>
         </td>
       </tr>
-      <tr><td style="padding:0 40px;"><div style="height:2px;background-color:#eab308;"></div></td></tr>
+      <tr><td style="padding:0 40px;"><div style="height:2px;background-color:#E0EB32;"></div></td></tr>
       <tr>
         <td style="padding:40px 40px 24px;text-align:center;">
-          <p style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#eab308;margin:0 0 12px;">Welcome</p>
-          <h1 style="font-size:34px;font-weight:900;color:#ffffff;margin:0 0 16px;line-height:1.1;">Good to have you,<br/><span style="color:#eab308;">${firstName}.</span></h1>
+          <p style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#E0EB32;margin:0 0 12px;">Welcome</p>
+          <h1 style="font-size:34px;font-weight:900;color:#ffffff;margin:0 0 16px;line-height:1.1;">Good to have you,<br/><span style="color:#E0EB32;">${firstName}.</span></h1>
           <p style="font-size:15px;line-height:1.7;color:#888888;margin:0;max-width:420px;display:inline-block;">Your OKIKE account is ready. You can now scope projects, track progress in real time, and work directly with our team.</p>
         </td>
       </tr>
       <tr>
         <td style="padding:8px 40px 32px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#111111;border-left:4px solid #eab308;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#111111;border-left:4px solid #E0EB32;">
             <tr><td style="padding:20px 24px;">
-              <p style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#eab308;margin:0 0 16px;">Here's what you can do</p>
+              <p style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#E0EB32;margin:0 0 16px;">Here's what you can do</p>
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:14px;"><tr>
-                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#eab308;text-align:center;line-height:30px;font-size:16px;">🚀</div></td>
+                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#E0EB32;text-align:center;line-height:30px;font-size:16px;">🚀</div></td>
                 <td style="padding-left:14px;vertical-align:top;"><p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Start a project</p><p style="font-size:13px;color:#777777;margin:0;">Describe what you want to build and get a fixed-price proposal within 24 hours.</p></td>
               </tr></table>
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:14px;"><tr>
-                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#eab308;text-align:center;line-height:30px;font-size:16px;">📊</div></td>
+                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#E0EB32;text-align:center;line-height:30px;font-size:16px;">📊</div></td>
                 <td style="padding-left:14px;vertical-align:top;"><p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Track your project</p><p style="font-size:13px;color:#777777;margin:0;">See milestones, updates, and your project stage in real time from your dashboard.</p></td>
               </tr></table>
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:14px;"><tr>
-                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#eab308;text-align:center;line-height:30px;font-size:16px;">🤖</div></td>
+                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#E0EB32;text-align:center;line-height:30px;font-size:16px;">🤖</div></td>
                 <td style="padding-left:14px;vertical-align:top;"><p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Ask OKIKE AI</p><p style="font-size:13px;color:#777777;margin:0;">Your AI assistant answers questions, summarises progress and suggests next steps.</p></td>
               </tr></table>
               <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#eab308;text-align:center;line-height:30px;font-size:16px;">🎓</div></td>
+                <td style="width:36px;vertical-align:top;"><div style="width:30px;height:30px;background-color:#E0EB32;text-align:center;line-height:30px;font-size:16px;">🎓</div></td>
                 <td style="padding-left:14px;vertical-align:top;"><p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Explore the Academy</p><p style="font-size:13px;color:#777777;margin:0;">Learn fullstack development, UI/UX design, and more through our structured courses.</p></td>
               </tr></table>
             </td></tr>
@@ -188,16 +188,16 @@ export function welcomeEmail(data: { name: string; email: string }): EmailPayloa
       <tr>
         <td align="center" style="padding:8px 40px 40px;">
           <table cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="background-color:#eab308;">
+            <tr><td style="background-color:#E0EB32;">
               <a href="https://okikeenterprises.com/dashboard" style="display:inline-block;padding:16px 40px;font-size:12px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:#000000;text-decoration:none;">Go to Dashboard &rarr;</a>
             </td></tr>
           </table>
-          <p style="font-size:13px;color:#555555;margin:20px 0 0;">Questions? <a href="mailto:support@okikeenterprises.com" style="color:#eab308;text-decoration:none;">support@okikeenterprises.com</a></p>
+          <p style="font-size:13px;color:#555555;margin:20px 0 0;">Questions? <a href="mailto:support@okikeenterprises.com" style="color:#E0EB32;text-decoration:none;">support@okikeenterprises.com</a></p>
         </td>
       </tr>
       <tr>
         <td style="padding:20px 40px 32px;border-top:1px solid #1a1a1a;text-align:center;">
-          <p style="font-size:12px;color:#444444;margin:0;">&copy; ${year} OKIKE Enterprises &nbsp;&middot;&nbsp; <a href="https://okikeenterprises.com" style="color:#eab308;text-decoration:none;">okikeenterprises.com</a></p>
+          <p style="font-size:12px;color:#444444;margin:0;">&copy; ${year} OKIKE Enterprises &nbsp;&middot;&nbsp; <a href="https://okikeenterprises.com" style="color:#E0EB32;text-decoration:none;">okikeenterprises.com</a></p>
           <p style="font-size:11px;color:#333333;margin:6px 0 0;">You're receiving this because you created an OKIKE account.</p>
         </td>
       </tr>
@@ -223,7 +223,7 @@ export function inquiryAdminEmail(data: {
 }): EmailPayload {
   const rows = [
     infoRow("Name", data.name),
-    infoRow("Email", `<a href="mailto:${data.email}" style="color:#eab308;">${data.email}</a>`),
+    infoRow("Email", `<a href="mailto:${data.email}" style="color:#E0EB32;">${data.email}</a>`),
     data.phone ? infoRow("Phone", data.phone) : "",
     data.company ? infoRow("Company", data.company) : "",
     infoRow("Package", data.package_name || data.project_type),
@@ -236,7 +236,7 @@ export function inquiryAdminEmail(data: {
     to: ADMIN_EMAIL,
     subject: `New project inquiry — ${data.name} (${data.project_type})`,
     html: baseTemplate(`
-      <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#eab308;margin:0 0 8px;">New Submission</p>
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#E0EB32;margin:0 0 8px;">New Submission</p>
       ${h1("New Project Inquiry")}
       ${para("A new project brief has been submitted via the OKIKE website.")}
       ${infoCard(rows)}
@@ -265,7 +265,7 @@ export function inquiryClientEmail(data: {
     ])}
       ${para("Track your project status anytime in your dashboard.")}
       ${ctaButton("View Dashboard", "https://okikeenterprises.com/dashboard")}
-      ${para(`Questions? Reply to this email or reach us at <a href="mailto:support@okikeenterprises.com" style="color:#eab308;">support@okikeenterprises.com</a>`)}
+      ${para(`Questions? Reply to this email or reach us at <a href="mailto:support@okikeenterprises.com" style="color:#E0EB32;">support@okikeenterprises.com</a>`)}
     `),
   };
 }
@@ -279,11 +279,11 @@ export function contactAdminEmail(data: {
     to: ADMIN_EMAIL,
     subject: `New contact message from ${data.name}`,
     html: baseTemplate(`
-      <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#eab308;margin:0 0 8px;">Contact Form</p>
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#E0EB32;margin:0 0 8px;">Contact Form</p>
       ${h1("New Message")}
       ${infoCard([
       infoRow("Name", data.name),
-      infoRow("Email", `<a href="mailto:${data.email}" style="color:#eab308;">${data.email}</a>`),
+      infoRow("Email", `<a href="mailto:${data.email}" style="color:#E0EB32;">${data.email}</a>`),
     ])}
       ${infoCard([`<p style="font-size:13px;font-weight:700;color:#111;margin:0 0 8px;">Message:</p><p style="font-size:13px;color:#555;margin:0;white-space:pre-wrap;line-height:1.6;">${data.message}</p>`])}
       ${ctaButton(`Reply to ${data.name}`, `mailto:${data.email}?subject=Re: Your message to OKIKE`)}
@@ -299,7 +299,7 @@ export function contactClientEmail(data: { name: string }): EmailPayload {
     html: baseTemplate(`
       ${h1(`Message received, ${firstName}.`)}
       ${para("Thanks for reaching out to OKIKE. We typically respond within <strong style=\"color:#111;\">24 hours</strong> on business days.")}
-      ${para(`If your inquiry is urgent, reach us directly at <a href="mailto:support@okikeenterprises.com" style="color:#eab308;">support@okikeenterprises.com</a>.`)}
+      ${para(`If your inquiry is urgent, reach us directly at <a href="mailto:support@okikeenterprises.com" style="color:#E0EB32;">support@okikeenterprises.com</a>.`)}
       ${ctaButton("Back to OKIKE", "https://okikeenterprises.com")}
     `),
   };
@@ -314,7 +314,7 @@ export function enrollmentAdminEmail(data: {
 }): EmailPayload {
   const rows = [
     infoRow("Name", data.name),
-    infoRow("Email", `<a href="mailto:${data.email}" style="color:#eab308;">${data.email}</a>`),
+    infoRow("Email", `<a href="mailto:${data.email}" style="color:#E0EB32;">${data.email}</a>`),
     data.phone ? infoRow("Phone/WhatsApp", data.phone) : "",
     infoRow("Experience level", data.experience_level),
   ].filter(Boolean);
@@ -323,7 +323,7 @@ export function enrollmentAdminEmail(data: {
     to: ADMIN_EMAIL,
     subject: `New academy application — ${data.name} (${data.experience_level})`,
     html: baseTemplate(`
-      <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#eab308;margin:0 0 8px;">Academy Application</p>
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#E0EB32;margin:0 0 8px;">Academy Application</p>
       ${h1("New Application")}
       ${infoCard(rows)}
       ${infoCard([`<p style="font-size:13px;font-weight:700;color:#111;margin:0 0 8px;">Why they want to join:</p><p style="font-size:13px;color:#555;margin:0;white-space:pre-wrap;line-height:1.6;">${data.goals}</p>`])}

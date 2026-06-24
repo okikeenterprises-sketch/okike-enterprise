@@ -62,8 +62,8 @@
   --ink: oklch(0.16 0.004 90);
   /* near-black text */
   --ink-muted: oklch(0.16 0.004 90 / 60%);
-  --brand: oklch(0.82 0.18 95);
-  /* signature yellow */
+  --brand: oklch(0.90 0.18 107);
+  /* signature lime-yellow #E0EB32 */
   --brand-foreground: oklch(0.14 0.004 90);
   /* black on yellow */
 
@@ -92,7 +92,7 @@
   --surface: oklch(0.16 0.004 90);
   --ink: oklch(0.985 0.003 95);
   --ink-muted: oklch(0.985 0.003 95 / 60%);
-  --brand: oklch(0.88 0.18 95);
+  --brand: oklch(0.90 0.18 107);
   --brand-foreground: oklch(0.14 0.004 90);
 
   /* Flip contrast colors for dark mode */
@@ -136,7 +136,7 @@
   }
 
   ::selection {
-    background-color: oklch(0.87 0.18 95 / 40%);
+    background-color: oklch(0.90 0.18 107 / 40%);
   }
 }
 
