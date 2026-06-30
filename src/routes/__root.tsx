@@ -141,7 +141,58 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               url: "https://okike-enterprise.com",
               name: "OKIKE",
               publisher: { "@id": "https://okike-enterprise.com/#organization" },
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: "https://okike-enterprise.com/blog?q={search_term_string}"
+                },
+                "query-input": "required name=search_term_string"
+              }
             },
+            {
+              "@type": "ItemList",
+              "@id": "https://okike-enterprise.com/#navigation",
+              name: "Navigation Menu",
+              itemListElement: [
+                {
+                  "@type": "SiteNavigationElement",
+                  position: 1,
+                  name: "Services",
+                  url: "https://okike-enterprise.com/services"
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  position: 2,
+                  name: "Portfolio",
+                  url: "https://okike-enterprise.com/portfolio"
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  position: 3,
+                  name: "Blog",
+                  url: "https://okike-enterprise.com/blog"
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  position: 4,
+                  name: "Academy",
+                  url: "https://okike-enterprise.com/learn"
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  position: 5,
+                  name: "About",
+                  url: "https://okike-enterprise.com/about"
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  position: 6,
+                  name: "Contact",
+                  url: "https://okike-enterprise.com/contact"
+                }
+              ]
+            }
           ],
         }),
       },
