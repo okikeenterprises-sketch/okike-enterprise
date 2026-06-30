@@ -107,7 +107,7 @@ function BlogIndexPage() {
       </section>
 
       {/* 2. BLOG GRID */}
-      <section className="py-24 md:py-32 px-6">
+      <section className="py-24 md:py-32">
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-ink/10 border border-ink/10">

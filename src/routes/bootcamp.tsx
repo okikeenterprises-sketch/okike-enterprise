@@ -83,7 +83,7 @@ function BootcampPage() {
                     <div className="flex flex-wrap items-center gap-6 text-sm text-contrast-foreground/70 mb-8">
                         <span className="flex items-center gap-2">
                             <Calendar className="size-4 text-brand" />
-                            1st July 2025
+                            1st August 2026
                         </span>
                         <span className="flex items-center gap-2">
                             <MapPin className="size-4 text-brand" />
@@ -100,7 +100,7 @@ function BootcampPage() {
                             Free for CS/IT department students
                         </div>
                         <div className="flex items-center gap-2 px-4 py-2 bg-contrast-foreground/10 text-contrast-foreground/80 text-sm font-semibold rounded-full">
-                            ₦2,000 for non-department attendees
+                            ₦5,000 for non-department attendees
                         </div>
                     </div>
                 </div>
@@ -121,7 +121,7 @@ function BootcampPage() {
                                 Where tech minds <span className="text-brand">converge.</span>
                             </h2>
                             <p className="text-ink/65 leading-relaxed max-w-[48ch]">
-                                The Computing Synergy Summit is a one-day event bringing together students, developers, and tech enthusiasts to learn, network, and build together. Whether you're from the department or just passionate about tech — you're welcome here.
+                                The Computing Synergy Summit is a four (4) month event bringing together students, developers, and tech enthusiasts to learn, network, and build together. Whether you're from the department or just passionate about tech — you're welcome here.
                             </p>
                         </div>
 
@@ -141,7 +141,7 @@ function BootcampPage() {
 
                         <div className="p-5 bg-brand/5 ring-1 ring-brand/20 rounded-xl">
                             <div className="text-sm font-semibold text-brand mb-2">Payment info (for non-department attendees)</div>
-                            <p className="text-sm text-ink/70">Registration is free for all. If you're not from the CS/IT department, you'll receive a payment link via email after submitting this form. Payment of <strong className="text-ink">₦2,000</strong> confirms your spot.</p>
+                            <p className="text-sm text-ink/70">Registration is free for all. If you're not from the CS/IT department, you'll receive a payment link via email after submitting this form. Payment of <strong className="text-ink">₦5,000</strong> confirms your spot.</p>
                         </div>
                     </div>
 
@@ -205,7 +205,7 @@ function BootcampPage() {
 
                             {!isDeptStudent && (
                                 <div className="p-3 bg-brand/5 ring-1 ring-brand/20 rounded-xl text-sm text-ink/70">
-                                    ₦2,000 payment link will be sent to your email after registration.
+                                    ₦5,000 payment link will be sent to your email after registration.
                                 </div>
                             )}
 
