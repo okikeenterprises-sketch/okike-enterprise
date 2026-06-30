@@ -5,4 +5,4 @@ Disallow: /dashboard
 Disallow: /login
 Disallow: /signup
 
-Sitemap: https://okike-enterprise.com/sitemap.xml
+Sitemap: https://www.okikeenterprises.com/sitemap.xml

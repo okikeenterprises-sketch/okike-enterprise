@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-const BASE_URL = "https://okike-enterprise.com";
-
 interface SitemapEntry {
   path: string;
   changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
@@ -13,7 +11,15 @@ interface SitemapEntry {
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }: { request: Request }) => {
+        // Dynamically detect base URL from request host / headers (useful behind proxies)
+        const requestUrl = new URL(request.url);
+        const host = request.headers.get("x-forwarded-host") || requestUrl.host;
+        const protocol = request.headers.get("x-forwarded-proto") || (requestUrl.protocol ? requestUrl.protocol.replace(":", "") : "https");
+        const baseUrl = (host.includes("localhost") || host.includes("127.0.0.1") || host.includes("dev"))
+          ? "https://www.okikeenterprises.com"
+          : `${protocol}://${host}`;
+
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/services", changefreq: "monthly", priority: "0.9" },
@@ -52,7 +58,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const urls = entries.map((e) =>
           [
             `  <url>`,
-            `    <loc>${BASE_URL}${e.path}</loc>`,
+            `    <loc>${baseUrl}${e.path}</loc>`,
             e.lastmod ? `    <lastmod>${e.lastmod}</lastmod>` : null,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
