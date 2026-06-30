@@ -14,7 +14,7 @@ export const Route = createFileRoute("/login")({
       { property: "og:title", content: "Sign in — OKIKE" },
       { property: "og:description", content: "Access your OKIKE dashboard." },
     ],
-    links: [{ rel: "canonical", href: "https://okike-enterprise.lovable.app/login" }],
+    links: [{ rel: "canonical", href: "https://okike-enterprise.com/login" }],
   }),
   component: LoginPage,
 });

@@ -27,10 +27,10 @@ export const Route = createFileRoute("/")({
       { name: "robots", content: "index, follow" },
       { name: "keywords", content: "software development Nigeria, web development Africa, AI tools, mobile app development, software academy Nigeria, tech training Africa, OKIKE" },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://okike-enterprise.lovable.app/" },
+      { property: "og:url", content: "https://okike-enterprise.com/" },
       { property: "og:title", content: "OKIKE — Build software. Learn to build it." },
       { property: "og:description", content: "Nigerian software studio and tech academy. We build web platforms, AI tools and mobile apps for ambitious teams — and train the engineers who build them." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      { property: "og:image", content: "https://okike-enterprise.com/background.png" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:locale", content: "en_NG" },
@@ -39,10 +39,10 @@ export const Route = createFileRoute("/")({
       { name: "twitter:site", content: "@okikeenterprises" },
       { name: "twitter:title", content: "OKIKE — Build software. Learn to build it." },
       { name: "twitter:description", content: "Nigerian software studio and tech academy. Build with us or learn to build it yourself." },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      { name: "twitter:image", content: "https://okike-enterprise.com/background.png" },
     ],
     links: [
-      { rel: "canonical", href: "https://okike-enterprise.lovable.app/" },
+      { rel: "canonical", href: "https://okike-enterprise.com/" },
     ],
   }),
   component: HomePage,
@@ -179,7 +179,7 @@ function HomePage() {
             <div className="flex items-center gap-3">
               <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-black/60 bg-black/10 px-2 py-0.5">Upcoming</span>
               <p className="text-sm font-bold text-black uppercase tracking-wider">
-                Computing Synergy Summit — 1st July 2025
+                Computing Synergy Summit — 1st August 2026
               </p>
             </div>
             <Link

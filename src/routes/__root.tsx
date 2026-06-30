@@ -96,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:image",
-        content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png",
+        content: "https://okike-enterprise.com/background.png",
       },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
@@ -109,7 +109,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         name: "twitter:image",
-        content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png",
+        content: "https://okike-enterprise.com/background.png",
       },
     ],
     links: [
@@ -129,18 +129,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@graph": [
             {
               "@type": "Organization",
-              "@id": "https://okike-enterprise.lovable.app/#organization",
+              "@id": "https://okike-enterprise.com/#organization",
               name: "OKIKE",
-              url: "https://okike-enterprise.lovable.app",
+              url: "https://okike-enterprise.com",
               description:
                 "Software house and academy building products for ambitious teams and training the next generation of African engineers.",
             },
             {
               "@type": "WebSite",
-              "@id": "https://okike-enterprise.lovable.app/#website",
-              url: "https://okike-enterprise.lovable.app",
+              "@id": "https://okike-enterprise.com/#website",
+              url: "https://okike-enterprise.com",
               name: "OKIKE",
-              publisher: { "@id": "https://okike-enterprise.lovable.app/#organization" },
+              publisher: { "@id": "https://okike-enterprise.com/#organization" },
             },
           ],
         }),

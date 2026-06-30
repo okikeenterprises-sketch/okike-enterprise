@@ -40,18 +40,18 @@ export const Route = createFileRoute("/services")({
       { name: "robots", content: "index, follow" },
       { name: "keywords", content: "software development Nigeria, AI development Africa, web app development, mobile app Nigeria, SaaS development, student portal Nigeria, OKIKE services" },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://okike-enterprise.lovable.app/services" },
+      { property: "og:url", content: "https://okike-enterprise.com/services" },
       { property: "og:title", content: "Software Development Services — OKIKE Nigeria" },
       { property: "og:description", content: "AI automation, scalable web platforms, mobile apps and UI/UX design for ambitious teams across Africa and globally." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      { property: "og:image", content: "https://okike-enterprise.com/background.png" },
       { property: "og:site_name", content: "OKIKE" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Software Development Services — OKIKE Nigeria" },
       { name: "twitter:description", content: "AI tools, web platforms, mobile apps and dashboards built for startups and businesses across Africa." },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/261c5493-35d0-4cb5-851d-5b09f89d86ba/id-preview-9589f573--e22e363f-f41b-4927-9ac6-0599fdc05dff.lovable.app-1778630917399.png" },
+      { name: "twitter:image", content: "https://okike-enterprise.com/background.png" },
     ],
     links: [
-      { rel: "canonical", href: "https://okike-enterprise.lovable.app/services" },
+      { rel: "canonical", href: "https://okike-enterprise.com/services" },
     ],
     scripts: [
       {
@@ -63,13 +63,13 @@ export const Route = createFileRoute("/services")({
           provider: {
             "@type": "Organization",
             name: "OKIKE",
-            url: "https://okike-enterprise.lovable.app",
+            url: "https://okike-enterprise.com",
           },
           name: "OKIKE software, AI & product services",
           description:
             "AI automation, web & mobile platforms, UI/UX design, student & campus systems, and branding for ambitious teams.",
           areaServed: "Worldwide",
-          url: "https://okike-enterprise.lovable.app/services",
+          url: "https://okike-enterprise.com/services",
         }),
       },
     ],
