@@ -309,6 +309,7 @@ export function enrollmentAdminEmail(data: {
   name: string;
   email: string;
   phone?: string;
+  course?: string;
   experience_level: string;
   goals: string;
 }): EmailPayload {
@@ -316,6 +317,7 @@ export function enrollmentAdminEmail(data: {
     infoRow("Name", data.name),
     infoRow("Email", `<a href="mailto:${data.email}" style="color:#E0EB32;">${data.email}</a>`),
     data.phone ? infoRow("Phone/WhatsApp", data.phone) : "",
+    data.course ? infoRow("Course of Interest", data.course) : "",
     infoRow("Experience level", data.experience_level),
   ].filter(Boolean);
 
@@ -332,14 +334,15 @@ export function enrollmentAdminEmail(data: {
   };
 }
 
-export function enrollmentClientEmail(data: { name: string }): EmailPayload {
+export function enrollmentClientEmail(data: { name: string; course?: string }): EmailPayload {
   const firstName = data.name.split(" ")[0];
+  const courseStr = data.course ? ` for <strong style="color:#111;">${data.course}</strong>` : "";
   return {
     to: data.name,
     subject: `Application received — OKIKE Academy`,
     html: baseTemplate(`
       ${h1(`Application received, ${firstName}.`)}
-      ${para("Thank you for applying to the <strong style=\"color:#111;\">OKIKE Academy</strong>. We review every application personally and will be in touch within <strong style=\"color:#111;\">3&ndash;5 business days</strong>.")}
+      ${para(`Thank you for applying to the <strong style="color:#111;">OKIKE Academy</strong>${courseStr}. We review every application personally and will be in touch within <strong style="color:#111;">3&ndash;5 business days</strong>.`)}
       ${infoCard([
       `<p style="font-size:13px;font-weight:700;color:#111;margin:0 0 10px;">What to expect:</p>`,
       `<p style="font-size:13px;color:#555;margin:4px 0;">1 &mdash; Personal review of your application</p>`,

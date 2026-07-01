@@ -161,12 +161,13 @@ export function Select({
   name,
   options,
   required,
+  ...rest
 }: {
   label: string;
   name: string;
   options: string[];
   required?: boolean;
-}) {
+} & React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <label className="flex flex-col gap-2">
       <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
@@ -178,6 +179,7 @@ export function Select({
         required={required}
         defaultValue=""
         className="bg-surface border border-ink/10 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition"
+        {...rest}
       >
         <option value="" disabled>Choose…</option>
         {options.map((o) => (

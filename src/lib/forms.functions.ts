@@ -89,6 +89,7 @@ const enrollSchema = z.object({
   name: z.string().min(1).max(120),
   email: z.string().email().max(200),
   phone: z.string().max(40).optional().or(z.literal("")),
+  course: z.string().max(120).optional().or(z.literal("")),
   experience_level: z.string().min(1).max(40),
   goals: z.string().min(10).max(2000),
 });
@@ -96,21 +97,29 @@ const enrollSchema = z.object({
 export const submitEnrollment = createServerFn({ method: "POST" })
   .inputValidator((data) => enrollSchema.parse(data))
   .handler(async ({ data }) => {
+    const consolidatedGoals = data.course
+      ? `[Course of Interest: ${data.course}]\n\n${data.goals}`
+      : data.goals;
+
     const { error } = await supabaseAdmin.from("course_enrollments").insert({
       name: data.name,
       email: data.email,
       phone: data.phone || null,
       experience_level: data.experience_level,
-      goals: data.goals,
+      goals: consolidatedGoals,
     });
     if (error) return { ok: false as const, error: "Could not submit. Please try again." };
 
     await Promise.allSettled([
       sendEmail(enrollmentAdminEmail({
-        name: data.name, email: data.email, phone: data.phone,
-        experience_level: data.experience_level, goals: data.goals,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        course: data.course,
+        experience_level: data.experience_level,
+        goals: data.goals,
       })),
-      sendEmail({ ...enrollmentClientEmail({ name: data.name }), to: data.email }),
+      sendEmail({ ...enrollmentClientEmail({ name: data.name, course: data.course }), to: data.email }),
     ]);
 
     return { ok: true as const };

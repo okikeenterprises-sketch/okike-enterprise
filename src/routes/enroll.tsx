@@ -4,9 +4,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { submitEnrollment } from "@/lib/forms.functions";
+import { getCourses } from "@/lib/public-content";
 import { Field, TextArea, Select } from "./contact";
 
 export const Route = createFileRoute("/enroll")({
+  validateSearch: (search: Record<string, unknown>): { course?: string } => ({
+    course: typeof search.course === "string" ? search.course : undefined,
+  }),
+  loader: async () => {
+    const courses = await getCourses();
+    return { courses };
+  },
   head: () => ({
     meta: [
       { title: "Apply to OKIKE Academy — Tech Courses in Nigeria" },
@@ -33,8 +41,11 @@ export const Route = createFileRoute("/enroll")({
 
 function EnrollPage() {
   const navigate = useNavigate();
+  const { course: searchCourse } = Route.useSearch();
+  const { courses } = Route.useLoaderData();
   const send = useServerFn(submitEnrollment);
   const [busy, setBusy] = useState(false);
+  const [course, setCourse] = useState(searchCourse || "");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -46,6 +57,7 @@ function EnrollPage() {
           name: String(fd.get("name") || ""),
           email: String(fd.get("email") || ""),
           phone: String(fd.get("phone") || ""),
+          course: String(fd.get("course") || ""),
           experience_level: String(fd.get("experience_level") || ""),
           goals: String(fd.get("goals") || ""),
         },
@@ -92,8 +104,25 @@ function EnrollPage() {
             <Field label="Full name" name="name" required />
             <Field label="Email" name="email" type="email" required />
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             <Field label="Phone or WhatsApp" name="phone" placeholder="Optional" />
+            <Select
+              label="Course of Interest"
+              name="course"
+              required
+              value={course}
+              onChange={(e) => setCourse(e.target.value)}
+              options={
+                courses.length > 0
+                  ? courses.map((c) => c.title)
+                  : [
+                      "Fullstack Web Development",
+                      "UI/UX Design",
+                      "Data Analysis & AI",
+                      "Mobile App Development",
+                    ]
+              }
+            />
             <Select
               label="Experience level"
               name="experience_level"

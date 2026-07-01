@@ -164,7 +164,11 @@ function LearnPage() {
                     </div>
                     <div className="flex items-center justify-between pt-3 border-t border-ink/5">
                       {course.price && <div className="font-semibold">₦{course.price.toLocaleString()}</div>}
-                      <Link to="/enroll" className="inline-flex items-center gap-1 text-brand font-semibold text-xs uppercase tracking-widest hover:gap-2 transition-all">
+                      <Link
+                        to="/enroll"
+                        search={{ course: course.title }}
+                        className="inline-flex items-center gap-1 text-brand font-semibold text-xs uppercase tracking-widest hover:gap-2 transition-all"
+                      >
                         Enroll <ArrowUpRight className="size-3" />
                       </Link>
                     </div>
