@@ -174,6 +174,7 @@ const bootcampSchema = z.object({
   department: z.string().min(1).max(120),
   level: z.string().min(1).max(40),
   is_department_student: z.boolean(),
+  course: z.string().min(1).max(200),
 });
 
 export const submitBootcampRegistration = createServerFn({ method: "POST" })
@@ -188,6 +189,7 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
         phone: data.phone,
         department: data.department,
         level: data.level,
+        course: data.course,
         is_department_student: data.is_department_student,
         payment_status: data.is_department_student ? "free" : "pending",
         payment_reference: data.is_department_student ? null : reference,
@@ -218,6 +220,7 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Name:</strong> ${data.name}</p>
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Department:</strong> ${data.department}</p>
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Level:</strong> ${data.level}</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Course:</strong> ${data.course}</p>
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Admission:</strong> ${data.is_department_student ? "Free (CS/IT Student)" : "₦5,000 — payment required"}</p>
 </td></tr>
 </table>

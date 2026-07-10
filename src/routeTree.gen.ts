@@ -35,6 +35,7 @@ import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminInquiriesRouteImport } from './routes/admin.inquiries'
+import { Route as AdminBootcampRouteImport } from './routes/admin.bootcamp'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ApiCronPublishBlogRouteImport } from './routes/api.cron.publish-blog'
@@ -170,6 +171,11 @@ const AdminInquiriesRoute = AdminInquiriesRouteImport.update({
   path: '/inquiries',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBootcampRoute = AdminBootcampRouteImport.update({
+  id: '/bootcamp',
+  path: '/bootcamp',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
   id: '/announcements',
   path: '/announcements',
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/thank-you': typeof ThankYouRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/bootcamp': typeof AdminBootcampRoute
   '/admin/inquiries': typeof AdminInquiriesRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/projects': typeof AdminProjectsRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/thank-you': typeof ThankYouRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/bootcamp': typeof AdminBootcampRoute
   '/admin/inquiries': typeof AdminInquiriesRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/projects': typeof AdminProjectsRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/thank-you': typeof ThankYouRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/bootcamp': typeof AdminBootcampRoute
   '/admin/inquiries': typeof AdminInquiriesRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/projects': typeof AdminProjectsRoute
@@ -307,6 +316,7 @@ export interface FileRouteTypes {
     | '/thank-you'
     | '/admin/analytics'
     | '/admin/announcements'
+    | '/admin/bootcamp'
     | '/admin/inquiries'
     | '/admin/payments'
     | '/admin/projects'
@@ -337,6 +347,7 @@ export interface FileRouteTypes {
     | '/thank-you'
     | '/admin/analytics'
     | '/admin/announcements'
+    | '/admin/bootcamp'
     | '/admin/inquiries'
     | '/admin/payments'
     | '/admin/projects'
@@ -369,6 +380,7 @@ export interface FileRouteTypes {
     | '/thank-you'
     | '/admin/analytics'
     | '/admin/announcements'
+    | '/admin/bootcamp'
     | '/admin/inquiries'
     | '/admin/payments'
     | '/admin/projects'
@@ -587,6 +599,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInquiriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/bootcamp': {
+      id: '/admin/bootcamp'
+      path: '/bootcamp'
+      fullPath: '/admin/bootcamp'
+      preLoaderRoute: typeof AdminBootcampRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/announcements': {
       id: '/admin/announcements'
       path: '/announcements'
@@ -621,6 +640,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
+  AdminBootcampRoute: typeof AdminBootcampRoute
   AdminInquiriesRoute: typeof AdminInquiriesRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminProjectsRoute: typeof AdminProjectsRoute
@@ -635,6 +655,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
+  AdminBootcampRoute: AdminBootcampRoute,
   AdminInquiriesRoute: AdminInquiriesRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminProjectsRoute: AdminProjectsRoute,

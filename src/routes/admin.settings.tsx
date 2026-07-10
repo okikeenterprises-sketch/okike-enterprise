@@ -54,6 +54,12 @@ function SiteSettingsPage() {
   const [settings, setSettings] = useState<SettingsMap>({});
   const upsert = useServerFn(cmsUpsert);
 
+  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+  const [courses, setCourses] = useState<{ id: string; name: string }[]>([]);
+  const [newDept, setNewDept] = useState("");
+  const [newCourse, setNewCourse] = useState("");
+  const [loadingDb, setLoadingDb] = useState(true);
+
   async function load() {
     const { data } = await supabase.from("site_settings").select("*");
     const m: SettingsMap = {};
@@ -64,8 +70,26 @@ function SiteSettingsPage() {
     });
     setSettings(m);
   }
+
+  async function loadDbData() {
+    setLoadingDb(true);
+    try {
+      const [{ data: depts }, { data: crs }] = await Promise.all([
+        (supabase as any).from("aksu_departments").select("*").order("name"),
+        (supabase as any).from("bootcamp_courses").select("*").order("name"),
+      ]);
+      setDepartments((depts as any) || []);
+      setCourses((crs as any) || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingDb(false);
+    }
+  }
+
   useEffect(() => {
     load();
+    loadDbData();
   }, []);
 
   async function saveKey(key: string) {
@@ -74,6 +98,56 @@ function SiteSettingsPage() {
       toast.success("Saved");
     } catch (e: unknown) {
       toast.error(errorMessage(e));
+    }
+  }
+
+  async function handleAddDept(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newDept.trim()) return;
+    const name = newDept.trim();
+    const { error } = await (supabase as any).from("aksu_departments").insert({ name });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Department added");
+      setNewDept("");
+      loadDbData();
+    }
+  }
+
+  async function handleDeleteDept(id: string) {
+    if (!confirm("Are you sure you want to delete this department?")) return;
+    const { error } = await (supabase as any).from("aksu_departments").delete().eq("id", id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Department deleted");
+      loadDbData();
+    }
+  }
+
+  async function handleAddCourse(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCourse.trim()) return;
+    const name = newCourse.trim();
+    const { error } = await (supabase as any).from("bootcamp_courses").insert({ name });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Course added");
+      setNewCourse("");
+      loadDbData();
+    }
+  }
+
+  async function handleDeleteCourse(id: string) {
+    if (!confirm("Are you sure you want to delete this course track?")) return;
+    const { error } = await (supabase as any).from("bootcamp_courses").delete().eq("id", id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Course track deleted");
+      loadDbData();
     }
   }
 
@@ -125,6 +199,104 @@ function SiteSettingsPage() {
           ))}
         </section>
       ))}
+
+      {/* AKSU Departments Management */}
+      <section className="bg-card rounded-2xl p-6 ring-1 ring-ink/5 flex flex-col gap-4">
+        <h2 className="font-medium text-lg">AKSU Departments</h2>
+        <p className="text-xs text-ink/50 -mt-2">Add or remove departments available for Synergy Summit registration.</p>
+        
+        <form onSubmit={handleAddDept} className="flex gap-2">
+          <input
+            type="text"
+            placeholder="New Department Name"
+            value={newDept}
+            onChange={(e) => setNewDept(e.target.value)}
+            className="flex-1 bg-surface ring-1 ring-ink/10 rounded-xl px-3 py-2 text-sm"
+            required
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium"
+          >
+            Add
+          </button>
+        </form>
+
+        {loadingDb ? (
+          <div className="text-xs text-ink/40">Loading departments...</div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {departments.map((d) => (
+              <span
+                key={d.id}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface ring-1 ring-ink/10 text-xs font-medium text-ink"
+              >
+                {d.name}
+                <button
+                  type="button"
+                  onClick={() => handleDeleteDept(d.id)}
+                  className="text-red-500 hover:text-red-700 font-bold ml-1"
+                  title="Delete"
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+            {departments.length === 0 && (
+              <div className="text-xs text-ink/40">No departments added yet.</div>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* Bootcamp Courses Management */}
+      <section className="bg-card rounded-2xl p-6 ring-1 ring-ink/5 flex flex-col gap-4">
+        <h2 className="font-medium text-lg">Summit Courses / Tracks</h2>
+        <p className="text-xs text-ink/50 -mt-2">Add or remove course tracks available for students to select.</p>
+        
+        <form onSubmit={handleAddCourse} className="flex gap-2">
+          <input
+            type="text"
+            placeholder="New Course Track Name"
+            value={newCourse}
+            onChange={(e) => setNewCourse(e.target.value)}
+            className="flex-1 bg-surface ring-1 ring-ink/10 rounded-xl px-3 py-2 text-sm"
+            required
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-sm font-medium"
+          >
+            Add
+          </button>
+        </form>
+
+        {loadingDb ? (
+          <div className="text-xs text-ink/40">Loading courses...</div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {courses.map((c) => (
+              <span
+                key={c.id}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface ring-1 ring-ink/10 text-xs font-medium text-ink"
+              >
+                {c.name}
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCourse(c.id)}
+                  className="text-red-500 hover:text-red-700 font-bold ml-1"
+                  title="Delete"
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+            {courses.length === 0 && (
+              <div className="text-xs text-ink/40">No course tracks added yet.</div>
+            )}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

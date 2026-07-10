@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { useServerFn } from "@tanstack/react-start";
 import { askAssistant, generateInsights } from "@/lib/ai-assistant.functions";
 import { toast } from "sonner";
-import { verifyProjectDeposit } from "@/lib/forms.functions";
+import { verifyProjectDeposit, verifyBootcampPayment } from "@/lib/forms.functions";
 import heroImg from "@/assets/dashboard-hero.jpg";
 import okikeLogo from "@/assets/okike-logo.png";
 import {
@@ -88,6 +88,7 @@ function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [updates, setUpdates] = useState<Update[]>([]);
+  const [bootcampReg, setBootcampReg] = useState<any>(null);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
@@ -99,7 +100,7 @@ function DashboardPage() {
     let active = true;
 
     async function load() {
-      const [{ data: p }, { data: m }, { data: u }] = await Promise.all([
+      const [{ data: p }, { data: m }, { data: u }, { data: b }] = await Promise.all([
         supabase
           .from("client_projects")
           .select("id, title, package_name, stage, created_at, total, deposit, currency")
@@ -114,11 +115,17 @@ function DashboardPage() {
           .select("id, project_id, message, created_at")
           .order("created_at", { ascending: false })
           .limit(8),
+        supabase
+          .from("bootcamp_registrations" as any)
+          .select("*")
+          .eq("email" as any, session!.user.email as any)
+          .maybeSingle(),
       ]);
       if (!active) return;
       setProjects((p ?? []) as Project[]);
       setMilestones((m ?? []) as Milestone[]);
       setUpdates((u ?? []) as Update[]);
+      setBootcampReg(b);
       setDataLoading(false);
     }
     load();
@@ -128,6 +135,7 @@ function DashboardPage() {
       .on("postgres_changes", { event: "*", schema: "public", table: "client_projects" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "project_milestones" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "project_updates" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "bootcamp_registrations" }, load)
       .subscribe();
 
     return () => {
@@ -148,6 +156,48 @@ function DashboardPage() {
   }, [projects]);
 
   const verifyDeposit = useServerFn(verifyProjectDeposit);
+  const verifyBootcamp = useServerFn(verifyBootcampPayment);
+
+  function handlePayBootcamp(reg: any) {
+    const koraKey = import.meta.env.VITE_KORAPAY_PUBLIC_KEY;
+    if (!koraKey) {
+      toast.error("Payment setup is missing.");
+      return;
+    }
+    const korapay = (window as any).Korapay;
+    if (!korapay) {
+      toast.error("Payment gateway failed to load.");
+      return;
+    }
+    korapay.initialize({
+      key: koraKey,
+      reference: reg.payment_reference,
+      amount: 5000,
+      currency: "NGN",
+      customer: {
+        name: reg.name,
+        email: reg.email,
+      },
+      onSuccess: async (transaction: any) => {
+        toast.loading("Confirming payment...");
+        try {
+          const res = await verifyBootcamp({ data: { reference: reg.payment_reference } });
+          toast.dismiss();
+          if (res.ok) {
+            toast.success("Payment confirmed! Your ticket is active.");
+            window.location.reload();
+          } else {
+            toast.error(res.error || "Verification failed.");
+          }
+        } catch {
+          toast.dismiss();
+          toast.error("Verification error.");
+        }
+      },
+      onFailed: () => toast.error("Payment failed."),
+      onClose: () => toast.warning("Payment closed."),
+    });
+  }
 
   function handlePayDeposit(project: Project) {
     if (!user?.email || !project.deposit) return;
@@ -362,6 +412,8 @@ function DashboardPage() {
                 onOpenAI={() => setSection("ai")}
                 onSeeProjects={() => setSection("projects")}
                 onPayDeposit={handlePayDeposit}
+                bootcampReg={bootcampReg}
+                onPayBootcamp={handlePayBootcamp}
               />
             )}
             {section === "projects" && (
@@ -430,6 +482,8 @@ function DashboardOverview({
   onOpenAI,
   onSeeProjects,
   onPayDeposit,
+  bootcampReg,
+  onPayBootcamp,
 }: {
   firstName: string;
   greeting: string;
@@ -441,6 +495,8 @@ function DashboardOverview({
   onOpenAI: () => void;
   onSeeProjects: () => void;
   onPayDeposit: (p: Project) => void;
+  bootcampReg: any;
+  onPayBootcamp: (reg: any) => void;
 }) {
   const active = projects
     .filter((p) => p.stage === "in_progress" || p.stage === "accepted")
@@ -492,6 +548,52 @@ function DashboardOverview({
             </div>
           </div>
         </section>
+
+        {/* Bootcamp ticket */}
+        {bootcampReg && (
+          <section className="rounded-2xl bg-card ring-1 ring-ink/10 p-6 flex flex-col gap-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-semibold text-lg flex items-center gap-2">
+                  <Calendar className="size-5 text-brand" />
+                  Computing Synergy Summit
+                </h2>
+                <p className="text-xs text-ink/50 mt-1">1st August 2026 · Venue TBA</p>
+              </div>
+              <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                bootcampReg.payment_status === "paid"
+                  ? "bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20"
+                  : bootcampReg.payment_status === "free"
+                    ? "bg-blue-500/10 text-blue-600 ring-1 ring-blue-500/20"
+                    : "bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20 animate-pulse"
+              }`}>
+                {bootcampReg.payment_status === "paid" ? "Confirmed (Paid)" : bootcampReg.payment_status === "free" ? "Confirmed (Free)" : "Payment Pending"}
+              </span>
+            </div>
+            <p className="text-sm text-ink/75 leading-relaxed">
+              Hi <strong className="text-ink">{bootcampReg.name}</strong>, your spot is reserved for the Computing Synergy Summit.
+            </p>
+            <div className="grid grid-cols-2 gap-4 bg-surface ring-1 ring-ink/5 rounded-xl p-4 text-xs">
+              <div>
+                <span className="text-ink/40 uppercase tracking-wider block text-[10px]">Department</span>
+                <span className="font-medium text-ink/80">{bootcampReg.department} ({bootcampReg.level})</span>
+              </div>
+              <div>
+                <span className="text-ink/40 uppercase tracking-wider block text-[10px]">Ticket Reference</span>
+                <span className="font-medium text-ink/80 truncate block">{bootcampReg.payment_reference || "N/A (Free)"}</span>
+              </div>
+            </div>
+            {bootcampReg.payment_status === "pending" && (
+              <button
+                type="button"
+                onClick={() => onPayBootcamp(bootcampReg)}
+                className="w-full py-3 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition animate-pulse"
+              >
+                Pay Registration Fee (₦5,000) &rarr;
+              </button>
+            )}
+          </section>
+        )}
 
         {/* Stats — only 3 honest tiles */}
         <div className="grid grid-cols-3 gap-3">

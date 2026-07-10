@@ -20,6 +20,7 @@ import {
   X,
   LogOut,
   BookOpen,
+  GraduationCap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/admin")({
 const NAV: { to: string; label: string; icon: LucideIcon; exact?: boolean }[] = [
   { to: "/admin", label: "Overview", icon: LayoutGrid, exact: true },
   { to: "/admin/users", label: "Users", icon: Users },
+  { to: "/admin/bootcamp", label: "Summit Registrations", icon: GraduationCap },
   { to: "/admin/inquiries", label: "Inquiries", icon: Inbox },
   { to: "/admin/projects", label: "Projects", icon: FolderKanban },
   { to: "/admin/payments", label: "Payments", icon: CreditCard },
