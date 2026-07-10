@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { useServerFn } from "@tanstack/react-start";
 import { askAssistant, generateInsights } from "@/lib/ai-assistant.functions";
 import { toast } from "sonner";
+import { verifyProjectDeposit } from "@/lib/forms.functions";
 import heroImg from "@/assets/dashboard-hero.jpg";
 import okikeLogo from "@/assets/okike-logo.png";
 import {
@@ -74,6 +75,8 @@ type Project = {
   stage: string;
   created_at: string;
   total: number | null;
+  deposit: number | null;
+  currency: string;
 };
 type Milestone = { id: string; project_id: string; name: string; status: string; position: number };
 type Update = { id: string; project_id: string; message: string; created_at: string };
@@ -99,7 +102,7 @@ function DashboardPage() {
       const [{ data: p }, { data: m }, { data: u }] = await Promise.all([
         supabase
           .from("client_projects")
-          .select("id, title, package_name, stage, created_at, total")
+          .select("id, title, package_name, stage, created_at, total, deposit, currency")
           .eq("client_user_id", session!.user.id)
           .order("created_at", { ascending: false }),
         supabase
@@ -143,6 +146,65 @@ function DashboardPage() {
     ).length;
     return { active, completed, submitted };
   }, [projects]);
+
+  const verifyDeposit = useServerFn(verifyProjectDeposit);
+
+  function handlePayDeposit(project: Project) {
+    if (!user?.email || !project.deposit) return;
+    
+    const koraKey = import.meta.env.VITE_KORAPAY_PUBLIC_KEY;
+    if (!koraKey) {
+      toast.error("Payment setup is missing. Please contact support.");
+      return;
+    }
+
+    const korapay = (window as any).Korapay;
+    if (!korapay) {
+      toast.error("Payment gateway failed to load. Please refresh and try again.");
+      return;
+    }
+
+    const reference = `project_dep_${project.id}_${Date.now()}`;
+    const clientName = user.user_metadata?.full_name || user.email.split("@")[0];
+
+    korapay.initialize({
+      key: koraKey,
+      reference,
+      amount: project.deposit,
+      currency: project.currency || "NGN",
+      customer: {
+        name: clientName,
+        email: user.email,
+      },
+      onSuccess: async (transaction: any) => {
+        toast.loading("Confirming deposit payment...");
+        try {
+          const res = await verifyDeposit({
+            data: {
+              projectId: project.id,
+              reference,
+            },
+          });
+          toast.dismiss();
+          if (res.ok) {
+            toast.success("Deposit paid! Your project is now in progress.");
+            window.location.reload();
+          } else {
+            toast.error(res.error || "Failed to verify deposit. Please contact support.");
+          }
+        } catch (err) {
+          toast.dismiss();
+          toast.error("Verification failed. We will manually check the payment.");
+        }
+      },
+      onFailed: () => {
+        toast.error("Payment failed. Please try again.");
+      },
+      onClose: () => {
+        toast.warning("Payment window closed.");
+      },
+    });
+  }
 
   if (loading || !session) {
     return (
@@ -299,10 +361,11 @@ function DashboardPage() {
                 loading={dataLoading}
                 onOpenAI={() => setSection("ai")}
                 onSeeProjects={() => setSection("projects")}
+                onPayDeposit={handlePayDeposit}
               />
             )}
             {section === "projects" && (
-              <ProjectsView projects={projects} milestones={milestones} loading={dataLoading} />
+              <ProjectsView projects={projects} milestones={milestones} loading={dataLoading} onPayDeposit={handlePayDeposit} />
             )}
             {section === "courses" && <CoursesView />}
             {section === "ai" && (
@@ -366,6 +429,7 @@ function DashboardOverview({
   loading,
   onOpenAI,
   onSeeProjects,
+  onPayDeposit,
 }: {
   firstName: string;
   greeting: string;
@@ -376,6 +440,7 @@ function DashboardOverview({
   loading: boolean;
   onOpenAI: () => void;
   onSeeProjects: () => void;
+  onPayDeposit: (p: Project) => void;
 }) {
   const active = projects
     .filter((p) => p.stage === "in_progress" || p.stage === "accepted")
@@ -458,6 +523,7 @@ function DashboardOverview({
               {active.map((p) => {
                 const pct = progressFor(p.id, milestones);
                 const stageLabel = p.stage === "in_progress" ? "In Progress" : "Accepted";
+                const symbol = p.currency === "NGN" ? "₦" : "$";
                 return (
                   <li
                     key={p.id}
@@ -490,6 +556,18 @@ function DashboardOverview({
                             {pct}%
                           </span>
                         </div>
+                        {p.stage === "accepted" && p.deposit && (
+                          <div className="mt-3 pt-3 border-t border-ink/5 flex items-center justify-between gap-3">
+                            <span className="text-xs font-medium text-ink/70">Deposit: {symbol}{Number(p.deposit).toLocaleString()}</span>
+                            <button
+                              type="button"
+                              onClick={() => onPayDeposit(p)}
+                              className="px-3 py-1.5 rounded-full bg-brand text-brand-foreground font-semibold text-[10px] uppercase tracking-wider hover:opacity-90 transition animate-pulse"
+                            >
+                              Pay Deposit
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </li>
@@ -553,10 +631,12 @@ function ProjectsView({
   projects,
   milestones,
   loading,
+  onPayDeposit,
 }: {
   projects: Project[];
   milestones: Milestone[];
   loading: boolean;
+  onPayDeposit: (p: Project) => void;
 }) {
   if (loading) return <div className="text-sm text-ink/40">Loading…</div>;
   if (projects.length === 0)
@@ -573,6 +653,7 @@ function ProjectsView({
       {projects.map((p) => {
         const own = milestones.filter((m) => m.project_id === p.id);
         const pct = progressFor(p.id, milestones);
+        const symbol = p.currency === "NGN" ? "₦" : "$";
         return (
           <section key={p.id} className="rounded-2xl bg-card ring-1 ring-ink/10 p-6">
             <div className="flex items-start justify-between gap-3">
@@ -587,6 +668,21 @@ function ProjectsView({
             <div className="mt-3 h-1.5 rounded-full bg-ink/10 overflow-hidden">
               <div className="h-full rounded-full bg-brand" style={{ width: `${pct}%` }} />
             </div>
+            {p.stage === "accepted" && p.deposit && (
+              <div className="mt-4 p-4 rounded-xl bg-brand/5 border border-brand/20 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="text-xs text-ink/50 uppercase tracking-wider">Deposit Due</div>
+                  <div className="font-semibold text-lg">{symbol}{Number(p.deposit).toLocaleString()}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onPayDeposit(p)}
+                  className="px-5 py-2.5 rounded-full bg-brand text-brand-foreground font-medium text-xs uppercase tracking-wider hover:opacity-90 transition animate-pulse"
+                >
+                  Pay Deposit &rarr;
+                </button>
+              </div>
+            )}
             {own.length > 0 && (
               <ul className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {own.map((m) => (

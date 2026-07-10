@@ -210,6 +210,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         {/* Google Analytics tag (gtag.js) */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-5ZG584XZV8" />
+        <script src="https://korablobstorage.blob.core.windows.net/modal-bucket/korapay-collections.min.js" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

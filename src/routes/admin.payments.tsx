@@ -88,10 +88,10 @@ function AdminPayments() {
                       </span>
                     </td>
                     <td className="px-2 py-3 text-right text-ink/70 tabular-nums">
-                      {p.deposit ? fmt(Number(p.deposit)) : "—"}
+                      {p.deposit ? fmt(Number(p.deposit), p.currency) : "—"}
                     </td>
                     <td className="px-6 py-3 text-right font-medium tabular-nums">
-                      {p.total ? fmt(Number(p.total)) : "—"}
+                      {p.total ? fmt(Number(p.total), p.currency) : "—"}
                     </td>
                   </tr>
                 ))}
@@ -113,9 +113,10 @@ function Tile({ label, value }: { label: string; value: string }) {
   );
 }
 
-function fmt(n: number) {
-  if (!n) return "$0";
-  if (n >= 1_000_000) return "$" + (n / 1_000_000).toFixed(2) + "M";
-  if (n >= 1000) return "$" + (n / 1000).toFixed(1) + "K";
-  return "$" + n.toFixed(0);
+function fmt(n: number, currency: string = "NGN") {
+  const symbol = currency === "NGN" ? "₦" : "$";
+  if (!n) return symbol + "0";
+  if (n >= 1_000_000) return symbol + (n / 1_000_000).toFixed(2) + "M";
+  if (n >= 1000) return symbol + (n / 1000).toFixed(1) + "K";
+  return symbol + n.toFixed(0);
 }

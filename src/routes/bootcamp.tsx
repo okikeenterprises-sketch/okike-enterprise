@@ -4,15 +4,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Calendar, MapPin, Users, CheckCircle } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { submitBootcampRegistration } from "@/lib/forms.functions";
+import { submitBootcampRegistration, verifyBootcampPayment } from "@/lib/forms.functions";
 
 export const Route = createFileRoute("/bootcamp")({
     head: () => ({
         meta: [
             { title: "Computing Synergy Summit — Register Now" },
-            { name: "description", content: "Register for the Computing Synergy Summit starting 1st July. Free for department students, ₦2,000 for others." },
+            { name: "description", content: "Register for the Computing Synergy Summit starting 1st August 2026. Free for department students, ₦5,000 for others." },
             { property: "og:title", content: "Computing Synergy Summit — Register Now" },
-            { property: "og:description", content: "Register for the Computing Synergy Summit. Free for CS/IT department students, ₦2,000 for others." },
+            { property: "og:description", content: "Register for the Computing Synergy Summit. Free for CS/IT department students, ₦5,000 for others." },
         ],
     }),
     component: BootcampPage,
@@ -36,6 +36,7 @@ const LEVELS = ["100 Level", "200 Level", "300 Level", "400 Level", "500 Level",
 function BootcampPage() {
     const navigate = useNavigate();
     const register = useServerFn(submitBootcampRegistration);
+    const verifyPayment = useServerFn(verifyBootcampPayment);
     const [busy, setBusy] = useState(false);
     const [isDeptStudent, setIsDeptStudent] = useState(false);
 
@@ -43,25 +44,89 @@ function BootcampPage() {
         e.preventDefault();
         setBusy(true);
         const fd = new FormData(e.currentTarget);
+        const name = String(fd.get("name") || "");
+        const email = String(fd.get("email") || "");
+        const phone = String(fd.get("phone") || "");
+        const department = String(fd.get("department") || "");
+        const level = String(fd.get("level") || "");
+
         try {
             const res = await register({
                 data: {
-                    name: String(fd.get("name") || ""),
-                    email: String(fd.get("email") || ""),
-                    phone: String(fd.get("phone") || ""),
-                    department: String(fd.get("department") || ""),
-                    level: String(fd.get("level") || ""),
+                    name,
+                    email,
+                    phone,
+                    department,
+                    level,
                     is_department_student: isDeptStudent,
                 },
             });
-            if (res.ok) {
-                navigate({ to: "/thank-you" });
-            } else {
+
+            if (!res.ok) {
                 toast.error(res.error || "Registration failed. Please try again.");
+                setBusy(false);
+                return;
             }
+
+            if (isDeptStudent) {
+                toast.success("Registration confirmed successfully!");
+                navigate({ to: "/thank-you" });
+                return;
+            }
+
+            // Trigger Korapay for non-department students
+            const koraKey = import.meta.env.VITE_KORAPAY_PUBLIC_KEY;
+            if (!koraKey) {
+                toast.error("Payment setup is missing. Please contact support.");
+                setBusy(false);
+                return;
+            }
+
+            const korapay = (window as any).Korapay;
+            if (!korapay) {
+                toast.error("Payment gateway failed to load. Please refresh and try again.");
+                setBusy(false);
+                return;
+            }
+
+            korapay.initialize({
+                key: koraKey,
+                reference: res.reference,
+                amount: 5000,
+                currency: "NGN",
+                customer: {
+                    name,
+                    email,
+                },
+                onSuccess: async (transaction: any) => {
+                    toast.loading("Verifying payment...");
+                    try {
+                        const ver = await verifyPayment({ data: { reference: res.reference } });
+                        toast.dismiss();
+                        if (ver.ok) {
+                            toast.success("Payment confirmed! Your registration is complete.");
+                            navigate({ to: "/thank-you" });
+                        } else {
+                            toast.error(ver.error || "Payment verification failed. Please contact support.");
+                            navigate({ to: "/thank-you" });
+                        }
+                    } catch {
+                        toast.dismiss();
+                        toast.error("Could not verify payment automatically. We will review it shortly.");
+                        navigate({ to: "/thank-you" });
+                    }
+                },
+                onFailed: (transaction: any) => {
+                    toast.error("Payment failed. Your registration is saved as pending.");
+                    navigate({ to: "/thank-you" });
+                },
+                onClose: () => {
+                    toast.warning("Payment modal closed. Your registration is pending.");
+                    navigate({ to: "/thank-you" });
+                },
+            });
         } catch {
             toast.error("Something went wrong. Please try again.");
-        } finally {
             setBusy(false);
         }
     }

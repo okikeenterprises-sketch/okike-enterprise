@@ -179,6 +179,7 @@ const bootcampSchema = z.object({
 export const submitBootcampRegistration = createServerFn({ method: "POST" })
   .inputValidator((data) => bootcampSchema.parse(data))
   .handler(async ({ data }) => {
+    const reference = "bootcamp_" + Math.random().toString(36).slice(2, 15) + "_" + Date.now();
     const { error } = await supabaseAdmin
       .from("bootcamp_registrations" as never)
       .insert({
@@ -188,6 +189,8 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
         department: data.department,
         level: data.level,
         is_department_student: data.is_department_student,
+        payment_status: data.is_department_student ? "free" : "pending",
+        payment_reference: data.is_department_student ? null : reference,
       } as never);
 
     if (error) {
@@ -204,9 +207,9 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
 <tr><td align="center" style="padding:32px 40px 20px;"><a href="https://okikeenterprises.com"><img src="https://res.cloudinary.com/djzsrfc6h/image/upload/v1781531660/Asset_40_q7oeri.png" alt="OKIKE" width="120" style="display:block;border:0;"/></a></td></tr>
 <tr><td style="padding:0 40px;"><div style="height:2px;background:#eab308;"></div></td></tr>
 <tr><td style="padding:36px 40px 24px;text-align:center;">
-<p style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#eab308;margin:0 0 10px;">Registration Confirmed</p>
-<h1 style="font-size:32px;font-weight:900;color:#fff;margin:0 0 14px;line-height:1.1;">You're in, <span style="color:#eab308;">${data.name.split(" ")[0]}!</span></h1>
-<p style="font-size:15px;color:#888;margin:0 0 0;line-height:1.7;">Your registration for the <strong style="color:#fff;">Computing Synergy Summit</strong> on <strong style="color:#fff;">1st July 2025</strong> has been received.</p>
+<p style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#eab308;margin:0 0 10px;">Registration Received</p>
+<h1 style="font-size:32px;font-weight:900;color:#fff;margin:0 0 14px;line-height:1.1;">You're registered, <span style="color:#eab308;">${data.name.split(" ")[0]}!</span></h1>
+<p style="font-size:15px;color:#888;margin:0 0 0;line-height:1.7;">Your registration for the <strong style="color:#fff;">Computing Synergy Summit</strong> on <strong style="color:#fff;">1st August 2026</strong> has been received.</p>
 </td></tr>
 <tr><td style="padding:8px 40px 32px;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#111;border-left:4px solid #eab308;">
@@ -215,7 +218,7 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Name:</strong> ${data.name}</p>
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Department:</strong> ${data.department}</p>
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Level:</strong> ${data.level}</p>
-<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Admission:</strong> ${data.is_department_student ? "Free (Department student)" : "₦2,000 — payment link coming shortly"}</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Admission:</strong> ${data.is_department_student ? "Free (CS/IT Student)" : "₦5,000 — payment required"}</p>
 </td></tr>
 </table>
 </td></tr>
@@ -223,7 +226,7 @@ ${!data.is_department_student ? `<tr><td style="padding:0 40px 24px;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#1a1200;border-left:4px solid #eab308;">
 <tr><td style="padding:16px 22px;">
 <p style="font-size:13px;font-weight:700;color:#eab308;margin:0 0 6px;">Payment required</p>
-<p style="font-size:13px;color:#999;margin:0;line-height:1.6;">Since you're not in the CS/IT department, a payment link of <strong style="color:#fff;">₦2,000</strong> will be sent to this email shortly. Your spot is reserved until you receive it.</p>
+<p style="font-size:13px;color:#999;margin:0;line-height:1.6;">Since you're not in the CS/IT department, a payment of <strong style="color:#fff;">₦5,000</strong> is required to confirm your ticket. If you didn't pay during checkout, please verify with our support.</p>
 </td></tr>
 </table>
 </td></tr>` : ""}
@@ -258,10 +261,11 @@ ${!data.is_department_student ? `<tr><td style="padding:0 40px 24px;">
 <p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Phone:</strong> ${data.phone}</p>
 <p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Department:</strong> ${data.department}</p>
 <p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Level:</strong> ${data.level}</p>
-<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Dept student:</strong> ${data.is_department_student ? "✅ Yes (Free)" : "❌ No (₦2,000 due)"}</p>
+<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Dept student:</strong> ${data.is_department_student ? "✅ Yes (Free)" : "❌ No (₦5,000 due)"}</p>
+<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Payment Reference:</strong> ${reference}</p>
 </td></tr>
 </table>
-${!data.is_department_student ? `<p style="font-size:13px;color:#e67e00;margin:16px 0 0;font-weight:600;">⚠️ This registrant requires a ₦2,000 payment link — send it manually to ${data.email}</p>` : ""}
+${!data.is_department_student ? `<p style="font-size:13px;color:#e67e00;margin:16px 0 0;font-weight:600;">⚠️ This registrant requires a ₦5,000 payment. Payment reference: ${reference}</p>` : ""}
 </td></tr>
 </table>
 </td></tr>
@@ -276,10 +280,208 @@ ${!data.is_department_student ? `<p style="font-size:13px;color:#e67e00;margin:1
       }),
       sendEmail({
         to: "okikeenterprises@gmail.com",
-        subject: `New summit registration — ${data.name} (${data.is_department_student ? "Free" : "₦2,000 due"})`,
+        subject: `New summit registration — ${data.name} (${data.is_department_student ? "Free" : "₦5,000 due"})`,
         html: adminHtml,
       }),
     ]);
 
-    return { ok: true as const };
+    return { ok: true as const, reference: data.is_department_student ? null : reference };
   });
+
+// ─── Payment Verification ───────────────────────────────────────────────────
+
+const verifyPaymentSchema = z.object({
+  reference: z.string(),
+});
+
+export const verifyBootcampPayment = createServerFn({ method: "POST" })
+  .inputValidator((data) => verifyPaymentSchema.parse(data))
+  .handler(async ({ data }) => {
+    const secretKey = process.env.KORAPAY_SECRET_KEY;
+    if (!secretKey) {
+      return { ok: false as const, error: "Payment verification key is not configured." };
+    }
+
+    try {
+      console.log(`[kora] Verifying payment for reference: ${data.reference}`);
+      const res = await fetch(`https://api.korapay.com/merchant/api/v1/charges/${data.reference}`, {
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+        },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("[kora] API verification failed:", text);
+        return { ok: false as const, error: "Failed to verify transaction with Kora." };
+      }
+
+      const body = await res.json();
+      console.log("[kora] Response payload:", body);
+
+      if (body.status && body.data && (body.data.status === "success" || body.data.status === "processing")) {
+        // Update payment_status in database
+        const { error } = await supabaseAdmin
+          .from("bootcamp_registrations" as never)
+          .update({ payment_status: "paid" } as never)
+          .eq("payment_reference" as never, data.reference as never);
+
+        if (error) {
+          console.error("[kora] Database update failed:", error);
+          return { ok: false as const, error: "Payment verified but database update failed." };
+        }
+
+        // Fetch registration details to send confirmation emails
+        const { data: reg } = await supabaseAdmin
+          .from("bootcamp_registrations" as never)
+          .select("*")
+          .eq("payment_reference" as never, data.reference as never)
+          .maybeSingle();
+
+        if (reg) {
+          const paidHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Summit Admission Confirmed</title></head>
+<body style="margin:0;padding:0;background:#111;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#111">
+<tr><td align="center" style="padding:40px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#0a0a0a;border-top:4px solid #eab308;">
+<tr><td align="center" style="padding:32px 40px 20px;"><a href="https://okikeenterprises.com"><img src="https://res.cloudinary.com/djzsrfc6h/image/upload/v1781531660/Asset_40_q7oeri.png" alt="OKIKE" width="120" style="display:block;border:0;"/></a></td></tr>
+<tr><td style="padding:0 40px;"><div style="height:2px;background:#eab308;"></div></td></tr>
+<tr><td style="padding:36px 40px 24px;text-align:center;">
+<p style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#eab308;margin:0 0 10px;">Payment Confirmed</p>
+<h1 style="font-size:32px;font-weight:900;color:#fff;margin:0 0 14px;line-height:1.1;">You're fully confirmed, <span style="color:#eab308;">${(reg as any).name.split(" ")[0]}!</span></h1>
+<p style="font-size:15px;color:#888;margin:0 0 0;line-height:1.7;">We have received your payment of <strong style="color:#fff;">₦5,000</strong> for the <strong style="color:#fff;">Computing Synergy Summit</strong> starting on <strong style="color:#fff;">1st August 2026</strong>. See you there!</p>
+</td></tr>
+<tr><td style="padding:8px 40px 32px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#111;border-left:4px solid #eab308;">
+<tr><td style="padding:18px 22px;">
+<p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 12px;">Your Summit Ticket:</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Ticket Reference:</strong> ${data.reference}</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Status:</strong> Paid & Confirmed</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Date:</strong> 1st August 2026</p>
+</td></tr>
+</table>
+</td></tr>
+<tr><td style="padding:8px 40px 36px;text-align:center;">
+<p style="font-size:13px;color:#555;margin:0;">Questions? <a href="mailto:support@okikeenterprises.com" style="color:#eab308;text-decoration:none;">support@okikeenterprises.com</a></p>
+</td></tr>
+<tr><td style="padding:16px 40px 28px;border-top:1px solid #1a1a1a;text-align:center;">
+<p style="font-size:12px;color:#444;margin:0;">&copy; ${new Date().getFullYear()} OKIKE Enterprises &nbsp;&middot;&nbsp; <a href="https://okikeenterprises.com" style="color:#eab308;text-decoration:none;">okikeenterprises.com</a></p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+          await Promise.allSettled([
+            sendEmail({
+              to: (reg as any).email,
+              subject: "Payment Confirmed — Computing Synergy Summit",
+              html: paidHtml,
+            }),
+            sendEmail({
+              to: "okikeenterprises@gmail.com",
+              subject: `Summit Payment Confirmed — ${(reg as any).name}`,
+              html: `<p>Payment of ₦5,000 received for <strong>${(reg as any).name}</strong>. Reference: ${data.reference}</p>`,
+            })
+          ]);
+        }
+
+        return { ok: true as const };
+      }
+
+      return { ok: false as const, error: `Payment not successful. Status: ${body.data?.status || "unknown"}` };
+    } catch (e: any) {
+      console.error("[kora] Error verifying payment:", e);
+      return { ok: false as const, error: e.message || "Failed to verify transaction." };
+    }
+  });
+
+const verifyProjectSchema = z.object({
+  projectId: z.string(),
+  reference: z.string(),
+});
+
+export const verifyProjectDeposit = createServerFn({ method: "POST" })
+  .inputValidator((data) => verifyProjectSchema.parse(data))
+  .handler(async ({ data }) => {
+    const secretKey = process.env.KORAPAY_SECRET_KEY;
+    if (!secretKey) {
+      return { ok: false as const, error: "Payment verification key is not configured." };
+    }
+
+    try {
+      console.log(`[kora] Verifying project deposit for projectId: ${data.projectId}, reference: ${data.reference}`);
+      const res = await fetch(`https://api.korapay.com/merchant/api/v1/charges/${data.reference}`, {
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+        },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("[kora] API verification failed:", text);
+        return { ok: false as const, error: "Failed to verify project deposit transaction." };
+      }
+
+      const body = await res.json();
+      console.log("[kora] Project payment response payload:", body);
+
+      if (body.status && body.data && (body.data.status === "success" || body.data.status === "processing")) {
+        // Fetch project to retrieve details
+        const { data: project } = await supabaseAdmin
+          .from("client_projects")
+          .select("*")
+          .eq("id", data.projectId)
+          .maybeSingle();
+
+        if (!project) {
+          return { ok: false as const, error: "Project not found." };
+        }
+
+        // Update project stage to 'in_progress' and append admin notes
+        // Trigger seed_milestones will automatically run
+        const notes = (project.admin_notes || "") + `\n[System: Deposit payment reference ${data.reference} verified via Korapay.]`;
+        const { error } = await supabaseAdmin
+          .from("client_projects")
+          .update({
+            stage: "in_progress",
+            admin_notes: notes,
+          })
+          .eq("id", data.projectId);
+
+        if (error) {
+          console.error("[kora] Database update failed:", error);
+          return { ok: false as const, error: "Payment verified but database update failed." };
+        }
+
+        // Insert project update message
+        await supabaseAdmin.from("project_updates").insert({
+          project_id: data.projectId,
+          message: `🎉 Deposit of ₦${Number(project.deposit || 0).toLocaleString()} received successfully. Project is now in progress!`,
+          created_by: null, // system
+        });
+
+        // Send email to admin & client confirming payment
+        await Promise.allSettled([
+          sendEmail({
+            to: project.client_email,
+            subject: "Deposit Received — Project Activated!",
+            html: `<p>We have successfully received your project deposit of <strong>₦${Number(project.deposit || 0).toLocaleString()}</strong>.</p><p>Your project <strong>"${project.title}"</strong> is now active and in progress. Check your dashboard to view milestones and track updates!</p>`,
+          }),
+          sendEmail({
+            to: "okikeenterprises@gmail.com",
+            subject: `Project Deposit Paid — ${project.title}`,
+            html: `<p>Client ${project.client_email} paid deposit of ₦${Number(project.deposit || 0).toLocaleString()} for project "${project.title}". Reference: ${data.reference}</p>`,
+          })
+        ]);
+
+        return { ok: true as const };
+      }
+
+      return { ok: false as const, error: `Payment not successful. Status: ${body.data?.status || "unknown"}` };
+    } catch (e: any) {
+      console.error("[kora] Error verifying project deposit:", e);
+      return { ok: false as const, error: e.message || "Failed to verify transaction." };
+    }
+  });
+

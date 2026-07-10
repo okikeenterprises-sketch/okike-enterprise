@@ -21,6 +21,7 @@ type Project = {
   admin_notes: string | null;
   created_at: string;
   inquiry_id: string | null;
+  currency: string;
 };
 type ProjectStage = Project["stage"];
 type Milestone = {
@@ -60,7 +61,7 @@ function AdminProjects() {
   async function load() {
     const { data } = await supabase
       .from("client_projects")
-      .select("id, title, client_email, package_name, total, deposit, stage, admin_notes, created_at, inquiry_id")
+      .select("id, title, client_email, package_name, total, deposit, stage, admin_notes, created_at, inquiry_id, currency")
       .order("created_at", { ascending: false });
     setList((data ?? []) as Project[]);
   }
@@ -124,7 +125,7 @@ function AdminProjects() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  {p.total ? `$${Number(p.total).toLocaleString()}` : "—"}
+                  {p.total ? (p.currency === "NGN" ? `₦${Number(p.total).toLocaleString()}` : `$${Number(p.total).toLocaleString()}`) : "—"}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <button onClick={() => setOpen(p)} className="text-brand text-sm font-medium">
@@ -190,7 +191,7 @@ function AdminProjects() {
                 </select>
               </label>
               <label className="flex flex-col gap-1 text-sm">
-                <span className="text-xs uppercase tracking-wider text-ink/40">Total ($)</span>
+                <span className="text-xs uppercase tracking-wider text-ink/40">Total ({open.currency})</span>
                 <input
                   type="number"
                   defaultValue={open.total ?? ""}
