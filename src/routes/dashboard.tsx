@@ -100,42 +100,70 @@ function DashboardPage() {
     let active = true;
 
     async function load() {
-      const [{ data: p }, { data: m }, { data: u }, { data: b }] = await Promise.all([
-        supabase
-          .from("client_projects")
-          .select("id, title, package_name, stage, created_at, total, deposit, currency")
-          .eq("client_user_id", session!.user.id)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("project_milestones")
-          .select("id, project_id, name, status, position")
-          .order("position"),
-        supabase
-          .from("project_updates")
-          .select("id, project_id, message, created_at")
-          .order("created_at", { ascending: false })
-          .limit(8),
-        supabase
-          .from("bootcamp_registrations" as any)
-          .select("*")
-          .eq("email" as any, session!.user.email as any)
-          .maybeSingle(),
-      ]);
-      if (!active) return;
-      setProjects((p ?? []) as Project[]);
-      setMilestones((m ?? []) as Milestone[]);
-      setUpdates((u ?? []) as Update[]);
-      setBootcampReg(b);
-      setDataLoading(false);
+      try {
+        // Fetch projects and bootcamp registrations first
+        const [{ data: p }, { data: b }] = await Promise.all([
+          supabase
+            .from("client_projects")
+            .select("id, title, package_name, stage, created_at, total, deposit, currency")
+            .eq("client_user_id", session!.user.id)
+            .order("created_at", { ascending: false }),
+          (supabase as any)
+            .from("bootcamp_registrations")
+            .select("*")
+            .ilike("email", session!.user.email)
+            .maybeSingle(),
+        ]);
+
+        if (!active) return;
+
+        const projectIds = (p ?? []).map((x) => x.id);
+
+        // Retrieve milestones and updates only for the user's specific projects
+        const [mRes, uRes] = await Promise.all([
+          projectIds.length > 0
+            ? supabase
+                .from("project_milestones")
+                .select("id, project_id, name, status, position")
+                .in("project_id", projectIds)
+                .order("position")
+            : Promise.resolve({ data: [] }),
+          projectIds.length > 0
+            ? supabase
+                .from("project_updates")
+                .select("id, project_id, message, created_at")
+                .in("project_id", projectIds)
+                .order("created_at", { ascending: false })
+                .limit(8)
+            : Promise.resolve({ data: [] }),
+        ]);
+
+        if (!active) return;
+
+        setProjects((p ?? []) as Project[]);
+        setMilestones((mRes.data ?? []) as Milestone[]);
+        setUpdates((uRes.data ?? []) as Update[]);
+        setBootcampReg(b);
+      } catch (err) {
+        console.error("Dashboard loading error:", err);
+      } finally {
+        if (active) setDataLoading(false);
+      }
     }
     load();
 
     const channel = supabase
       .channel("dashboard-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "client_projects" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "project_milestones" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "project_updates" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "bootcamp_registrations" }, load)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "client_projects",
+          filter: `client_user_id=eq.${session!.user.id}`,
+        },
+        load
+      )
       .subscribe();
 
     return () => {
@@ -419,7 +447,7 @@ function DashboardPage() {
             {section === "projects" && (
               <ProjectsView projects={projects} milestones={milestones} loading={dataLoading} onPayDeposit={handlePayDeposit} />
             )}
-            {section === "courses" && <CoursesView />}
+            {section === "courses" && <CoursesView bootcampReg={bootcampReg} />}
             {section === "ai" && (
               <AIView
                 firstName={firstName}
@@ -1004,35 +1032,638 @@ type Course = {
   nextLesson?: string;
 };
 
-function CoursesView() {
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+const MOCK_COURSES_DATA: Course[] = [
+  {
+    id: "frontend-track",
+    title: "Frontend Web Development",
+    slug: "frontend-web-development",
+    track: "Frontend Web Development",
+    description: "Learn HTML, CSS, JavaScript, TailwindCSS, React, and modern deployment architectures.",
+    duration: "12 Weeks",
+    image_url: null,
+    instructor: "Okike Frontend Team",
+    lessons: [
+      "Introduction to HTML & CSS Markup",
+      "Responsive Layouts, Flexbox & Grid Systems",
+      "JavaScript Fundamentals & ES6+ Features",
+      "DOM Manipulation, Actions & Event Handlers",
+      "React Basics: Component State & Lifecycle",
+      "Advanced React Hooks: useEffect & useContext",
+      "API Integration & Async Data Fetching",
+      "State Management with Context & Redux",
+      "Vite, Linting, & Production Builds",
+      "Git Collaboration & GitHub Hosting"
+    ],
+    position: 1,
+    published: true,
+    created_at: "",
+    updated_at: ""
+  },
+  {
+    id: "backend-track",
+    title: "Backend Web Development",
+    slug: "backend-web-development",
+    track: "Backend Web Development",
+    description: "Learn Node.js, Express server frameworks, Postgres SQL database design, Supabase API integrations, and token-based security.",
+    duration: "12 Weeks",
+    image_url: null,
+    instructor: "Okike Backend Team",
+    lessons: [
+      "Intro to Server-Client Architectures",
+      "Node.js Ecosystem & Package Management",
+      "Building RESTful APIs with Express",
+      "PostgreSQL Database Design & Querying",
+      "ORM vs Raw SQL & Database Migrations",
+      "User Authentication, Hashing & JWT",
+      "Supabase Client & Server Integrations",
+      "Serverless Functions & Edge Routing",
+      "Testing Node APIs with Jest",
+      "Docker Containerization & Render Hosting"
+    ],
+    position: 2,
+    published: true,
+    created_at: "",
+    updated_at: ""
+  },
+  {
+    id: "uiux-track",
+    title: "Product Design (UI/UX)",
+    slug: "uiux-track",
+    track: "Product Design (UI/UX)",
+    description: "Learn Figma layout tools, wireframing, interactive prototyping, user research, and UI developer handoff principles.",
+    duration: "12 Weeks",
+    image_url: null,
+    instructor: "Okike Design Team",
+    lessons: [
+      "Core UI/UX Principles & Design Thinking",
+      "User Research, Personas & User Journeys",
+      "Information Architecture & Sitemap Layouts",
+      "Figma workspace: Shapes, Frames & Layout grids",
+      "Wireframing & Low-Fidelity Mockups",
+      "Typography, Grid Alignment & Color Palettes",
+      "Component Libraries & Auto-Layout in Figma",
+      "High-Fidelity UI Prototyping & Interactions",
+      "Usability Testing, Heatmaps & User Feedback",
+      "Asset Export & Developer Handoff Rules"
+    ],
+    position: 3,
+    published: true,
+    created_at: "",
+    updated_at: ""
+  },
+  {
+    id: "mobile-track",
+    title: "Mobile App Development",
+    slug: "mobile-app-track",
+    track: "Mobile App Development",
+    description: "Learn React Native app architectures, Expo build pipelines, native mobile styling, device APIs, and app store deployment.",
+    duration: "12 Weeks",
+    image_url: null,
+    instructor: "Okike Mobile Team",
+    lessons: [
+      "React Native Fundamentals vs Web React",
+      "Expo SDK & Development Tools Environment",
+      "Native Views, ScrollViews & Touchables",
+      "Styling & Flexbox Layouts in React Native",
+      "Mobile Navigation: React Navigation Stack/Tabs",
+      "Managing State & SQLite Local Caching",
+      "Camera, Location, & Hardware Sensor Integration",
+      "Push Notifications & Background Services",
+      "Building APK/IPA bundles using EAS",
+      "Google Play Store & Apple App Store Guidelines"
+    ],
+    position: 4,
+    published: true,
+    created_at: "",
+    updated_at: ""
+  },
+  {
+    id: "security-track",
+    title: "Cyber Security",
+    slug: "cyber-security-track",
+    track: "Cyber Security",
+    description: "Learn network security protocols, system scanning, ethical hacking tools, risk assessments, and defense strategies.",
+    duration: "12 Weeks",
+    image_url: null,
+    instructor: "Okike Security Team",
+    lessons: [
+      "History of Security & Threat Landscapes",
+      "TCP/IP Networking, Ports & Core Protocols",
+      "Operating System Security & Hardening Rules",
+      "Network Scanning, Nmap & Wireshark Analysis",
+      "Vulnerability Identification & CVE Databases",
+      "Cryptography, SSL certificates & Key exchanges",
+      "Ethical Hacking: Hacking tools & Metasploit",
+      "Firewalls, IDS/IPS, & Security Auditing",
+      "Web App Hacking: OWASP Top 10 exploits",
+      "Incident Response Plans & Forensic Investigation"
+    ],
+    position: 5,
+    published: true,
+    created_at: "",
+    updated_at: ""
+  }
+];
+
+const DEFAULT_QUIZZES = [
+  {
+    id: "quiz-1",
+    title: "Module 1 Assessment: Fundamentals",
+    description: "Test your understanding of the foundational lessons in your course track.",
+    questions: [
+      {
+        question: "Which of the following describes the main goal of responsive design?",
+        options: [
+          "Optimizing speed on desktop servers",
+          "Ensuring layout adjusts beautifully on mobile, tablet, and desktop viewports",
+          "Preventing unauthorized script injection",
+          "Using heavy image assets for high resolution"
+        ],
+        answer: 1
+      },
+      {
+        question: "What does Git use to track changes over time?",
+        options: [
+          "Local zip files and backups",
+          "A chain of commits representing repository snapshots",
+          "A live Google Doc tracking files",
+          "None of the above"
+        ],
+        answer: 1
+      },
+      {
+        question: "Why do we use package managers (like npm or yarn)?",
+        options: [
+          "To speed up database index scans",
+          "To download, update, and manage third-party code packages and dependencies",
+          "To compile React styles into native mobile code",
+          "To deploy the server to vercel hosting"
+        ],
+        answer: 1
+      }
+    ]
+  }
+];
+
+const DEFAULT_MILESTONES = [
+  { id: "ms-1", title: "Git & Workspace Setup", description: "Fork repository, connect to remote GitHub, and set up your local development workspace." },
+  { id: "ms-2", title: "Module 1 Exam Passed", description: "Complete the diagnostic Module 1 fundamentals quiz with a score of 70% or higher." },
+  { id: "ms-3", title: "Mid-term Project Submission", description: "Build and submit the initial prototype of your track project for review." },
+  { id: "ms-4", title: "Summit Capstone Approved", description: "Deploy your final summit capstone application/design project and pass instructor review." }
+];
+
+function CoursesView({ bootcampReg }: { bootcampReg: any }) {
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const { session } = useAuth();
 
+  // Progress states
+  const [progress, setProgress] = useState<{
+    lessons_completed: string[];
+    quiz_scores: Record<string, number>;
+    milestone_status: Record<string, string>;
+  } | null>(null);
+
+  // LMS tabs
+  const [activeTab, setActiveTab] = useState<"lessons" | "milestones" | "quizzes">("lessons");
+  const [activeLessonIndex, setActiveLessonIndex] = useState<number>(0);
+
+  // Quiz taker states
+  const [quizScoreFeedback, setQuizScoreFeedback] = useState<number | null>(null);
+  const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
+
+  // DB queries
   useEffect(() => {
-    async function loadCourses() {
-      const { data } = await supabase
-        .from("courses")
-        .select("*")
-        .eq("published", true)
-        .order("position", { ascending: true });
-      // For now, we'll treat all courses as available. In the future, we'll add user course progress tracking.
-      setCourses(
-        (data ?? []).map((course: Tables<"courses">) => ({
-          ...course,
-          lessons: (course.lessons as string[]) ?? [],
-          status: "available" as const,
-          progress: 0,
-          lessonsCompleted: 0,
-        })),
-      );
-      setLoading(false);
+    async function loadCoursesAndProgress() {
+      if (!session?.user?.email) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Query database courses
+        const { data: dbCourses } = await supabase
+          .from("courses")
+          .select("*")
+          .eq("published", true)
+          .order("position", { ascending: true });
+
+        // Query student progress
+        let { data: spRow } = await (supabase as any)
+          .from("student_progress")
+          .select("*")
+          .eq("student_email", session.user.email)
+          .maybeSingle();
+
+        if (!spRow) {
+          // Auto-insert progress row on first load
+          const { data: newRow } = await (supabase as any)
+            .from("student_progress")
+            .insert({
+              student_email: session.user.email,
+              lessons_completed: [],
+              quiz_scores: {},
+              milestone_status: {}
+            })
+            .select()
+            .maybeSingle();
+          spRow = newRow;
+        }
+
+        setProgress(spRow || { lessons_completed: [], quiz_scores: {}, milestone_status: {} });
+
+        const registeredTrack = bootcampReg?.course;
+        const isConfirmed = !!bootcampReg;
+
+        let filtered: Course[] = [];
+        const sourceData = dbCourses && dbCourses.length > 0 ? dbCourses : MOCK_COURSES_DATA;
+
+        if (isConfirmed && registeredTrack) {
+          filtered = (sourceData as any[])
+            .map((course: any) => {
+              const completedList = spRow?.lessons_completed || [];
+              const lessons = (course.lessons as string[]) ?? [];
+              const completedCount = lessons.filter(l => completedList.includes(l)).length;
+              const pct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
+
+              return {
+                ...course,
+                lessons,
+                status: "enrolled" as const,
+                progress: pct,
+                lessonsCompleted: completedCount,
+              };
+            })
+            .filter((course) => {
+              const matchTrack = course.track?.toLowerCase().trim() === registeredTrack.toLowerCase().trim();
+              const matchTitle = course.title?.toLowerCase().trim() === registeredTrack.toLowerCase().trim();
+              return matchTrack || matchTitle;
+            });
+        }
+
+        setCourses(filtered);
+      } catch (err) {
+        console.error("LMS loader error:", err);
+      } finally {
+        setLoading(false);
+      }
     }
-    if (session) {
-      loadCourses();
-    }
-  }, [session]);
+    loadCoursesAndProgress();
+  }, [bootcampReg, session]);
+
+  // Lessons completed handler
+  async function toggleLessonComplete(lessonTitle: string) {
+    if (!session?.user?.email || !progress) return;
+    const completed = progress.lessons_completed || [];
+    const isCompleted = completed.includes(lessonTitle);
+
+    const updatedCompleted = isCompleted
+      ? completed.filter(x => x !== lessonTitle)
+      : [...completed, lessonTitle];
+
+    // Optimistic UI state update
+    setProgress({
+      ...progress,
+      lessons_completed: updatedCompleted
+    });
+
+    // Update in database
+    await (supabase as any)
+      .from("student_progress")
+      .upsert({
+        student_email: session.user.email,
+        lessons_completed: updatedCompleted,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "student_email" });
+
+    // Update course local state progress bar
+    setCourses(prev =>
+      prev.map(c => {
+        const completedCount = c.lessons.filter(l => updatedCompleted.includes(l)).length;
+        const pct = c.lessons.length > 0 ? Math.round((completedCount / c.lessons.length) * 100) : 0;
+        return {
+          ...c,
+          progress: pct,
+          lessonsCompleted: completedCount
+        };
+      })
+    );
+
+    // Update selected course state to update reader layout too
+    setSelectedCourse(prev => {
+      if (!prev) return null;
+      const completedCount = prev.lessons.filter(l => updatedCompleted.includes(l)).length;
+      const pct = prev.lessons.length > 0 ? Math.round((completedCount / prev.lessons.length) * 100) : 0;
+      return {
+        ...prev,
+        progress: pct,
+        lessonsCompleted: completedCount
+      };
+    });
+  }
+
+  // Quiz submission handler
+  async function submitQuiz(quizId: string, questions: any[]) {
+    if (!session?.user?.email || !progress) return;
+
+    let correctCount = 0;
+    questions.forEach((q, idx) => {
+      if (quizAnswers[idx] === q.answer) {
+        correctCount++;
+      }
+    });
+
+    const score = Math.round((correctCount / questions.length) * 100);
+    setQuizScoreFeedback(score);
+
+    const updatedScores = {
+      ...(progress.quiz_scores || {}),
+      [quizId]: score
+    };
+
+    setProgress({
+      ...progress,
+      quiz_scores: updatedScores
+    });
+
+    await (supabase as any)
+      .from("student_progress")
+      .upsert({
+        student_email: session.user.email,
+        quiz_scores: updatedScores,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "student_email" });
+  }
+
+  if (selectedCourse) {
+    const lessons = selectedCourse.lessons || [];
+    const activeLesson = lessons[activeLessonIndex] || "No lessons";
+
+    return (
+      <div className="flex flex-col gap-6">
+        {/* Back header */}
+        <section className="bg-card rounded-2xl ring-1 ring-ink/10 p-6 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => {
+                setSelectedCourse(null);
+                setQuizScoreFeedback(null);
+                setQuizAnswers({});
+              }}
+              className="text-xs text-brand hover:underline font-semibold uppercase tracking-wider flex items-center gap-1"
+            >
+              &larr; Back to My Courses
+            </button>
+            <span className="text-xs text-ink/50 font-medium">{selectedCourse.duration} Track</span>
+          </div>
+
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h2 className="text-xl md:text-2xl font-serif tracking-tight text-ink">{selectedCourse.title}</h2>
+              <p className="text-xs text-ink/65 mt-1">Instructor: {selectedCourse.instructor}</p>
+            </div>
+            {/* Progress bar */}
+            <div className="w-full md:w-64">
+              <div className="flex justify-between text-xs mb-1.5">
+                <span className="text-ink/60">Syllabus Completion</span>
+                <span className="font-semibold text-brand">{selectedCourse.progress}%</span>
+              </div>
+              <div className="h-2.5 bg-ink/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-brand rounded-full transition-all duration-300"
+                  style={{ width: `${selectedCourse.progress}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* LMS Player Panel */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left panel tabs navigation */}
+          <div className="lg:col-span-3 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
+            <button
+              onClick={() => setActiveTab("lessons")}
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition shrink-0 w-full text-left ${
+                activeTab === "lessons" ? "bg-brand text-brand-foreground" : "bg-card hover:bg-ink/5 ring-1 ring-ink/10"
+              }`}
+            >
+              <BookOpen className="size-4" /> Syllabus Lessons
+            </button>
+            <button
+              onClick={() => setActiveTab("milestones")}
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition shrink-0 w-full text-left ${
+                activeTab === "milestones" ? "bg-brand text-brand-foreground" : "bg-card hover:bg-ink/5 ring-1 ring-ink/10"
+              }`}
+            >
+              <Award className="size-4" /> Roadmap Milestones
+            </button>
+            <button
+              onClick={() => setActiveTab("quizzes")}
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition shrink-0 w-full text-left ${
+                activeTab === "quizzes" ? "bg-brand text-brand-foreground" : "bg-card hover:bg-ink/5 ring-1 ring-ink/10"
+              }`}
+            >
+              <CheckCircle className="size-4" /> Track Quizzes
+            </button>
+          </div>
+
+          {/* Main Content Workspace Panel */}
+          <div className="lg:col-span-9 bg-card ring-1 ring-ink/10 rounded-2xl p-6 md:p-8 min-h-[50vh]">
+            
+            {/* TABS: LESSONS WORKSPACE */}
+            {activeTab === "lessons" && (
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                {/* Syllabus Checklist */}
+                <div className="md:col-span-4 flex flex-col gap-2 max-h-[45vh] overflow-y-auto pr-1">
+                  <h4 className="font-semibold text-xs text-ink/55 uppercase tracking-wider mb-1">Lessons Index</h4>
+                  {lessons.map((lesson, idx) => {
+                    const isCompleted = progress?.lessons_completed?.includes(lesson);
+                    return (
+                      <button
+                        key={lesson}
+                        onClick={() => {
+                          setActiveLessonIndex(idx);
+                          setQuizScoreFeedback(null);
+                        }}
+                        className={`text-left text-xs px-3 py-2.5 rounded-xl font-medium transition flex items-start justify-between gap-2 border ${
+                          activeLessonIndex === idx
+                            ? "bg-brand/5 border-brand text-brand font-semibold"
+                            : "border-transparent bg-surface hover:bg-ink/5 text-ink/80"
+                        }`}
+                      >
+                        <span className="truncate">{idx + 1}. {lesson}</span>
+                        {isCompleted && <CheckCircle className="size-3.5 text-emerald-500 shrink-0 mt-0.5" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Active Lesson Reader content */}
+                <div className="md:col-span-8 flex flex-col gap-4 border-t md:border-t-0 md:border-l border-ink/10 pt-4 md:pt-0 md:pl-6">
+                  <div className="flex justify-between items-start gap-4">
+                    <div>
+                      <span className="text-[10px] text-brand uppercase font-bold tracking-widest">Lesson {activeLessonIndex + 1}</span>
+                      <h3 className="font-semibold text-lg text-ink mt-0.5">{activeLesson}</h3>
+                    </div>
+                  </div>
+
+                  <div className="bg-surface ring-1 ring-ink/5 rounded-xl p-4 md:p-6 text-sm text-ink/75 leading-relaxed min-h-[24vh] flex flex-col justify-between">
+                    <div>
+                      <p className="font-medium text-ink/90 mb-3">Summit Learning Syllabus Material</p>
+                      <p className="mb-4">
+                        Welcome to your online class for the Computing Synergy Summit track. This lesson introduces the fundamental concepts of {selectedCourse.title}. 
+                      </p>
+                      <p className="text-xs text-ink/50 italic">
+                        Reference guidelines, links to reading repositories, and live video code walkthrough classrooms will be shared here as the Summit commences.
+                      </p>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-ink/5 flex justify-between items-center">
+                      <button
+                        onClick={() => toggleLessonComplete(activeLesson)}
+                        className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition ${
+                          progress?.lessons_completed?.includes(activeLesson)
+                            ? "bg-emerald-500/15 text-emerald-600 hover:opacity-80"
+                            : "bg-brand text-brand-foreground hover:opacity-90"
+                        }`}
+                      >
+                        {progress?.lessons_completed?.includes(activeLesson) ? "✓ Completed (Undo)" : "Mark as Completed"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TABS: ROADMAP MILESTONES */}
+            {activeTab === "milestones" && (
+              <div className="flex flex-col gap-6">
+                <div>
+                  <h3 className="font-semibold text-lg text-ink">Learning Roadmap</h3>
+                  <p className="text-xs text-ink/50 mt-1">Milestones checked off by your Synergy Summit track instructors.</p>
+                </div>
+
+                <div className="relative border-l border-ink/10 pl-6 ml-3 flex flex-col gap-6 mt-2">
+                  {DEFAULT_MILESTONES.map((m) => {
+                    const status = progress?.milestone_status?.[m.id] || "pending";
+                    return (
+                      <div key={m.id} className="relative">
+                        {/* Dot indicator */}
+                        <div className={`absolute -left-[31px] top-1 size-4 rounded-full ring-4 ring-card flex items-center justify-center ${
+                          status === "completed"
+                            ? "bg-emerald-500"
+                            : status === "in_progress"
+                              ? "bg-amber-500 animate-pulse"
+                              : "bg-ink/20"
+                        }`} />
+                        <div>
+                          <div className="font-semibold text-sm flex items-center gap-2">
+                            {m.title}
+                            <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                              status === "completed"
+                                ? "bg-emerald-500/10 text-emerald-600"
+                                : status === "in_progress"
+                                  ? "bg-amber-500/10 text-amber-600"
+                                  : "bg-ink/10 text-ink/50"
+                            }`}>
+                              {status === "completed" ? "Approved" : status === "in_progress" ? "In Progress" : "Pending"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-ink/65 mt-1 leading-relaxed max-w-xl">{m.description}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TABS: QUIZZES */}
+            {activeTab === "quizzes" && (
+              <div className="flex flex-col gap-6">
+                <div>
+                  <h3 className="font-semibold text-lg text-ink">Track Quizzes</h3>
+                  <p className="text-xs text-ink/50 mt-1">Submit assessments to diagnostic testing of your knowledge.</p>
+                </div>
+
+                {DEFAULT_QUIZZES.map((quiz) => {
+                  const savedScore = progress?.quiz_scores?.[quiz.id];
+                  const hasTaken = typeof savedScore === "number";
+
+                  return (
+                    <div key={quiz.id} className="bg-surface ring-1 ring-ink/10 rounded-xl p-5 md:p-6 flex flex-col gap-4">
+                      <div className="flex justify-between items-start gap-4">
+                        <div>
+                          <h4 className="font-semibold text-base text-ink">{quiz.title}</h4>
+                          <p className="text-xs text-ink/60 mt-0.5">{quiz.description}</p>
+                        </div>
+                        {hasTaken && (
+                          <div className="text-right shrink-0">
+                            <span className="text-[10px] text-ink/40 uppercase font-semibold block">Last Score</span>
+                            <span className={`text-lg font-bold ${savedScore >= 70 ? "text-emerald-500" : "text-amber-500"}`}>{savedScore}%</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {quizScoreFeedback !== null ? (
+                        <div className="p-4 bg-brand/5 ring-1 ring-brand/20 rounded-xl flex flex-col items-center justify-center gap-2 text-center py-6">
+                          <Award className="size-10 text-brand animate-bounce" />
+                          <h5 className="font-semibold text-ink text-sm">Quiz Submitted!</h5>
+                          <p className="text-xs text-ink/60 max-w-[28ch]">You scored <strong>{quizScoreFeedback}%</strong> on this assessment.</p>
+                          <button
+                            onClick={() => {
+                              setQuizScoreFeedback(null);
+                              setQuizAnswers({});
+                            }}
+                            className="mt-2 text-xs font-semibold text-brand hover:underline"
+                          >
+                            Retake Quiz &rarr;
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-4 border-t border-ink/5 pt-4">
+                          {quiz.questions.map((q, qidx) => (
+                            <div key={qidx} className="flex flex-col gap-2">
+                              <p className="text-xs font-semibold text-ink/80">{qidx + 1}. {q.question}</p>
+                              <div className="grid gap-2 pl-2">
+                                {q.options.map((opt, oidx) => (
+                                  <label key={oidx} className="flex items-center gap-2 text-xs cursor-pointer hover:text-brand transition select-none">
+                                    <input
+                                      type="radio"
+                                      name={`q-${quiz.id}-${qidx}`}
+                                      checked={quizAnswers[qidx] === oidx}
+                                      onChange={() => setQuizAnswers(prev => ({ ...prev, [qidx]: oidx }))}
+                                      className="accent-brand size-3.5 shrink-0"
+                                    />
+                                    <span>{opt}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+
+                          <button
+                            onClick={() => submitQuiz(quiz.id, quiz.questions)}
+                            disabled={Object.keys(quizAnswers).length < quiz.questions.length}
+                            className="self-start mt-2 px-5 py-2.5 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition disabled:opacity-50"
+                          >
+                            Submit Assessment
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-5">
@@ -1094,14 +1725,27 @@ function CoursesView() {
         </div>
         {loading ? (
           <div className="text-center py-12 text-ink/50">Loading courses...</div>
+        ) : courses.length === 0 ? (
+          <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-8 text-center flex flex-col items-center gap-4 max-w-lg mx-auto mt-4">
+            <GraduationCap className="size-12 text-brand/40" />
+            <h3 className="font-semibold text-lg text-ink">No Enrolled Courses</h3>
+            <p className="text-sm text-ink/65 leading-relaxed">
+              Unlock your course dashboard and access tech track learning materials by registering for the upcoming Computing Synergy Summit 2026.
+            </p>
+            <Link
+              to="/bootcamp"
+              className="mt-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-xl font-semibold text-xs uppercase tracking-widest hover:opacity-90 transition inline-flex items-center gap-2"
+            >
+              Register for the Summit &rarr;
+            </Link>
+          </div>
         ) : (
           <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-4">
             {courses.map((course) => (
               <div
                 key={course.id}
-                onClick={() => setSelectedCourse(selectedCourse === course.id ? null : course.id)}
-                className={`rounded-2xl bg-card ring-1 transition-all transition-all ring-ink/10 p-6 cursor-pointer ${selectedCourse === course.id ? "ring-brand bg-brand/5" : "hover:ring-brand/20"
-                  }`}
+                onClick={() => setSelectedCourse(course)}
+                className={`rounded-2xl bg-card ring-1 transition-all ring-ink/10 p-6 cursor-pointer hover:ring-brand/20`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
@@ -1121,8 +1765,7 @@ function CoursesView() {
                     <h4 className="font-semibold text-lg mb-1">{course.title}</h4>
                     <p className="text-sm text-ink/60 mb-4">{course.track}</p>
 
-                    {course.status !== "available" &&
-                      course.lessons &&
+                    {course.lessons &&
                       course.lessons.length > 0 && (
                         <div className="mb-4">
                           <div className="flex justify-between text-xs mb-1">
@@ -1133,7 +1776,7 @@ function CoursesView() {
                           </div>
                           <div className="h-2 bg-ink/10 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-brand rounded-full"
+                              className="h-full bg-brand rounded-full transition-all duration-300"
                               style={{ width: `${course.progress}%` }}
                             />
                           </div>
@@ -1146,26 +1789,14 @@ function CoursesView() {
                         <div className="flex items-center justify-between pt-3 border-t border-ink/10">
                           <div className="flex items-center gap-2 text-sm text-ink/60">
                             <Clock className="size-4" />
-                            Next: {course.lessons[0]}
+                            Lessons: {course.lessons.length}
                           </div>
                           <button className="inline-flex items-center gap-1.5 rounded-xl bg-brand text-brand-foreground px-3 py-1.5 text-xs font-medium hover:opacity-90">
-                            <Play className="size-3" /> Continue
+                            <Play className="size-3" /> Start learning
                           </button>
                         </div>
                       )}
                   </div>
-                  {course.status === "available" && (
-                    <div className="pt-3 border-t border-ink/10">
-                      <button className="inline-flex items-center gap-1.5 rounded-xl bg-ink/5 text-ink px-3 py-1.5 text-xs font-medium hover:bg-ink/10">
-                        Enroll Now
-                      </button>
-                    </div>
-                  )}
-                  {course.status === "completed" && (
-                    <div className="pt-3 border-t border-ink/10 flex items-center gap-2 text-sm text-emerald-600">
-                      <CheckCircle className="size-4" /> Certificate earned
-                    </div>
-                  )}
                 </div>
               </div>
             ))}

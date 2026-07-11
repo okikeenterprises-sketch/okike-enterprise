@@ -35,9 +35,17 @@ const DEPARTMENTS = [
 
 const LEVELS = ["100 Level", "200 Level", "300 Level", "400 Level", "500 Level", "Postgraduate", "Not a Student"];
 
+const COURSES = [
+    "Frontend Web Development",
+    "Backend Web Development",
+    "Product Design (UI/UX)",
+    "Mobile App Development",
+    "Cyber Security"
+];
+
 function BootcampPage() {
     const navigate = useNavigate();
-    const { session, user } = useAuth();
+    const { session, user, loading } = useAuth();
     const register = useServerFn(submitBootcampRegistration);
     const verifyPayment = useServerFn(verifyBootcampPayment);
     const [busy, setBusy] = useState(false);
@@ -61,12 +69,13 @@ function BootcampPage() {
     const [password, setPassword] = useState("");
     const [finishingProfile, setFinishingProfile] = useState(false);
 
-    const [departments, setDepartments] = useState<string[]>([]);
-    const [courses, setCourses] = useState<string[]>([]);
-    const [dbLoading, setDbLoading] = useState(true);
+    const [departments, setDepartments] = useState<string[]>(DEPARTMENTS);
+    const [courses, setCourses] = useState<string[]>(COURSES);
+    const [dbLoading, setDbLoading] = useState(false);
 
     useEffect(() => {
         async function checkExistingReg() {
+            if (loading) return;
             if (!session?.user?.email) {
                 setLoadingRegCheck(false);
                 return;
@@ -87,7 +96,7 @@ function BootcampPage() {
             }
         }
         checkExistingReg();
-    }, [session]);
+    }, [session, loading]);
 
     useEffect(() => {
         async function loadData() {
@@ -98,32 +107,12 @@ function BootcampPage() {
                 ]);
                 if (depts && depts.length > 0) {
                     setDepartments(depts.map((d: any) => d.name));
-                } else {
-                    setDepartments(DEPARTMENTS);
                 }
                 if (crs && crs.length > 0) {
                     setCourses(crs.map((c: any) => c.name));
-                } else {
-                    setCourses([
-                        "Frontend Web Development",
-                        "Backend Web Development",
-                        "Product Design (UI/UX)",
-                        "Mobile App Development",
-                        "Cyber Security"
-                    ]);
                 }
             } catch (err) {
                 console.error("Failed to load departments/courses", err);
-                setDepartments(DEPARTMENTS);
-                setCourses([
-                    "Frontend Web Development",
-                    "Backend Web Development",
-                    "Product Design (UI/UX)",
-                    "Mobile App Development",
-                    "Cyber Security"
-                ]);
-            } finally {
-                setDbLoading(false);
             }
         }
         loadData();
@@ -133,12 +122,18 @@ function BootcampPage() {
         const stored = localStorage.getItem("okike_bootcamp_reg");
         if (stored) {
             try {
-                setCachedReg(JSON.parse(stored));
+                const parsed = JSON.parse(stored);
+                if (user && (parsed.status === "paid" || parsed.status === "free")) {
+                    localStorage.removeItem("okike_bootcamp_reg");
+                    setCachedReg(null);
+                } else {
+                    setCachedReg(parsed);
+                }
             } catch {
                 localStorage.removeItem("okike_bootcamp_reg");
             }
         }
-    }, []);
+    }, [user]);
 
     function handleStartOver() {
         localStorage.removeItem("okike_bootcamp_reg");
@@ -224,6 +219,13 @@ function BootcampPage() {
                     const ver = await verifyPayment({ data: { reference: cachedReg.reference! } });
                     toast.dismiss();
                     if (ver.ok) {
+                        if (user) {
+                            toast.success("Payment confirmed and registration complete!");
+                            localStorage.removeItem("okike_bootcamp_reg");
+                            setCachedReg(null);
+                            navigate({ to: "/dashboard" });
+                            return;
+                        }
                         toast.success("Payment confirmed! Now choose a password to complete your account.");
                         const updated = {
                             ...cachedReg,
@@ -283,6 +285,14 @@ function BootcampPage() {
             }
 
             if (isDeptStudent) {
+                if (user) {
+                    toast.success("Registration confirmed successfully! Redirecting to your dashboard...");
+                    localStorage.removeItem("okike_bootcamp_reg");
+                    setCachedReg(null);
+                    setBusy(false);
+                    navigate({ to: "/dashboard" });
+                    return;
+                }
                 toast.success("Registration confirmed successfully! Now choose a password to complete your profile.");
                 const regData = {
                     name,
@@ -331,6 +341,13 @@ function BootcampPage() {
                         const ver = await verifyPayment({ data: { reference: res.reference } });
                         toast.dismiss();
                         if (ver.ok) {
+                            if (user) {
+                                toast.success("Payment confirmed and registration complete!");
+                                localStorage.removeItem("okike_bootcamp_reg");
+                                setCachedReg(null);
+                                navigate({ to: "/dashboard" });
+                                return;
+                            }
                             toast.success("Payment confirmed! Now choose a password to complete your profile.");
                             const regData = {
                                 name,
