@@ -57,7 +57,7 @@
   /* dark text in light mode */
 
   /* Yellow & Black brand — LIGHT theme (default) */
-  --surface: oklch(0.985 0.003 95);
+  --surface: oklch(0.975 0.004 95);
   /* off-white background */
   --ink: oklch(0.16 0.004 90);
   /* near-black text */
@@ -69,9 +69,9 @@
 
   --background: var(--surface);
   --foreground: var(--ink);
-  --card: oklch(1 0 0);
+  --card: oklch(0.99 0.002 95);
   --card-foreground: var(--ink);
-  --popover: oklch(1 0 0);
+  --popover: oklch(0.99 0.002 95);
   --popover-foreground: var(--ink);
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 type AuthedSupabase = SupabaseClient<Database>;
 type DynamicMutationBuilder = {
@@ -209,7 +210,7 @@ export const cmsDelete = createServerFn({ method: "POST" })
 export const updateUserRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({ userId: z.string(), role: z.enum(["admin", "client"]) }).parse(d),
+    z.object({ userId: z.string(), role: z.enum(["admin", "client", "instructor"]) }).parse(d),
   )
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
@@ -222,6 +223,123 @@ export const updateUserRole = createServerFn({ method: "POST" })
       .from("user_roles")
       .insert({ user_id: data.userId, role: data.role });
     if (insertError) throw new Error(insertError.message);
+    return { ok: true };
+  });
+
+export const adminCreateUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        email: z.string().email(),
+        password: z.string().min(6),
+        fullName: z.string(),
+        role: z.enum(["admin", "client", "instructor"]),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+    
+    // Create auth user via supabaseAdmin helper
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email,
+      password: data.password,
+      email_confirm: true,
+      user_metadata: { full_name: data.fullName },
+    });
+
+    if (authError) throw new Error(authError.message);
+    const userId = authUser.user.id;
+
+    // Check if profile exists, if not create one
+    const { data: existingProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!existingProfile) {
+      await supabaseAdmin.from("profiles").insert({
+        user_id: userId,
+        email: data.email,
+        full_name: data.fullName,
+      });
+    }
+
+    // Insert user role
+    await supabaseAdmin.from("user_roles").insert({
+      user_id: userId,
+      role: data.role,
+    });
+
+    return { ok: true };
+  });
+
+export const adminSuspendUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ userId: z.string(), suspend: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+
+    // Update profiles table
+    const { error: profileError } = await (supabaseAdmin as any)
+      .from("profiles")
+      .update({ is_suspended: data.suspend })
+      .eq("user_id", data.userId);
+
+    if (profileError) throw new Error(profileError.message);
+
+    // Update auth ban status
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+      ban_duration: data.suspend ? "87600h" : "none",
+    });
+
+    if (authError) throw new Error(authError.message);
+
+    return { ok: true };
+  });
+
+export const adminDeleteUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ userId: z.string() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+    if (error) throw new Error(error.message);
+
+    return { ok: true };
+  });
+
+export const adminAssignInstructor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ userId: z.string(), courseId: z.string().nullable() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context.supabase, context.userId);
+
+    // 1. Remove this user from any other courses they might be instructing
+    const { error: clearError } = await (supabaseAdmin as any)
+      .from("courses")
+      .update({ instructor_user_id: null })
+      .eq("instructor_user_id", data.userId);
+
+    if (clearError) throw new Error(clearError.message);
+
+    // 2. If courseId is provided, assign them to this new course
+    if (data.courseId) {
+      const { error: assignError } = await (supabaseAdmin as any)
+        .from("courses")
+        .update({ instructor_user_id: data.userId })
+        .eq("id", data.courseId);
+
+      if (assignError) throw new Error(assignError.message);
+    }
+
     return { ok: true };
   });
 

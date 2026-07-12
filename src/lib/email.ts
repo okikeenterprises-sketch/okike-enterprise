@@ -354,3 +354,15 @@ export function enrollmentClientEmail(data: { name: string; course?: string }): 
     `),
   };
 }
+
+export function passwordChangedEmail(): EmailPayload {
+  return {
+    to: "",
+    subject: "Security Alert: Your OKIKE Password Was Updated",
+    html: baseTemplate(`
+      ${h1("Password Changed")}
+      ${para("This email is to notify you that the password for your OKIKE account has been successfully updated.")}
+      ${para("If you did not make this change, please contact the OKIKE Support team immediately at <a href=\"mailto:support@okikeenterprises.com\" style=\"color:#E0EB32;text-decoration:underline;\">support@okikeenterprises.com</a> to secure your account.")}
+    `),
+  };
+}

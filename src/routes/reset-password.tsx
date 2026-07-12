@@ -6,6 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { useAuth } from "@/hooks/use-auth";
 
+import { useServerFn } from "@tanstack/react-start";
+import { sendPasswordChangedEmail } from "@/lib/forms.functions";
+
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [{ title: "Set New Password — OKIKE" }],
@@ -16,6 +19,7 @@ export const Route = createFileRoute("/reset-password")({
 function ResetPasswordPage() {
   const navigate = useNavigate();
   const { session } = useAuth();
+  const sendEmailAlert = useServerFn(sendPasswordChangedEmail);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -35,6 +39,10 @@ function ResetPasswordPage() {
     if (error) {
       toast.error(error.message);
     } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        await sendEmailAlert({ data: { email: user.email } }).catch(() => {});
+      }
       toast.success("Password reset successfully! Redirecting you...");
       setTimeout(() => {
         navigate({ to: "/dashboard" });

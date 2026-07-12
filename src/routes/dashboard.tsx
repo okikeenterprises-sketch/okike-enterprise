@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { useServerFn } from "@tanstack/react-start";
 import { askAssistant, generateInsights } from "@/lib/ai-assistant.functions";
 import { toast } from "sonner";
-import { verifyProjectDeposit, verifyBootcampPayment } from "@/lib/forms.functions";
+import { verifyProjectDeposit, verifyBootcampPayment, sendPasswordChangedEmail } from "@/lib/forms.functions";
 import heroImg from "@/assets/dashboard-hero.jpg";
 import okikeLogo from "@/assets/okike-logo.png";
 import {
@@ -112,7 +112,8 @@ function DashboardPage() {
             .from("bootcamp_registrations")
             .select("*")
             .ilike("email", session!.user.email)
-            .maybeSingle(),
+            .order("created_at", { ascending: false })
+            .limit(1),
         ]);
 
         if (!active) return;
@@ -143,7 +144,7 @@ function DashboardPage() {
         setProjects((p ?? []) as Project[]);
         setMilestones((mRes.data ?? []) as Milestone[]);
         setUpdates((uRes.data ?? []) as Update[]);
-        setBootcampReg(b);
+        setBootcampReg(b && b.length > 0 ? b[0] : null);
       } catch (err) {
         console.error("Dashboard loading error:", err);
       } finally {
@@ -336,6 +337,16 @@ function DashboardPage() {
               >
                 <Shield className="size-4 shrink-0" />
                 <span>Admin panel</span>
+              </Link>
+            )}
+
+            {(role === "admin" || role === "instructor") && (
+              <Link
+                to="/instructor"
+                className="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 hover:text-brand hover:bg-ink/5 ring-1 ring-ink/10"
+              >
+                <GraduationCap className="size-4 shrink-0" />
+                <span>Instructor panel</span>
               </Link>
             )}
           </nav>
@@ -1302,9 +1313,30 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
               };
             })
             .filter((course) => {
-              const matchTrack = course.track?.toLowerCase().trim() === regTrack.toLowerCase().trim();
-              const matchTitle = course.title?.toLowerCase().trim() === regTrack.toLowerCase().trim();
-              return matchTrack || matchTitle;
+              const reg = regTrack.toLowerCase().trim();
+              const title = (course.title || "").toLowerCase().trim();
+              const track = (course.track || "").toLowerCase().trim();
+              
+              if (title === reg || track === reg) return true;
+
+              // Fuzzy match overlaps (e.g. Cyber Security -> Cyber Security Fundamentals)
+              if (reg.includes("cyber") && (title.includes("cyber") || track.includes("cyber"))) return true;
+              if (
+                (reg.includes("frontend") || reg.includes("backend") || reg.includes("web") || reg.includes("stack")) && 
+                (title.includes("stack") || title.includes("web") || title.includes("frontend") || title.includes("backend") || track.includes("web"))
+              ) {
+                return true;
+              }
+              if (
+                (reg.includes("design") || reg.includes("ui") || reg.includes("ux")) &&
+                (title.includes("design") || title.includes("ui") || title.includes("ux") || track.includes("design") || track.includes("ui"))
+              ) {
+                return true;
+              }
+              if (reg.includes("mobile") && (title.includes("mobile") || track.includes("mobile"))) return true;
+              if (reg.includes("python") && (title.includes("python") || track.includes("python"))) return true;
+
+              return false;
             });
         }
 
@@ -1826,6 +1858,7 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
 /* ---------------- Settings ---------------- */
 
 function SettingsView({ email, fullName }: { email: string; fullName: string }) {
+  const sendEmailAlert = useServerFn(sendPasswordChangedEmail);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -1843,6 +1876,7 @@ function SettingsView({ email, fullName }: { email: string; fullName: string }) 
     if (error) {
       toast.error(error.message);
     } else {
+      await sendEmailAlert({ data: { email } }).catch(() => {});
       toast.success("Password changed successfully!");
       setNewPassword("");
       setConfirmPassword("");

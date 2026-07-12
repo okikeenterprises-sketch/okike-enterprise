@@ -84,10 +84,11 @@ function BootcampPage() {
                 const { data } = await (supabase as any)
                     .from("bootcamp_registrations")
                     .select("*")
-                    .eq("email", session.user.email)
-                    .maybeSingle();
-                if (data) {
-                    setUserReg(data);
+                    .ilike("email", session.user.email)
+                    .order("created_at", { ascending: false })
+                    .limit(1);
+                if (data && data.length > 0) {
+                    setUserReg(data[0]);
                 }
             } catch (err) {
                 console.error("Error checking registration", err);

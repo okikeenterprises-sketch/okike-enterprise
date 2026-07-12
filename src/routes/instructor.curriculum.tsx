@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash, ArrowUp, ArrowDown, BookOpen, Save, FilePlus } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/instructor/curriculum")({
   component: InstructorCurriculumPage,
@@ -26,6 +27,7 @@ const SUMMIT_TRACKS = [
 ];
 
 function InstructorCurriculumPage() {
+  const { user, role } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<string[]>([]);
@@ -40,10 +42,16 @@ function InstructorCurriculumPage() {
 
   async function loadCourses() {
     try {
-      const { data } = await supabase
+      let query = (supabase as any)
         .from("courses")
-        .select("id, title, track, lessons, duration, instructor")
+        .select("id, title, track, lessons, duration, instructor, instructor_user_id")
         .order("title");
+
+      if (role === "instructor" && user?.id) {
+        query = query.eq("instructor_user_id", user.id);
+      }
+
+      const { data } = await query;
 
       const list = (data ?? []).map((c: any) => ({
         ...c,
@@ -53,7 +61,7 @@ function InstructorCurriculumPage() {
 
       if (list.length > 0) {
         // Keep selection if exists, else select first
-        const current = selectedCourse ? list.find(x => x.id === selectedCourse.id) : null;
+        const current = selectedCourse ? list.find((x: any) => x.id === selectedCourse.id) : null;
         const target = current || list[0];
         setSelectedCourse(target);
         setLessons(target.lessons);
@@ -141,6 +149,7 @@ function InstructorCurriculumPage() {
         lessons: [],
         duration: "12 Weeks",
         published: true,
+        instructor_user_id: role === "instructor" ? user?.id : null,
       } as any)
       .select()
       .single();

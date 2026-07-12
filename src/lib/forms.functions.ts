@@ -10,6 +10,7 @@ import {
   contactClientEmail,
   enrollmentAdminEmail,
   enrollmentClientEmail,
+  passwordChangedEmail,
 } from "@/lib/email";
 
 // ─── Project inquiry ──────────────────────────────────────────────────────────
@@ -485,6 +486,25 @@ export const verifyProjectDeposit = createServerFn({ method: "POST" })
     } catch (e: any) {
       console.error("[kora] Error verifying project deposit:", e);
       return { ok: false as const, error: e.message || "Failed to verify transaction." };
+    }
+  });
+
+const passwordChangedSchema = z.object({
+  email: z.string().email(),
+});
+
+export const sendPasswordChangedEmail = createServerFn({ method: "POST" })
+  .inputValidator((data) => passwordChangedSchema.parse(data))
+  .handler(async ({ data }) => {
+    try {
+      await sendEmail({
+        ...passwordChangedEmail(),
+        to: data.email,
+      });
+      return { ok: true as const };
+    } catch (err: any) {
+      console.error("Failed to send password changed email", err);
+      return { ok: false as const, error: err.message };
     }
   });
 
