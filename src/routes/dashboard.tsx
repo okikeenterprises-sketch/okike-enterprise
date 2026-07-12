@@ -1218,6 +1218,9 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
   const [loading, setLoading] = useState(true);
   const { session } = useAuth();
 
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registeredTrack, setRegisteredTrack] = useState<string | null>(null);
+
   // Progress states
   const [progress, setProgress] = useState<{
     lessons_completed: string[];
@@ -1273,13 +1276,16 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
 
         setProgress(spRow || { lessons_completed: [], quiz_scores: {}, milestone_status: {} });
 
-        const registeredTrack = bootcampReg?.course;
+        const regTrack = bootcampReg?.course;
         const isConfirmed = !!bootcampReg;
 
-        let filtered: Course[] = [];
-        const sourceData = dbCourses && dbCourses.length > 0 ? dbCourses : MOCK_COURSES_DATA;
+        setIsRegistered(isConfirmed);
+        setRegisteredTrack(regTrack || null);
 
-        if (isConfirmed && registeredTrack) {
+        let filtered: Course[] = [];
+        const sourceData = dbCourses ?? [];
+
+        if (isConfirmed && regTrack) {
           filtered = (sourceData as any[])
             .map((course: any) => {
               const completedList = spRow?.lessons_completed || [];
@@ -1296,8 +1302,8 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
               };
             })
             .filter((course) => {
-              const matchTrack = course.track?.toLowerCase().trim() === registeredTrack.toLowerCase().trim();
-              const matchTitle = course.title?.toLowerCase().trim() === registeredTrack.toLowerCase().trim();
+              const matchTrack = course.track?.toLowerCase().trim() === regTrack.toLowerCase().trim();
+              const matchTitle = course.title?.toLowerCase().trim() === regTrack.toLowerCase().trim();
               return matchTrack || matchTitle;
             });
         }
@@ -1726,19 +1732,29 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
         {loading ? (
           <div className="text-center py-12 text-ink/50">Loading courses...</div>
         ) : courses.length === 0 ? (
-          <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-8 text-center flex flex-col items-center gap-4 max-w-lg mx-auto mt-4">
-            <GraduationCap className="size-12 text-brand/40" />
-            <h3 className="font-semibold text-lg text-ink">No Enrolled Courses</h3>
-            <p className="text-sm text-ink/65 leading-relaxed">
-              Unlock your course dashboard and access tech track learning materials by registering for the upcoming Computing Synergy Summit 2026.
-            </p>
-            <Link
-              to="/bootcamp"
-              className="mt-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-xl font-semibold text-xs uppercase tracking-widest hover:opacity-90 transition inline-flex items-center gap-2"
-            >
-              Register for the Summit &rarr;
-            </Link>
-          </div>
+          isRegistered ? (
+            <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-8 text-center flex flex-col items-center gap-4 max-w-lg mx-auto mt-4">
+              <GraduationCap className="size-12 text-brand/40" />
+              <h3 className="font-semibold text-lg text-ink">Curriculum Coming Soon</h3>
+              <p className="text-sm text-ink/65 leading-relaxed">
+                You are registered for the <strong>{registeredTrack}</strong> track. Your syllabus is currently being set up by the instructors. Check back soon!
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-card ring-1 ring-ink/10 p-8 text-center flex flex-col items-center gap-4 max-w-lg mx-auto mt-4">
+              <GraduationCap className="size-12 text-brand/40" />
+              <h3 className="font-semibold text-lg text-ink">No Enrolled Courses</h3>
+              <p className="text-sm text-ink/65 leading-relaxed">
+                Unlock your course dashboard and access tech track learning materials by registering for the upcoming Computing Synergy Summit 2026.
+              </p>
+              <Link
+                to="/bootcamp"
+                className="mt-2 bg-brand text-brand-foreground px-6 py-3.5 rounded-xl font-semibold text-xs uppercase tracking-widest hover:opacity-90 transition inline-flex items-center gap-2"
+              >
+                Register for the Summit &rarr;
+              </Link>
+            </div>
+          )
         ) : (
           <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-4">
             {courses.map((course) => (
@@ -1810,20 +1826,80 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
 /* ---------------- Settings ---------------- */
 
 function SettingsView({ email, fullName }: { email: string; fullName: string }) {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function handlePasswordChange(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match.");
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setBusy(false);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Password changed successfully!");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  }
+
   return (
-    <div className="grid gap-4 max-w-2xl">
+    <div className="grid md:grid-cols-2 gap-5 max-w-4xl">
       <section className="rounded-2xl bg-card ring-1 ring-ink/10 p-6">
-        <h2 className="font-semibold mb-4">Account</h2>
+        <h2 className="font-semibold mb-4">Account Details</h2>
         <div className="grid gap-3 text-sm">
           <div className="flex justify-between border-b border-ink/5 pb-2">
             <span className="text-ink/60">Name</span>
-            <span className="capitalize">{fullName}</span>
+            <span className="capitalize font-medium text-ink">{fullName}</span>
           </div>
           <div className="flex justify-between border-b border-ink/5 pb-2">
             <span className="text-ink/60">Email</span>
-            <span>{email}</span>
+            <span className="font-medium text-ink">{email}</span>
           </div>
         </div>
+      </section>
+
+      <section className="rounded-2xl bg-card ring-1 ring-ink/10 p-6">
+        <h2 className="font-semibold mb-4">Change Password</h2>
+        <form onSubmit={handlePasswordChange} className="flex flex-col gap-3">
+          <div>
+            <label className="text-[10px] text-ink/50 uppercase tracking-wider block font-semibold mb-1">New Password</label>
+            <input
+              type="password"
+              required
+              minLength={6}
+              placeholder="••••••••"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full rounded-xl bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-brand"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] text-ink/50 uppercase tracking-wider block font-semibold mb-1">Confirm New Password</label>
+            <input
+              type="password"
+              required
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full rounded-xl bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-brand"
+            />
+          </div>
+
+          <button
+            disabled={busy}
+            className="mt-2 bg-brand text-brand-foreground font-semibold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition w-full"
+          >
+            {busy ? "Updating…" : "Update Password"}
+          </button>
+        </form>
       </section>
     </div>
   );

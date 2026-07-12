@@ -31,6 +31,7 @@ export const Route = createFileRoute("/admin")({
 
 const NAV: { to: string; label: string; icon: LucideIcon; exact?: boolean }[] = [
   { to: "/admin", label: "Overview", icon: LayoutGrid, exact: true },
+  { to: "/instructor", label: "Instructor View", icon: GraduationCap },
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/bootcamp", label: "Summit Registrations", icon: GraduationCap },
   { to: "/admin/inquiries", label: "Inquiries", icon: Inbox },

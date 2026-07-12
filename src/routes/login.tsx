@@ -27,8 +27,12 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotBusy, setForgotBusy] = useState(false);
+
   useEffect(() => {
-    if (session) navigate({ to: role === "admin" ? "/admin" : "/dashboard" });
+    if (session) navigate({ to: role === "admin" ? "/admin" : role === "instructor" ? "/instructor" : "/dashboard" });
   }, [session, role, navigate]);
 
   async function onEmail(e: React.FormEvent) {
@@ -39,6 +43,21 @@ function LoginPage() {
     if (error) toast.error(error.message);
   }
 
+  async function onForgotPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setForgotBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setForgotBusy(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Password reset email sent! Check your inbox.");
+      setForgotMode(false);
+    }
+  }
+
   async function onGithub() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -47,6 +66,54 @@ function LoginPage() {
     });
     setBusy(false);
     if (error) toast.error(error.message ?? "Could not sign in with GitHub");
+  }
+
+  if (forgotMode) {
+    return (
+      <SiteLayout>
+        <section className="py-24 px-6 min-h-[80vh] flex items-center">
+          <div className="max-w-md w-full mx-auto flex flex-col gap-8">
+            <div>
+              <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-4">
+                <span className="h-px w-8 bg-brand" />
+                <span>Reset password</span>
+              </div>
+              <h1 className="font-display text-5xl leading-[0.92] tracking-wide uppercase text-ink">
+                Forgot <span className="text-brand">Password</span>
+              </h1>
+              <p className="text-sm text-ink/65 mt-3 leading-relaxed">
+                Enter your email address below, and we'll send you a secure link to reset your password.
+              </p>
+            </div>
+
+            <form onSubmit={onForgotPassword} className="flex flex-col gap-3">
+              <input
+                type="email"
+                required
+                placeholder="Email Address"
+                aria-label="Email Address"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                className="bg-surface ring-1 ring-ink/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition w-full"
+              />
+              <button
+                disabled={forgotBusy}
+                className="w-full py-3.5 bg-brand text-brand-foreground font-semibold text-sm uppercase tracking-widest hover:opacity-90 transition disabled:opacity-50"
+              >
+                {forgotBusy ? "Sending…" : "Send Reset Link"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setForgotMode(false)}
+                className="w-full py-2.5 text-ink/60 font-semibold text-xs uppercase tracking-widest hover:text-ink transition mt-1"
+              >
+                Back to Sign in
+              </button>
+            </form>
+          </div>
+        </section>
+      </SiteLayout>
+    );
   }
 
   return (
@@ -110,6 +177,15 @@ function LoginPage() {
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => setForgotMode(true)}
+                  className="text-xs text-brand font-semibold hover:underline underline-offset-2"
+                >
+                  Forgot password?
                 </button>
               </div>
               <button

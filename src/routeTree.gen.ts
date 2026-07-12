@@ -13,9 +13,11 @@ import { Route as ThankYouRouteImport } from './routes/thank-you'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LearnRouteImport } from './routes/learn'
+import { Route as InstructorRouteImport } from './routes/instructor'
 import { Route as EnrollRouteImport } from './routes/enroll'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -25,8 +27,11 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as InstructorIndexRouteImport } from './routes/instructor.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as InstructorStudentsRouteImport } from './routes/instructor.students'
+import { Route as InstructorCurriculumRouteImport } from './routes/instructor.curriculum'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSystemHealthRouteImport } from './routes/admin.system-health'
@@ -61,6 +66,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
@@ -74,6 +84,11 @@ const LoginRoute = LoginRouteImport.update({
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstructorRoute = InstructorRouteImport.update({
+  id: '/instructor',
+  path: '/instructor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnrollRoute = EnrollRouteImport.update({
@@ -121,6 +136,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InstructorIndexRoute = InstructorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InstructorRoute,
+} as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -130,6 +150,16 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const InstructorStudentsRoute = InstructorStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorCurriculumRoute = InstructorCurriculumRouteImport.update({
+  id: '/curriculum',
+  path: '/curriculum',
+  getParentRoute: () => InstructorRoute,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
@@ -207,9 +237,11 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/enroll': typeof EnrollRoute
+  '/instructor': typeof InstructorRouteWithChildren
   '/learn': typeof LearnRoute
   '/login': typeof LoginRoute
   '/portfolio': typeof PortfolioRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -225,8 +257,11 @@ export interface FileRoutesByFullPath {
   '/admin/system-health': typeof AdminSystemHealthRoute
   '/admin/users': typeof AdminUsersRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/instructor/curriculum': typeof InstructorCurriculumRoute
+  '/instructor/students': typeof InstructorStudentsRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
+  '/instructor/': typeof InstructorIndexRoute
   '/admin/content/$type': typeof AdminContentTypeRoute
   '/api/cron/publish-blog': typeof ApiCronPublishBlogRoute
 }
@@ -241,6 +276,7 @@ export interface FileRoutesByTo {
   '/learn': typeof LearnRoute
   '/login': typeof LoginRoute
   '/portfolio': typeof PortfolioRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -256,8 +292,11 @@ export interface FileRoutesByTo {
   '/admin/system-health': typeof AdminSystemHealthRoute
   '/admin/users': typeof AdminUsersRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/instructor/curriculum': typeof InstructorCurriculumRoute
+  '/instructor/students': typeof InstructorStudentsRoute
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
+  '/instructor': typeof InstructorIndexRoute
   '/admin/content/$type': typeof AdminContentTypeRoute
   '/api/cron/publish-blog': typeof ApiCronPublishBlogRoute
 }
@@ -272,9 +311,11 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/enroll': typeof EnrollRoute
+  '/instructor': typeof InstructorRouteWithChildren
   '/learn': typeof LearnRoute
   '/login': typeof LoginRoute
   '/portfolio': typeof PortfolioRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -290,8 +331,11 @@ export interface FileRoutesById {
   '/admin/system-health': typeof AdminSystemHealthRoute
   '/admin/users': typeof AdminUsersRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/instructor/curriculum': typeof InstructorCurriculumRoute
+  '/instructor/students': typeof InstructorStudentsRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
+  '/instructor/': typeof InstructorIndexRoute
   '/admin/content/$type': typeof AdminContentTypeRoute
   '/api/cron/publish-blog': typeof ApiCronPublishBlogRoute
 }
@@ -307,9 +351,11 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/enroll'
+    | '/instructor'
     | '/learn'
     | '/login'
     | '/portfolio'
+    | '/reset-password'
     | '/services'
     | '/signup'
     | '/sitemap.xml'
@@ -325,8 +371,11 @@ export interface FileRouteTypes {
     | '/admin/system-health'
     | '/admin/users'
     | '/blog/$slug'
+    | '/instructor/curriculum'
+    | '/instructor/students'
     | '/admin/'
     | '/blog/'
+    | '/instructor/'
     | '/admin/content/$type'
     | '/api/cron/publish-blog'
   fileRoutesByTo: FileRoutesByTo
@@ -341,6 +390,7 @@ export interface FileRouteTypes {
     | '/learn'
     | '/login'
     | '/portfolio'
+    | '/reset-password'
     | '/services'
     | '/signup'
     | '/sitemap.xml'
@@ -356,8 +406,11 @@ export interface FileRouteTypes {
     | '/admin/system-health'
     | '/admin/users'
     | '/blog/$slug'
+    | '/instructor/curriculum'
+    | '/instructor/students'
     | '/admin'
     | '/blog'
+    | '/instructor'
     | '/admin/content/$type'
     | '/api/cron/publish-blog'
   id:
@@ -371,9 +424,11 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/enroll'
+    | '/instructor'
     | '/learn'
     | '/login'
     | '/portfolio'
+    | '/reset-password'
     | '/services'
     | '/signup'
     | '/sitemap.xml'
@@ -389,8 +444,11 @@ export interface FileRouteTypes {
     | '/admin/system-health'
     | '/admin/users'
     | '/blog/$slug'
+    | '/instructor/curriculum'
+    | '/instructor/students'
     | '/admin/'
     | '/blog/'
+    | '/instructor/'
     | '/admin/content/$type'
     | '/api/cron/publish-blog'
   fileRoutesById: FileRoutesById
@@ -405,9 +463,11 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
   EnrollRoute: typeof EnrollRoute
+  InstructorRoute: typeof InstructorRouteWithChildren
   LearnRoute: typeof LearnRoute
   LoginRoute: typeof LoginRoute
   PortfolioRoute: typeof PortfolioRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -445,6 +505,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolio': {
       id: '/portfolio'
       path: '/portfolio'
@@ -464,6 +531,13 @@ declare module '@tanstack/react-router' {
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instructor': {
+      id: '/instructor'
+      path: '/instructor'
+      fullPath: '/instructor'
+      preLoaderRoute: typeof InstructorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/enroll': {
@@ -529,6 +603,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/instructor/': {
+      id: '/instructor/'
+      path: '/'
+      fullPath: '/instructor/'
+      preLoaderRoute: typeof InstructorIndexRouteImport
+      parentRoute: typeof InstructorRoute
+    }
     '/blog/': {
       id: '/blog/'
       path: '/'
@@ -542,6 +623,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/instructor/students': {
+      id: '/instructor/students'
+      path: '/students'
+      fullPath: '/instructor/students'
+      preLoaderRoute: typeof InstructorStudentsRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/curriculum': {
+      id: '/instructor/curriculum'
+      path: '/curriculum'
+      fullPath: '/instructor/curriculum'
+      preLoaderRoute: typeof InstructorCurriculumRouteImport
+      parentRoute: typeof InstructorRoute
     }
     '/blog/$slug': {
       id: '/blog/$slug'
@@ -681,6 +776,22 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface InstructorRouteChildren {
+  InstructorCurriculumRoute: typeof InstructorCurriculumRoute
+  InstructorStudentsRoute: typeof InstructorStudentsRoute
+  InstructorIndexRoute: typeof InstructorIndexRoute
+}
+
+const InstructorRouteChildren: InstructorRouteChildren = {
+  InstructorCurriculumRoute: InstructorCurriculumRoute,
+  InstructorStudentsRoute: InstructorStudentsRoute,
+  InstructorIndexRoute: InstructorIndexRoute,
+}
+
+const InstructorRouteWithChildren = InstructorRoute._addFileChildren(
+  InstructorRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -691,9 +802,11 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
   EnrollRoute: EnrollRoute,
+  InstructorRoute: InstructorRouteWithChildren,
   LearnRoute: LearnRoute,
   LoginRoute: LoginRoute,
   PortfolioRoute: PortfolioRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
