@@ -260,7 +260,7 @@ function BootcampPage() {
         setBusy(true);
         const fd = new FormData(e.currentTarget);
         const name = user ? (user.user_metadata?.full_name || "Student") : String(fd.get("name") || "");
-        const email = user ? (user.email || "") : String(fd.get("email") || "");
+        const email = user ? (user.email || "") : String(fd.get("email") || "").toLowerCase().trim();
         const phone = String(fd.get("phone") || "");
         const department = String(fd.get("department") || "");
         const level = String(fd.get("level") || "");

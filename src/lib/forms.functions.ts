@@ -186,7 +186,7 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
       .from("bootcamp_registrations" as never)
       .insert({
         name: data.name,
-        email: data.email,
+        email: data.email.toLowerCase().trim(),
         phone: data.phone,
         department: data.department,
         level: data.level,
