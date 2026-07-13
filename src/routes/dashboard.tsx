@@ -467,6 +467,15 @@ function DashboardPage() {
               )}
             </div>
             <ThemeToggle />
+            {(role === "instructor" || role === "admin") && (
+              <Link
+                to="/instructor"
+                className="lg:hidden flex items-center gap-1.5 bg-brand text-brand-foreground px-3 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition hover:opacity-90 shrink-0"
+              >
+                <GraduationCap className="size-4" />
+                <span className="hidden sm:inline">Console</span>
+              </Link>
+            )}
             <button
               onClick={() => setSection("settings")}
               className="size-8 rounded-full bg-brand/20 ring-2 ring-brand/30 grid place-items-center text-sm font-semibold text-brand hover:bg-brand/30 transition"
@@ -535,7 +544,7 @@ function DashboardPage() {
       </div>
 
       {/* ── MOBILE BOTTOM NAV ── */}
-      <MobileBottomNav section={section} setSection={setSection} />
+      <MobileBottomNav section={section} setSection={setSection} role={role} />
     </div>
   );
 }
@@ -2540,9 +2549,11 @@ function EmptyView({
 function MobileBottomNav({
   section,
   setSection,
+  role,
 }: {
   section: Section;
   setSection: (s: Section) => void;
+  role: string | null;
 }) {
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -2605,6 +2616,29 @@ function MobileBottomNav({
                 </button>
               );
             })}
+
+            {/* Custom Links for Console views */}
+            {(role === "instructor" || role === "admin") && (
+              <Link
+                to="/instructor"
+                onClick={() => setMoreOpen(false)}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-brand/10 text-brand ring-1 ring-brand/20 hover:bg-brand/15 transition text-center"
+              >
+                <GraduationCap className="size-5" />
+                <span className="text-[10px] font-semibold uppercase tracking-wide">Instructor</span>
+              </Link>
+            )}
+
+            {role === "admin" && (
+              <Link
+                to="/admin"
+                onClick={() => setMoreOpen(false)}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-brand/10 text-brand ring-1 ring-brand/20 hover:bg-brand/15 transition text-center"
+              >
+                <Shield className="size-5" />
+                <span className="text-[10px] font-semibold uppercase tracking-wide">Admin</span>
+              </Link>
+            )}
           </div>
         </div>
       )}
