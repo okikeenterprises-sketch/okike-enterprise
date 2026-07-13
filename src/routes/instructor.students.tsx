@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Search, GraduationCap, Award, CheckCircle, Clock } from "lucide-react";
+import { Users, Search, GraduationCap, Award, CheckCircle, Clock, CheckSquare } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/instructor/students")({
   component: InstructorStudentsPage,
 });
 
-const DEFAULT_MILESTONES = [
+const BACKUP_MILESTONES = [
   { id: "ms-1", title: "Git & Workspace Setup" },
   { id: "ms-2", title: "Module 1 Exam Passed" },
   { id: "ms-3", title: "Mid-term Project Submission" },
@@ -16,20 +17,66 @@ const DEFAULT_MILESTONES = [
 ];
 
 function InstructorStudentsPage() {
+  const { user, role } = useAuth();
   const [progressRows, setProgressRows] = useState<any[]>([]);
+  const [coursesList, setCoursesList] = useState<any[]>([]);
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProgress, setSelectedProgress] = useState<any | null>(null);
+  
   const [milestonesUpdate, setMilestonesUpdate] = useState<Record<string, string>>({});
+  const [lessonsUpdate, setLessonsUpdate] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
   async function loadProgress() {
     try {
-      const { data } = await (supabase as any)
-        .from("student_progress")
-        .select("*")
-        .order("updated_at", { ascending: false });
-      setProgressRows(data ?? []);
+      const [{ data: sp }, { data: cs }, { data: regs }] = await Promise.all([
+        (supabase as any).from("student_progress").select("*").order("updated_at", { ascending: false }),
+        supabase.from("courses").select("id, title, track, lessons, milestones, instructor_user_id"),
+        (supabase as any).from("bootcamp_registrations").select("email, course"),
+      ]);
+
+      const courses = cs ?? [];
+      const studentRegs = regs ?? [];
+      setCoursesList(courses);
+      setRegistrations(studentRegs);
+
+      let filteredProgress = sp ?? [];
+      if (role === "instructor" && user?.id) {
+        // Instructors only see students matching their courses
+        const myCourses = courses.filter((c: any) => c.instructor_user_id === user.id);
+        
+        filteredProgress = (sp ?? []).filter((progressItem: any) => {
+          const studentReg = studentRegs.find(
+            (r: any) => r.email?.toLowerCase().trim() === progressItem.student_email?.toLowerCase().trim()
+          );
+          if (!studentReg?.course) return false;
+          const regTrack = studentReg.course;
+          
+          return myCourses.some((c: any) => {
+            const reg = regTrack.toLowerCase().trim();
+            const title = (c.title || "").toLowerCase().trim();
+            const track = (c.track || "").toLowerCase().trim();
+            if (title === reg || track === reg) return true;
+            if (reg.includes("cyber") && (title.includes("cyber") || track.includes("cyber"))) return true;
+            if (
+              (reg.includes("frontend") || reg.includes("backend") || reg.includes("web") || reg.includes("stack")) && 
+              (title.includes("stack") || title.includes("web") || title.includes("frontend") || title.includes("backend") || track.includes("web"))
+            ) return true;
+            if (
+              (reg.includes("design") || reg.includes("ui") || reg.includes("ux")) &&
+              (title.includes("design") || title.includes("ui") || title.includes("ux") || track.includes("design") || track.includes("ui"))
+            ) return true;
+            if (reg.includes("mobile") && (title.includes("mobile") || track.includes("mobile"))) return true;
+            if (reg.includes("python") && (title.includes("python") || track.includes("python"))) return true;
+            return false;
+          });
+        });
+      }
+
+      setProgressRows(filteredProgress);
     } catch (err) {
       console.error("Error loading student progress", err);
     } finally {
@@ -41,6 +88,32 @@ function InstructorStudentsPage() {
     loadProgress();
   }, []);
 
+  function getStudentCourse(email: string) {
+    const studentReg = registrations.find(
+      (r: any) => r.email?.toLowerCase().trim() === email.toLowerCase().trim()
+    );
+    if (!studentReg?.course) return null;
+    const regTrack = studentReg.course;
+    return coursesList.find((c) => {
+      const reg = regTrack.toLowerCase().trim();
+      const title = (c.title || "").toLowerCase().trim();
+      const track = (c.track || "").toLowerCase().trim();
+      if (title === reg || track === reg) return true;
+      if (reg.includes("cyber") && (title.includes("cyber") || track.includes("cyber"))) return true;
+      if (
+        (reg.includes("frontend") || reg.includes("backend") || reg.includes("web") || reg.includes("stack")) && 
+        (title.includes("stack") || title.includes("web") || title.includes("frontend") || title.includes("backend") || track.includes("web"))
+      ) return true;
+      if (
+        (reg.includes("design") || reg.includes("ui") || reg.includes("ux")) &&
+        (title.includes("design") || title.includes("ui") || title.includes("ux") || track.includes("design") || track.includes("ui"))
+      ) return true;
+      if (reg.includes("mobile") && (title.includes("mobile") || track.includes("mobile"))) return true;
+      if (reg.includes("python") && (title.includes("python") || track.includes("python"))) return true;
+      return false;
+    });
+  }
+
   async function saveMilestones() {
     if (!selectedProgress) return;
     setBusy(true);
@@ -49,17 +122,18 @@ function InstructorStudentsPage() {
       .from("student_progress")
       .update({
         milestone_status: milestonesUpdate,
+        lessons_completed: lessonsUpdate,
         updated_at: new Date().toISOString()
       })
       .eq("id", selectedProgress.id);
 
     setBusy(false);
     if (!error) {
-      toast.success("Student milestones updated successfully!");
+      toast.success("Student records updated successfully!");
       setSelectedProgress(null);
       loadProgress();
     } else {
-      toast.error("Could not update milestones. Please try again.");
+      toast.error("Could not save records. Please try again.");
     }
   }
 
@@ -93,7 +167,7 @@ function InstructorStudentsPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Progress List Table */}
-          <div className="lg:col-span-8 bg-card rounded-2xl ring-1 ring-ink/10 overflow-hidden">
+          <div className="lg:col-span-7 bg-card rounded-2xl ring-1 ring-ink/10 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm border-collapse">
                 <thead>
@@ -117,12 +191,17 @@ function InstructorStudentsPage() {
                       const completedCount = p.lessons_completed?.length || 0;
                       const scores = p.quiz_scores || {};
                       const milestones = p.milestone_status || {};
-                      const completedMilestones = Object.values(milestones).filter(s => s === "completed").length;
+                      
+                      const course = getStudentCourse(p.student_email);
+                      const courseMilestones = course?.milestones || BACKUP_MILESTONES;
+                      const completedMilestones = Object.keys(milestones).filter(k => 
+                        courseMilestones.some((m: any) => m.id === k) && milestones[k] === "completed"
+                      ).length;
 
                       return (
                         <tr key={p.id} className="hover:bg-ink/5 transition text-xs">
                           <td className="px-6 py-4 font-semibold text-ink">{p.student_email}</td>
-                          <td className="px-6 py-4 font-mono">{completedCount} lessons</td>
+                          <td className="px-6 py-4 font-mono">{completedCount} modules complete</td>
                           <td className="px-6 py-4">
                             {Object.keys(scores).length > 0 ? (
                               <div className="flex flex-col gap-0.5">
@@ -135,17 +214,18 @@ function InstructorStudentsPage() {
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <span className="font-mono">{completedMilestones}/4 approved</span>
+                            <span className="font-mono">{completedMilestones}/{courseMilestones.length} approved</span>
                           </td>
                           <td className="px-6 py-4 text-right">
                             <button
                               onClick={() => {
                                 setSelectedProgress(p);
                                 setMilestonesUpdate(p.milestone_status || {});
+                                setLessonsUpdate(p.lessons_completed || []);
                               }}
                               className="px-3 py-1.5 rounded-lg bg-brand text-brand-foreground font-semibold hover:opacity-90"
                             >
-                              Edit Milestones
+                              Manage Record
                             </button>
                           </td>
                         </tr>
@@ -157,42 +237,97 @@ function InstructorStudentsPage() {
             </div>
           </div>
 
-          {/* Edit milestones sidebar */}
+          {/* Edit milestones & modules sidebar */}
           {selectedProgress ? (
-            <div className="lg:col-span-4 bg-card rounded-2xl ring-1 ring-ink/10 p-6 flex flex-col gap-4">
+            <div className="lg:col-span-5 bg-card rounded-2xl ring-1 ring-ink/10 p-6 flex flex-col gap-4">
               <div>
-                <h3 className="font-semibold text-ink">Update Student Milestones</h3>
+                <h3 className="font-semibold text-ink">Manage Student Progress</h3>
                 <p className="text-xs text-ink/50 mt-0.5 truncate">{selectedProgress.student_email}</p>
               </div>
 
               <div className="flex flex-col gap-4 border-t border-ink/5 pt-4">
-                {DEFAULT_MILESTONES.map((m) => {
-                  const status = milestonesUpdate[m.id] || "pending";
+                {/* Modules completed checkbox */}
+                {(() => {
+                  const course = getStudentCourse(selectedProgress.student_email);
+                  const courseLessons = (course?.lessons as string[]) || [];
+
                   return (
-                    <div key={m.id} className="flex flex-col gap-2 p-3 bg-surface rounded-xl">
-                      <div className="text-xs font-semibold text-ink">{m.title}</div>
-                      <div className="flex gap-2 mt-1">
-                        {["pending", "in_progress", "completed"].map((st) => (
-                          <button
-                            key={st}
-                            onClick={() => setMilestonesUpdate(prev => ({ ...prev, [m.id]: st }))}
-                            className={`flex-1 text-[10px] uppercase font-semibold py-1 rounded transition ${
-                              status === st
-                                ? st === "completed"
-                                  ? "bg-emerald-500 text-white"
-                                  : st === "in_progress"
-                                    ? "bg-amber-500 text-white"
-                                    : "bg-ink/60 text-white"
-                                : "bg-ink/5 hover:bg-ink/10 text-ink/60"
-                            }`}
-                          >
-                            {st === "in_progress" ? "Working" : st}
-                          </button>
-                        ))}
+                    <div className="flex flex-col gap-2 p-3 bg-surface rounded-xl">
+                      <div className="text-xs font-semibold text-ink flex items-center gap-1">
+                        <CheckSquare className="size-4 text-brand" /> Course Modules Completion
                       </div>
+                      {courseLessons.length > 0 ? (
+                        <div className="space-y-2 mt-2 max-h-48 overflow-y-auto pr-1">
+                          {courseLessons.map((lesson) => {
+                            const isDone = lessonsUpdate.includes(lesson);
+                            return (
+                              <label key={lesson} className="flex items-start gap-2.5 text-xs cursor-pointer text-ink/80 hover:text-ink select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={isDone}
+                                  onChange={() => {
+                                    setLessonsUpdate(prev =>
+                                      isDone ? prev.filter(x => x !== lesson) : [...prev, lesson]
+                                    );
+                                  }}
+                                  className="mt-0.5 size-4 rounded border-ink/20 text-brand focus:ring-brand"
+                                />
+                                <span>{lesson}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="text-[11px] text-ink/40 italic pl-1">No course track syllabus linked.</div>
+                      )}
                     </div>
                   );
-                })}
+                })()}
+
+                {/* Milestones status updates */}
+                {(() => {
+                  const course = getStudentCourse(selectedProgress.student_email);
+                  const courseMilestones = course?.milestones || BACKUP_MILESTONES;
+
+                  return (
+                    <div className="flex flex-col gap-2.5">
+                      <div className="text-xs font-semibold text-ink flex items-center gap-1">
+                        <Award className="size-4 text-brand" /> Syllabus Milestones
+                      </div>
+                      {courseMilestones.length > 0 ? (
+                        courseMilestones.map((m: any) => {
+                          const status = milestonesUpdate[m.id] || "pending";
+                          return (
+                            <div key={m.id} className="flex flex-col gap-2 p-3 bg-surface rounded-xl">
+                              <div className="text-xs font-semibold text-ink">{m.title}</div>
+                              <div className="flex gap-2 mt-1">
+                                {["pending", "in_progress", "completed"].map((st) => (
+                                  <button
+                                    key={st}
+                                    onClick={() => setMilestonesUpdate(prev => ({ ...prev, [m.id]: st }))}
+                                    className={`flex-1 text-[10px] uppercase font-semibold py-1 rounded transition ${
+                                      status === st
+                                        ? st === "completed"
+                                          ? "bg-emerald-500 text-white"
+                                          : st === "in_progress"
+                                            ? "bg-amber-500 text-white"
+                                            : "bg-ink/60 text-white"
+                                        : "bg-ink/5 hover:bg-ink/10 text-ink/60"
+                                    }`}
+                                  >
+                                    {st === "in_progress" ? "Working" : st}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-[11px] text-ink/40 italic pl-1">No milestones defined.</div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="flex gap-2 mt-2">
@@ -212,8 +347,8 @@ function InstructorStudentsPage() {
               </div>
             </div>
           ) : (
-            <div className="lg:col-span-4 bg-surface rounded-2xl border border-dashed border-ink/20 p-8 text-center text-ink/50 text-xs uppercase tracking-wider">
-              Select a student to edit milestones
+            <div className="lg:col-span-5 bg-surface rounded-2xl border border-dashed border-ink/20 p-8 text-center text-ink/50 text-xs uppercase tracking-wider">
+              Select a student to edit milestones & course module completions
             </div>
           )}
         </div>

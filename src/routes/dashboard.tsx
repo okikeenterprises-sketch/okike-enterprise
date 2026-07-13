@@ -37,6 +37,7 @@ import {
   Award,
   MoreHorizontal,
   X,
+  HelpCircle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -1033,6 +1034,7 @@ type Course = {
   image_url: string | null;
   instructor: string | null;
   lessons: string[];
+  milestones?: { id: string; title: string }[];
   position: number;
   published: boolean;
   created_at: string;
@@ -1240,8 +1242,52 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
   } | null>(null);
 
   // LMS tabs
-  const [activeTab, setActiveTab] = useState<"lessons" | "milestones" | "quizzes">("lessons");
+  const [activeTab, setActiveTab] = useState<"lessons" | "milestones" | "quizzes" | "assignments">("lessons");
   const [activeLessonIndex, setActiveLessonIndex] = useState<number>(0);
+
+  // Extra LMS module state variables
+  const [dbQuizzes, setDbQuizzes] = useState<any[]>([]);
+  const [dbAssignments, setDbAssignments] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [submittingAssign, setSubmittingAssign] = useState<string | null>(null);
+  const [assignText, setAssignText] = useState("");
+  const [loadingExtra, setLoadingExtra] = useState(false);
+
+  // Load quizzes/assignments for active module
+  useEffect(() => {
+    async function loadModuleDetails() {
+      if (!selectedCourse || !session?.user?.email) return;
+      const activeModule = selectedCourse.lessons[activeLessonIndex];
+      if (!activeModule) return;
+      
+      setLoadingExtra(true);
+      try {
+        const [{ data: q }, { data: a }] = await Promise.all([
+          (supabase as any).from("quizzes").select("*").eq("course_id", selectedCourse.id).eq("module_name", activeModule),
+          (supabase as any).from("assignments").select("*").eq("course_id", selectedCourse.id).eq("module_name", activeModule),
+        ]);
+        setDbQuizzes(q ?? []);
+        setDbAssignments(a ?? []);
+
+        const aIds = (a ?? []).map((x: any) => x.id);
+        if (aIds.length > 0) {
+          const { data: s } = await (supabase as any)
+            .from("assignment_submissions")
+            .select("*")
+            .eq("student_email", session.user.email)
+            .in("assignment_id", aIds);
+          setSubmissions(s ?? []);
+        } else {
+          setSubmissions([]);
+        }
+      } catch (err) {
+        console.error("Error loading module quizzes/assignments", err);
+      } finally {
+        setLoadingExtra(false);
+      }
+    }
+    loadModuleDetails();
+  }, [selectedCourse, activeLessonIndex, session]);
 
   // Quiz taker states
   const [quizScoreFeedback, setQuizScoreFeedback] = useState<number | null>(null);
@@ -1503,7 +1549,15 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
                 activeTab === "quizzes" ? "bg-brand text-brand-foreground" : "bg-card hover:bg-ink/5 ring-1 ring-ink/10"
               }`}
             >
-              <CheckCircle className="size-4" /> Track Quizzes
+              <HelpCircle className="size-4" /> Track Quizzes
+            </button>
+            <button
+              onClick={() => setActiveTab("assignments")}
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition shrink-0 w-full text-left ${
+                activeTab === "assignments" ? "bg-brand text-brand-foreground" : "bg-card hover:bg-ink/5 ring-1 ring-ink/10"
+              }`}
+            >
+              <FileText className="size-4" /> Assignments
             </button>
           </div>
 
@@ -1584,36 +1638,48 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
                 </div>
 
                 <div className="relative border-l border-ink/10 pl-6 ml-3 flex flex-col gap-6 mt-2">
-                  {DEFAULT_MILESTONES.map((m) => {
-                    const status = progress?.milestone_status?.[m.id] || "pending";
-                    return (
-                      <div key={m.id} className="relative">
-                        {/* Dot indicator */}
-                        <div className={`absolute -left-[31px] top-1 size-4 rounded-full ring-4 ring-card flex items-center justify-center ${
-                          status === "completed"
-                            ? "bg-emerald-500"
-                            : status === "in_progress"
-                              ? "bg-amber-500 animate-pulse"
-                              : "bg-ink/20"
-                        }`} />
-                        <div>
-                          <div className="font-semibold text-sm flex items-center gap-2">
-                            {m.title}
-                            <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                              status === "completed"
-                                ? "bg-emerald-500/10 text-emerald-600"
-                                : status === "in_progress"
-                                  ? "bg-amber-500/10 text-amber-600"
-                                  : "bg-ink/10 text-ink/50"
-                            }`}>
-                              {status === "completed" ? "Approved" : status === "in_progress" ? "In Progress" : "Pending"}
-                            </span>
+                  {(() => {
+                    const BACKUP_MILESTONES = [
+                      { id: "ms-1", title: "Git & Workspace Setup", description: "Configure your local terminal workspace parameters." },
+                      { id: "ms-2", title: "Module 1 Exam Passed", description: "Deliver scoring passmarks on diagnostic tests." },
+                      { id: "ms-3", title: "Mid-term Project Submission", description: "Deploy intermediate prototype assets." },
+                      { id: "ms-4", title: "Summit Capstone Approved", description: "Complete caps approval from course director." }
+                    ];
+                    const courseMilestones = selectedCourse.milestones && selectedCourse.milestones.length > 0
+                      ? selectedCourse.milestones
+                      : BACKUP_MILESTONES;
+
+                    return courseMilestones.map((m: any) => {
+                      const status = progress?.milestone_status?.[m.id] || "pending";
+                      return (
+                        <div key={m.id} className="relative">
+                          {/* Dot indicator */}
+                          <div className={`absolute -left-[31px] top-1 size-4 rounded-full ring-4 ring-card flex items-center justify-center ${
+                            status === "completed"
+                              ? "bg-emerald-500"
+                              : status === "in_progress"
+                                ? "bg-amber-500 animate-pulse"
+                                : "bg-ink/20"
+                          }`} />
+                          <div>
+                            <div className="font-semibold text-sm flex items-center gap-2">
+                              {m.title}
+                              <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                status === "completed"
+                                  ? "bg-emerald-500/10 text-emerald-600"
+                                  : status === "in_progress"
+                                    ? "bg-amber-500/10 text-amber-600"
+                                    : "bg-ink/10 text-ink/50"
+                              }`}>
+                                {status === "completed" ? "Approved" : status === "in_progress" ? "In Progress" : "Pending"}
+                              </span>
+                            </div>
+                            {m.description && <p className="text-xs text-ink/65 mt-1 leading-relaxed max-w-xl">{m.description}</p>}
                           </div>
-                          <p className="text-xs text-ink/65 mt-1 leading-relaxed max-w-xl">{m.description}</p>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             )}
@@ -1622,78 +1688,225 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
             {activeTab === "quizzes" && (
               <div className="flex flex-col gap-6">
                 <div>
-                  <h3 className="font-semibold text-lg text-ink">Track Quizzes</h3>
-                  <p className="text-xs text-ink/50 mt-1">Submit assessments to diagnostic testing of your knowledge.</p>
+                  <h3 className="font-semibold text-lg text-ink font-serif">Module Quizzes</h3>
+                  <p className="text-xs text-ink/50 mt-1">
+                    Topic: <span className="font-semibold text-brand">{selectedCourse.lessons[activeLessonIndex]}</span>
+                  </p>
                 </div>
 
-                {DEFAULT_QUIZZES.map((quiz) => {
-                  const savedScore = progress?.quiz_scores?.[quiz.id];
-                  const hasTaken = typeof savedScore === "number";
+                {loadingExtra ? (
+                  <div className="text-xs text-ink/40 py-4"><Loader2 className="size-4 animate-spin inline mr-2" /> Loading module quizzes...</div>
+                ) : dbQuizzes.length === 0 ? (
+                  <div className="text-center py-10 bg-surface rounded-2xl border border-dashed border-ink/10 text-xs text-ink/50">
+                    No quizzes published yet for this module.
+                  </div>
+                ) : (
+                  dbQuizzes.map((quiz) => {
+                    const savedScore = progress?.quiz_scores?.[quiz.id];
+                    const hasTaken = typeof savedScore === "number";
 
-                  return (
-                    <div key={quiz.id} className="bg-surface ring-1 ring-ink/10 rounded-xl p-5 md:p-6 flex flex-col gap-4">
-                      <div className="flex justify-between items-start gap-4">
-                        <div>
-                          <h4 className="font-semibold text-base text-ink">{quiz.title}</h4>
-                          <p className="text-xs text-ink/60 mt-0.5">{quiz.description}</p>
+                    return (
+                      <div key={quiz.id} className="bg-surface ring-1 ring-ink/10 rounded-xl p-5 md:p-6 flex flex-col gap-4">
+                        <div className="flex justify-between items-start gap-4">
+                          <div>
+                            <h4 className="font-semibold text-base text-ink">{quiz.title}</h4>
+                            <p className="text-xs text-ink/55 mt-0.5">Test your understanding of this lesson module.</p>
+                          </div>
+                          {hasTaken && (
+                            <div className="text-right shrink-0">
+                              <span className="text-[10px] text-ink/40 uppercase font-semibold block">Last Score</span>
+                              <span className={`text-lg font-bold ${savedScore >= 70 ? "text-emerald-500" : "text-amber-500"}`}>{savedScore}%</span>
+                            </div>
+                          )}
                         </div>
-                        {hasTaken && (
-                          <div className="text-right shrink-0">
-                            <span className="text-[10px] text-ink/40 uppercase font-semibold block">Last Score</span>
-                            <span className={`text-lg font-bold ${savedScore >= 70 ? "text-emerald-500" : "text-amber-500"}`}>{savedScore}%</span>
+
+                        {quizScoreFeedback !== null ? (
+                          <div className="p-4 bg-brand/5 ring-1 ring-brand/20 rounded-xl flex flex-col items-center justify-center gap-2 text-center py-6">
+                            <Award className="size-10 text-brand animate-bounce" />
+                            <h5 className="font-semibold text-ink text-sm">Quiz Submitted!</h5>
+                            <p className="text-xs text-ink/60 max-w-[28ch]">You scored <strong>{quizScoreFeedback}%</strong> on this assessment.</p>
+                            <button
+                              onClick={() => {
+                                setQuizScoreFeedback(null);
+                                setQuizAnswers({});
+                              }}
+                              className="mt-2 text-xs font-semibold text-brand hover:underline"
+                            >
+                              Retake Quiz &rarr;
+                            </button>
+                          </div>
+                        ) : hasTaken ? (
+                          <div className="text-xs text-ink/55 bg-card border border-ink/5 p-3 rounded-xl">
+                            You have already submitted this assessment. You scored <strong>{savedScore}%</strong>. If you wish to retake it:
+                            <button
+                              onClick={() => {
+                                setQuizScoreFeedback(null);
+                                setQuizAnswers({});
+                                setProgress(prev => {
+                                  if (!prev) return null;
+                                  const nextScores = { ...prev.quiz_scores };
+                                  delete nextScores[quiz.id];
+                                  return { ...prev, quiz_scores: nextScores };
+                                });
+                              }}
+                              className="block mt-2 font-bold text-brand hover:underline"
+                            >
+                              Retake Quiz Assessment
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-4 border-t border-ink/5 pt-4">
+                            {(quiz.questions || []).map((q: any, qidx: number) => (
+                              <div key={qidx} className="flex flex-col gap-2">
+                                <p className="text-xs font-semibold text-ink/80">{qidx + 1}. {q.question}</p>
+                                <div className="grid gap-2 pl-2">
+                                  {(q.options || []).map((opt: string, oidx: number) => (
+                                    <label key={oidx} className="flex items-center gap-2 text-xs cursor-pointer hover:text-brand transition select-none">
+                                      <input
+                                        type="radio"
+                                        name={`q-${quiz.id}-${qidx}`}
+                                        checked={quizAnswers[qidx] === oidx}
+                                        onChange={() => setQuizAnswers(prev => ({ ...prev, [qidx]: oidx }))}
+                                        className="accent-brand size-3.5 shrink-0"
+                                      />
+                                      <span>{opt}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+
+                            <button
+                              onClick={() => submitQuiz(quiz.id, quiz.questions)}
+                              disabled={Object.keys(quizAnswers).length < (quiz.questions || []).length}
+                              className="self-start mt-2 px-5 py-2.5 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition disabled:opacity-50"
+                            >
+                              Submit Assessment
+                            </button>
                           </div>
                         )}
                       </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
 
-                      {quizScoreFeedback !== null ? (
-                        <div className="p-4 bg-brand/5 ring-1 ring-brand/20 rounded-xl flex flex-col items-center justify-center gap-2 text-center py-6">
-                          <Award className="size-10 text-brand animate-bounce" />
-                          <h5 className="font-semibold text-ink text-sm">Quiz Submitted!</h5>
-                          <p className="text-xs text-ink/60 max-w-[28ch]">You scored <strong>{quizScoreFeedback}%</strong> on this assessment.</p>
-                          <button
-                            onClick={() => {
-                              setQuizScoreFeedback(null);
-                              setQuizAnswers({});
-                            }}
-                            className="mt-2 text-xs font-semibold text-brand hover:underline"
-                          >
-                            Retake Quiz &rarr;
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-4 border-t border-ink/5 pt-4">
-                          {quiz.questions.map((q, qidx) => (
-                            <div key={qidx} className="flex flex-col gap-2">
-                              <p className="text-xs font-semibold text-ink/80">{qidx + 1}. {q.question}</p>
-                              <div className="grid gap-2 pl-2">
-                                {q.options.map((opt, oidx) => (
-                                  <label key={oidx} className="flex items-center gap-2 text-xs cursor-pointer hover:text-brand transition select-none">
-                                    <input
-                                      type="radio"
-                                      name={`q-${quiz.id}-${qidx}`}
-                                      checked={quizAnswers[qidx] === oidx}
-                                      onChange={() => setQuizAnswers(prev => ({ ...prev, [qidx]: oidx }))}
-                                      className="accent-brand size-3.5 shrink-0"
-                                    />
-                                    <span>{opt}</span>
-                                  </label>
-                                ))}
-                              </div>
+            {/* TABS: ASSIGNMENTS */}
+            {activeTab === "assignments" && (
+              <div className="flex flex-col gap-6">
+                <div>
+                  <h3 className="font-semibold text-lg text-ink font-serif font-semibold">Module Tasks & Assignments</h3>
+                  <p className="text-xs text-ink/50 mt-1">
+                    Lesson: <span className="font-semibold text-brand">{selectedCourse.lessons[activeLessonIndex]}</span>
+                  </p>
+                </div>
+
+                {loadingExtra ? (
+                  <div className="text-xs text-ink/40 py-4"><Loader2 className="size-4 animate-spin inline mr-2" /> Loading assignments...</div>
+                ) : dbAssignments.length === 0 ? (
+                  <div className="text-center py-10 bg-surface rounded-2xl border border-dashed border-ink/10 text-xs text-ink/50">
+                    No assignments published for this module yet.
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {dbAssignments.map((assignment) => {
+                      const submission = submissions.find(s => s.assignment_id === assignment.id);
+                      const isGraded = submission && submission.grade !== null;
+
+                      return (
+                        <div key={assignment.id} className="bg-surface ring-1 ring-ink/10 rounded-xl p-5 md:p-6 space-y-4">
+                          <div>
+                            <div className="flex justify-between items-start gap-3 flex-wrap">
+                              <h4 className="font-semibold text-base text-ink">{assignment.title}</h4>
+                              <span className="text-[10px] font-mono uppercase bg-brand/10 text-brand px-2 py-0.5 rounded">
+                                Max Score: {assignment.max_points} points
+                              </span>
                             </div>
-                          ))}
+                            <p className="text-xs text-ink/70 mt-2 font-mono whitespace-pre-wrap bg-card p-3 rounded-lg border border-ink/5 leading-relaxed">
+                              {assignment.description}
+                            </p>
+                          </div>
 
-                          <button
-                            onClick={() => submitQuiz(quiz.id, quiz.questions)}
-                            disabled={Object.keys(quizAnswers).length < quiz.questions.length}
-                            className="self-start mt-2 px-5 py-2.5 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition disabled:opacity-50"
-                          >
-                            Submit Assessment
-                          </button>
+                          {submission ? (
+                            <div className="border-t border-ink/5 pt-4 space-y-3">
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="font-bold text-ink/75">Your Submission:</span>
+                                {isGraded ? (
+                                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 font-mono font-bold text-[10px]">
+                                    Graded Score: {submission.grade} / {assignment.max_points}
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 font-mono font-bold text-[10px]">
+                                    Submitted (Pending Grade Comments)
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-ink/65 bg-card p-3 rounded-lg border border-ink/5 whitespace-pre-wrap italic">
+                                "{submission.submission_text}"
+                              </p>
+                              {submission.feedback && (
+                                <div className="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-lg text-xs">
+                                  <span className="font-semibold text-emerald-700 block">Director Feedback:</span>
+                                  <p className="text-ink/75 mt-1">"{submission.feedback}"</p>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <form
+                              onSubmit={async (e) => {
+                                e.preventDefault();
+                                if (!assignText.trim() || !session?.user?.email) return;
+                                setSubmittingAssign(assignment.id);
+                                const { error } = await (supabase as any)
+                                  .from("assignment_submissions")
+                                  .insert({
+                                    assignment_id: assignment.id,
+                                    student_email: session.user.email,
+                                    submission_text: assignText.trim(),
+                                    submitted_at: new Date().toISOString()
+                                  });
+                                setSubmittingAssign(null);
+                                if (!error) {
+                                  toast.success("Assignment submitted successfully!");
+                                  setAssignText("");
+                                  const { data: s } = await (supabase as any)
+                                    .from("assignment_submissions")
+                                    .select("*")
+                                    .eq("student_email", session.user.email)
+                                    .in("assignment_id", dbAssignments.map(x => x.id));
+                                  setSubmissions(s ?? []);
+                                } else {
+                                  toast.error("Could not submit assignment.");
+                                }
+                              }}
+                              className="border-t border-ink/5 pt-4 space-y-3"
+                            >
+                              <div>
+                                <label className="text-[11px] text-ink/55 block font-semibold mb-1">Your Solution/Submission</label>
+                                <textarea
+                                  required
+                                  rows={4}
+                                  placeholder="Type your response, links to repository files, or solution summary details here..."
+                                  value={assignText}
+                                  onChange={(e) => setAssignText(e.target.value)}
+                                  className="w-full bg-card ring-1 ring-ink/10 rounded-xl p-3 text-xs text-ink focus:outline-none focus:ring-brand"
+                                />
+                              </div>
+                              <button
+                                type="submit"
+                                disabled={submittingAssign === assignment.id}
+                                className="px-4 py-2 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition disabled:opacity-50"
+                              >
+                                {submittingAssign === assignment.id ? "Submitting..." : "Submit Solution"}
+                              </button>
+                            </form>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

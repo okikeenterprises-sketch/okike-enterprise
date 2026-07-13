@@ -91,7 +91,7 @@ function AdminLayout() {
         </div>
       </div>
 
-      <nav className="mt-7 flex-1 flex flex-col gap-1 overflow-y-auto">
+      <nav className="mt-7 flex-1 flex flex-col gap-1 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
         {NAV.map((t) => {
           const active = t.exact ? location.pathname === t.to : location.pathname.startsWith(t.to);
           const Icon = t.icon;
@@ -134,10 +134,10 @@ function AdminLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="flex">
+    <div className="h-screen bg-background text-foreground overflow-hidden">
+      <div className="flex h-full">
         {/* Desktop sidebar */}
-        <aside className="hidden lg:flex sticky top-0 h-screen w-64 shrink-0 flex-col border-r border-border bg-card px-5 py-5 overflow-y-auto">
+        <aside className="hidden lg:flex h-full w-64 shrink-0 flex-col border-r border-border bg-card px-5 py-5 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
           {SidebarNav}
         </aside>
 
@@ -159,7 +159,7 @@ function AdminLayout() {
         )}
 
         {/* Main */}
-        <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        <div className="flex-1 flex flex-col min-w-0 h-full">
           <header className="sticky top-0 z-30 flex items-center gap-3 px-4 md:px-8 py-4 bg-background/85 backdrop-blur border-b border-border">
             <button
               className="lg:hidden text-foreground/70 p-2 hover:bg-foreground/5 rounded-lg"
@@ -184,7 +184,7 @@ function AdminLayout() {
             <ThemeToggle />
           </header>
 
-          <main className="flex-1 px-4 md:px-8 py-6">
+          <main className="flex-1 px-4 md:px-8 py-6 overflow-y-auto">
             <Outlet />
           </main>
         </div>

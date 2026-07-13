@@ -11,6 +11,7 @@ import {
   X,
   LogOut,
   GraduationCap,
+  ArrowLeft,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -52,7 +53,7 @@ function InstructorLayout() {
   const initial = (email[0] ?? "I").toUpperCase();
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       {/* Top navbar */}
       <header className="sticky top-0 z-40 w-full border-b border-ink/10 bg-background/80 backdrop-blur">
         <div className="flex h-16 items-center justify-between px-6">
@@ -105,13 +106,20 @@ function InstructorLayout() {
               );
             })}
           </nav>
-          <div className="border-t border-ink/5 pt-4">
+          <div className="border-t border-ink/5 pt-4 flex flex-col gap-1">
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-ink/70 hover:text-brand hover:bg-ink/5 transition"
+            >
+              <ArrowLeft className="size-4 shrink-0" />
+              Return to Dashboard
+            </Link>
             <button
               onClick={() => {
                 signOut();
                 navigate({ to: "/login" });
               }}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-500/5 transition"
+              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-500/5 transition"
             >
               <LogOut className="size-4 shrink-0" />
               Sign Out
@@ -144,13 +152,21 @@ function InstructorLayout() {
                   );
                 })}
               </nav>
-              <div className="border-t border-ink/5 pt-4">
+              <div className="border-t border-ink/5 pt-4 flex flex-col gap-1">
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-ink/70 hover:text-brand hover:bg-ink/5 transition"
+                >
+                  <ArrowLeft className="size-4 shrink-0" />
+                  Return to Dashboard
+                </Link>
                 <button
                   onClick={() => {
                     signOut();
                     navigate({ to: "/login" });
                   }}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-500/5 transition"
+                  className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-500/5 transition"
                 >
                   <LogOut className="size-4 shrink-0" />
                   Sign Out
