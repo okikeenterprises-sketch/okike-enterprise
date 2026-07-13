@@ -129,9 +129,17 @@ function InstructorLayout() {
 
         {/* Mobile menu overlay */}
         {mobileOpen && (
-          <div className="lg:hidden fixed inset-0 z-30 flex">
+          <div className="lg:hidden fixed inset-0 z-50 flex">
             <div className="fixed inset-0 bg-ink/30 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
             <aside className="relative flex w-64 flex-col bg-card p-4 ring-1 ring-ink/10 h-full">
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="absolute top-3 right-3 p-2 rounded-xl hover:bg-ink/5 text-ink/75"
+                aria-label="Close"
+              >
+                <X className="size-4" />
+              </button>
+              <div className="h-8" />
               <nav className="flex-1 space-y-1">
                 {NAV.map((item) => {
                   const active = item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to);
