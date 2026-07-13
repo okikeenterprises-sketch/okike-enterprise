@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, GraduationCap, Calendar, CreditCard, Award, CheckCircle, Clock, BookOpen } from "lucide-react";
+import { Users, GraduationCap, Calendar, CreditCard, Award, CheckCircle, Clock, BookOpen, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/bootcamp")({
@@ -35,6 +35,39 @@ function AdminBootcampPage() {
   const [loading, setLoading] = useState(true);
   const [selectedProgress, setSelectedProgress] = useState<any | null>(null);
   const [milestonesUpdate, setMilestonesUpdate] = useState<Record<string, string>>({});
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.length === rows.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(rows.map((r) => r.id));
+    }
+  }
+
+  async function deleteSelected() {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Are you sure you want to delete the ${selectedIds.length} selected registration(s)?`)) return;
+
+    const { error } = await (supabase as any)
+      .from("bootcamp_registrations")
+      .delete()
+      .in("id", selectedIds);
+
+    if (!error) {
+      toast.success("Selected registrations deleted successfully!");
+      setSelectedIds([]);
+      load();
+    } else {
+      toast.error("Could not delete registrations. Please try again.");
+    }
+  }
 
   async function load() {
     const { data } = await (supabase as any)
@@ -125,11 +158,33 @@ function AdminBootcampPage() {
             <Tile label="Pending Payment" value={String(pendingCount)} />
           </div>
 
-          <section className="bg-card rounded-2xl ring-1 ring-ink/10 overflow-hidden">
+          {selectedIds.length > 0 && (
+            <div className="flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-2xl p-4 mt-3 transition-all">
+              <span className="text-sm font-medium text-red-600 dark:text-red-400 flex items-center gap-2">
+                <Trash2 className="size-4" /> {selectedIds.length} registration{selectedIds.length > 1 ? "s" : ""} selected
+              </span>
+              <button
+                onClick={deleteSelected}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition"
+              >
+                Delete Selected
+              </button>
+            </div>
+          )}
+
+          <section className="bg-card rounded-2xl ring-1 ring-ink/10 overflow-hidden mt-3">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm border-collapse">
                 <thead>
                   <tr className="border-b border-ink/10 bg-surface text-ink/60 text-xs font-semibold uppercase tracking-wider">
+                    <th className="px-4 py-4 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        checked={rows.length > 0 && selectedIds.length === rows.length}
+                        onChange={toggleSelectAll}
+                        className="rounded border-ink/20 text-brand focus:ring-brand cursor-pointer size-4"
+                      />
+                    </th>
                     <th className="px-6 py-4">Student Info</th>
                     <th className="px-6 py-4">Academic Details</th>
                     <th className="px-6 py-4">Course Track</th>
@@ -140,19 +195,27 @@ function AdminBootcampPage() {
                 <tbody className="divide-y divide-ink/10">
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-ink/40">
+                      <td colSpan={6} className="px-6 py-12 text-center text-ink/40">
                         Loading registrations...
                       </td>
                     </tr>
                   ) : rows.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-ink/40">
+                      <td colSpan={6} className="px-6 py-12 text-center text-ink/40">
                         No registrations found.
                       </td>
                     </tr>
                   ) : (
                     rows.map((r) => (
                       <tr key={r.id} className="hover:bg-ink/5 transition">
+                        <td className="px-4 py-4 w-10 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(r.id)}
+                            onChange={() => toggleSelect(r.id)}
+                            className="rounded border-ink/20 text-brand focus:ring-brand cursor-pointer size-4"
+                          />
+                        </td>
                         <td className="px-6 py-4">
                           <div className="font-medium text-ink">{r.name}</div>
                           <div className="text-xs text-ink/50 mt-0.5">{r.email}</div>
