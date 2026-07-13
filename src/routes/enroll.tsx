@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -8,6 +8,9 @@ import { getCourses } from "@/lib/public-content";
 import { Field, TextArea, Select } from "./contact";
 
 export const Route = createFileRoute("/enroll")({
+  beforeLoad: () => {
+    throw redirect({ to: "/bootcamp" });
+  },
   validateSearch: (search: Record<string, unknown>): { course?: string } => ({
     course: typeof search.course === "string" ? search.course : undefined,
   }),

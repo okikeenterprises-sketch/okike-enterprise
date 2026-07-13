@@ -34,15 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         // Defer role fetch to avoid deadlock
         setTimeout(async () => {
-          // Check if user_roles exists, if not create one
-          let { data } = await supabase.from("user_roles").select("role").eq("user_id", s.user.id);
+          const { data } = await supabase.from("user_roles").select("role").eq("user_id", s.user.id);
 
-          if (!data || data.length === 0) {
-            // Create default client role
-            await supabase.from("user_roles").insert({ user_id: s.user.id, role: "client" });
-            data = [{ role: "client" }];
-          }
-
+          // Role is assigned by DB trigger on signup — just read it here
           const roles = (data ?? []).map((r) => r.role as string);
           if (roles.includes("admin")) setRole("admin");
           else if (roles.includes("instructor")) setRole("instructor");
@@ -55,20 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data: sessionData }) => {
       setSession(sessionData.session);
       if (sessionData.session) {
-        // Check if user_roles exists, if not create one
-        let { data: r } = await supabase
+        const { data: r } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", sessionData.session.user.id);
 
-        if (!r || r.length === 0) {
-          // Create default client role
-          await supabase
-            .from("user_roles")
-            .insert({ user_id: sessionData.session.user.id, role: "client" });
-          r = [{ role: "client" }];
-        }
-
+        // Role is assigned by DB trigger on signup — just read it here
         const roles = (r ?? []).map((x) => x.role as string);
         if (roles.includes("admin")) setRole("admin");
         else if (roles.includes("instructor")) setRole("instructor");

@@ -9,6 +9,7 @@ import { askAssistant, generateInsights } from "@/lib/ai-assistant.functions";
 import { toast } from "sonner";
 import { verifyProjectDeposit, verifyBootcampPayment, sendPasswordChangedEmail } from "@/lib/forms.functions";
 import heroImg from "@/assets/dashboard-hero.jpg";
+import heroImgLight from "@/assets/dashboard-hero-light.png";
 import okikeLogo from "@/assets/okike-logo.png";
 import {
   LayoutDashboard,
@@ -38,6 +39,8 @@ import {
   MoreHorizontal,
   X,
   HelpCircle,
+  Video,
+  Download,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -89,6 +92,7 @@ function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [updates, setUpdates] = useState<Update[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [bootcampReg, setBootcampReg] = useState<any>(null);
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -415,19 +419,53 @@ function DashboardPage() {
             >
               <MessageSquare className="size-4 text-ink/70" />
             </button>
-            <button
-              onClick={() => setSection("dashboard")}
-              className="relative rounded-xl p-2 ring-1 ring-ink/10 hover:bg-ink/5"
-              aria-label="View latest updates"
-              title="View latest updates"
-            >
-              <Bell className="size-4 text-ink/70" />
-              {updates.length > 0 && (
-                <span className="absolute -top-1 -right-1 size-4 rounded-full bg-brand text-[10px] font-semibold text-brand-foreground grid place-items-center">
-                  {updates.length}
-                </span>
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative rounded-xl p-2 ring-1 ring-ink/10 hover:bg-ink/5"
+                aria-label="View latest updates"
+                title="View latest updates"
+              >
+                <Bell className="size-4 text-ink/70" />
+                {updates.length > 0 && (
+                  <span className="absolute -top-1 -right-1 size-4 rounded-full bg-brand text-[10px] font-semibold text-brand-foreground grid place-items-center animate-pulse">
+                    {updates.length}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-card ring-1 ring-ink/15 shadow-xl rounded-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex justify-between items-center border-b border-ink/5 pb-2 mb-3">
+                    <span className="font-semibold text-xs text-ink uppercase tracking-wider">Notifications & Updates</span>
+                    <button
+                      onClick={() => setShowNotifications(false)}
+                      className="text-[10px] text-brand hover:underline font-semibold"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  {updates.length === 0 ? (
+                    <div className="text-center py-6 text-xs text-ink/40">No new updates or alerts.</div>
+                  ) : (
+                    <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+                      {updates.map((up) => {
+                        const proj = projects.find(p => p.id === up.project_id);
+                        return (
+                          <div key={up.id} className="text-xs p-2 bg-surface rounded-xl flex flex-col gap-1 ring-1 ring-ink/5 text-left">
+                            <div className="flex justify-between items-center">
+                              <span className="font-semibold text-brand-text truncate max-w-[15ch]">{proj?.title || "Project Update"}</span>
+                              <span className="text-[9px] text-ink/40">{new Date(up.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <p className="text-ink/85 leading-relaxed font-sans">{up.message}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               )}
-            </button>
+            </div>
             <ThemeToggle />
             <button
               onClick={() => setSection("settings")}
@@ -548,10 +586,17 @@ function DashboardOverview({
       <div className="flex flex-col gap-5 min-w-0">
         {/* Hero */}
         <section className="relative overflow-hidden rounded-3xl ring-1 ring-ink/10 bg-card">
+          {/* Light Theme Day Image */}
+          <img
+            src={heroImgLight}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-90 block dark:hidden select-none pointer-events-none"
+          />
+          {/* Dark Theme Night Image */}
           <img
             src={heroImg}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover opacity-80"
+            className="absolute inset-0 w-full h-full object-cover opacity-85 hidden dark:block select-none pointer-events-none"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-card via-card/85 to-transparent" />
           <div className="relative p-6 md:p-9 min-h-[220px] flex flex-col justify-center max-w-xl">
@@ -1239,15 +1284,18 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
     lessons_completed: string[];
     quiz_scores: Record<string, number>;
     milestone_status: Record<string, string>;
+    attendance_mode?: string;
   } | null>(null);
 
   // LMS tabs
-  const [activeTab, setActiveTab] = useState<"lessons" | "milestones" | "quizzes" | "assignments">("lessons");
+  const [activeTab, setActiveTab] = useState<"lessons" | "milestones" | "quizzes" | "assignments" | "virtual" | "materials">("lessons");
   const [activeLessonIndex, setActiveLessonIndex] = useState<number>(0);
 
   // Extra LMS module state variables
   const [dbQuizzes, setDbQuizzes] = useState<any[]>([]);
   const [dbAssignments, setDbAssignments] = useState<any[]>([]);
+  const [dbVirtualClasses, setDbVirtualClasses] = useState<any[]>([]);
+  const [dbCourseMaterials, setDbCourseMaterials] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [submittingAssign, setSubmittingAssign] = useState<string | null>(null);
   const [assignText, setAssignText] = useState("");
@@ -1262,12 +1310,16 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
       
       setLoadingExtra(true);
       try {
-        const [{ data: q }, { data: a }] = await Promise.all([
+        const [{ data: q }, { data: a }, { data: vc }, { data: cm }] = await Promise.all([
           (supabase as any).from("quizzes").select("*").eq("course_id", selectedCourse.id).eq("module_name", activeModule),
           (supabase as any).from("assignments").select("*").eq("course_id", selectedCourse.id).eq("module_name", activeModule),
+          (supabase as any).from("virtual_classes").select("*").eq("course_id", selectedCourse.id).eq("module_name", activeModule).order("meeting_time", { ascending: true }),
+          (supabase as any).from("course_materials").select("*").eq("course_id", selectedCourse.id).eq("module_name", activeModule).order("created_at", { ascending: false }),
         ]);
         setDbQuizzes(q ?? []);
         setDbAssignments(a ?? []);
+        setDbVirtualClasses(vc ?? []);
+        setDbCourseMaterials(cm ?? []);
 
         const aIds = (a ?? []).map((x: any) => x.id);
         if (aIds.length > 0) {
@@ -1331,7 +1383,7 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
           spRow = newRow;
         }
 
-        setProgress(spRow || { lessons_completed: [], quiz_scores: {}, milestone_status: {} });
+        setProgress(spRow || { lessons_completed: [], quiz_scores: {}, milestone_status: {}, attendance_mode: "physical" });
 
         const regTrack = bootcampReg?.course;
         const isConfirmed = !!bootcampReg;
@@ -1447,6 +1499,32 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
     });
   }
 
+  // Attendance Mode Switcher
+  async function toggleAttendanceMode() {
+    if (!session?.user?.email || !progress) return;
+    const currentMode = progress.attendance_mode || "physical";
+    const nextMode = currentMode === "physical" ? "online" : "physical";
+
+    setProgress({
+      ...progress,
+      attendance_mode: nextMode
+    });
+
+    const { error } = await (supabase as any)
+      .from("student_progress")
+      .upsert({
+        student_email: session.user.email,
+        attendance_mode: nextMode,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "student_email" });
+
+    if (error) {
+      toast.error("Could not save attendance preference.");
+    } else {
+      toast.success(`Attendance mode switched to ${nextMode.toUpperCase()} successfully!`);
+    }
+  }
+
   // Quiz submission handler
   async function submitQuiz(quizId: string, questions: any[]) {
     if (!session?.user?.email || !progress) return;
@@ -1558,6 +1636,22 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
               }`}
             >
               <FileText className="size-4" /> Assignments
+            </button>
+            <button
+              onClick={() => setActiveTab("virtual")}
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition shrink-0 w-full text-left ${
+                activeTab === "virtual" ? "bg-brand text-brand-foreground" : "bg-card hover:bg-ink/5 ring-1 ring-ink/10"
+              }`}
+            >
+              <Video className="size-4" /> Live Classes
+            </button>
+            <button
+              onClick={() => setActiveTab("materials")}
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition shrink-0 w-full text-left ${
+                activeTab === "materials" ? "bg-brand text-brand-foreground" : "bg-card hover:bg-ink/5 ring-1 ring-ink/10"
+              }`}
+            >
+              <Download className="size-4" /> Course Materials
             </button>
           </div>
 
@@ -1905,6 +1999,125 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
                         </div>
                       );
                     })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TABS: VIRTUAL CLASSES / LIVE */}
+            {activeTab === "virtual" && (
+              <div className="flex flex-col gap-6">
+                <div>
+                  <h3 className="font-semibold text-lg text-ink font-serif">Virtual Sessions & Night Classes</h3>
+                  <p className="text-xs text-ink/50 mt-1">
+                    Lesson Module: <span className="font-semibold text-brand">{selectedCourse.lessons[activeLessonIndex]}</span>
+                  </p>
+                </div>
+
+                {/* Attendance Preference Switcher component */}
+                <div className="bg-surface ring-1 ring-ink/10 rounded-xl p-5 md:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h4 className="font-semibold text-sm text-ink">Attendance Preference Mode</h4>
+                    <p className="text-xs text-ink/60 mt-1">
+                      Are you registered for physical classes but need to attend online today? Toggle your mode below.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded uppercase tracking-wider ${
+                      (progress as any)?.attendance_mode === "online" ? "bg-emerald-500/10 text-emerald-600" : "bg-blue-500/10 text-blue-600"
+                    }`}>
+                      {(progress as any)?.attendance_mode === "online" ? "Online Mode" : "Physical Attendance"}
+                    </span>
+                    <button
+                      onClick={toggleAttendanceMode}
+                      className="px-3 py-1.5 rounded-lg bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition"
+                    >
+                      Switch to {(progress as any)?.attendance_mode === "physical" || !(progress as any)?.attendance_mode ? "Online" : "Physical"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Live classes list */}
+                {loadingExtra ? (
+                  <div className="text-xs text-ink/40 py-4"><Loader2 className="size-4 animate-spin inline mr-2" /> Loading live sessions...</div>
+                ) : dbVirtualClasses.length === 0 ? (
+                  <div className="text-center py-10 bg-surface rounded-2xl border border-dashed border-ink/10 text-xs text-ink/50">
+                    No virtual sessions scheduled for this module yet.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {dbVirtualClasses.map((vc) => {
+                      const isOnline = (progress as any)?.attendance_mode === "online";
+                      return (
+                        <div key={vc.id} className="p-4 bg-surface ring-1 ring-ink/10 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                          <div>
+                            <div className="text-sm font-semibold text-ink flex items-center gap-1.5">
+                              {vc.title}
+                              <span className={`text-[8px] font-semibold px-1.5 py-0.5 rounded uppercase ${
+                                vc.session_type === "night" ? "bg-purple-500/10 text-purple-600" : "bg-blue-500/10 text-blue-600"
+                              }`}>
+                                {vc.session_type === "night" ? "🌙 Night" : "☀️ General"}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-ink/40 font-mono mt-0.5">Time: {new Date(vc.meeting_time).toLocaleString()}</p>
+                          </div>
+
+                          {isOnline ? (
+                            <a
+                              href={vc.meeting_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-4 py-2 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 shrink-0 text-center"
+                            >
+                              Join Class Link &rarr;
+                            </a>
+                          ) : (
+                            <div className="text-xs text-ink/40 text-right italic max-w-[20ch]">
+                              Switch mode to Online to join this live session.
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TABS: COURSE MATERIALS */}
+            {activeTab === "materials" && (
+              <div className="flex flex-col gap-6">
+                <div>
+                  <h3 className="font-semibold text-lg text-ink font-serif">Module Resources & Materials</h3>
+                  <p className="text-xs text-ink/50 mt-1">
+                    Lesson: <span className="font-semibold text-brand">{selectedCourse.lessons[activeLessonIndex]}</span>
+                  </p>
+                </div>
+
+                {loadingExtra ? (
+                  <div className="text-xs text-ink/40 py-4"><Loader2 className="size-4 animate-spin inline mr-2" /> Loading resources...</div>
+                ) : dbCourseMaterials.length === 0 ? (
+                  <div className="text-center py-10 bg-surface rounded-2xl border border-dashed border-ink/10 text-xs text-ink/50">
+                    No resources uploaded by the instructor for this module yet.
+                  </div>
+                ) : (
+                  <div className="grid gap-3">
+                    {dbCourseMaterials.map((m) => (
+                      <div key={m.id} className="bg-surface ring-1 ring-ink/5 rounded-xl p-4 flex justify-between items-start gap-4">
+                        <div>
+                          <div className="text-xs font-semibold text-ink">{m.title}</div>
+                          {m.description && <p className="text-[10px] text-ink/60 mt-1">{m.description}</p>}
+                        </div>
+                        <a
+                          href={m.file_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-4 py-2 rounded-xl bg-brand text-brand-foreground font-semibold text-[10px] uppercase tracking-wider hover:opacity-90 text-center shrink-0"
+                        >
+                          Download Resource
+                        </a>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

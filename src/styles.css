@@ -43,6 +43,7 @@
   --color-ink-muted: var(--ink-muted);
   --color-contrast: var(--contrast);
   --color-contrast-foreground: var(--contrast-foreground);
+  --color-brand-text: var(--brand-text);
   --font-sans: "DM Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Bebas Neue", ui-sans-serif, system-ui, sans-serif;
 }
@@ -66,6 +67,8 @@
   /* signature lime-yellow #E0EB32 */
   --brand-foreground: oklch(0.14 0.004 90);
   /* black on yellow */
+  --brand-text: oklch(0.48 0.15 107);
+  /* high contrast forest gold/lime text in light mode */
 
   --background: var(--surface);
   --foreground: var(--ink);
@@ -94,6 +97,7 @@
   --ink-muted: oklch(0.985 0.003 95 / 60%);
   --brand: oklch(0.90 0.18 107);
   --brand-foreground: oklch(0.14 0.004 90);
+  --brand-text: oklch(0.90 0.18 107);
 
   /* Flip contrast colors for dark mode */
   --contrast: oklch(0.16 0.004 90);
@@ -197,4 +201,15 @@
     scrollbar-width: thin;
     scrollbar-color: color-mix(in oklch, var(--color-ink) 30%, transparent) transparent;
   }
+}
+
+/* High contrast utility overrides for readable brand-color text */
+.text-brand {
+  color: var(--brand-text) !important;
+}
+.hover\:text-brand:hover {
+  color: var(--brand-text) !important;
+}
+.group:hover .group-hover\:text-brand {
+  color: var(--brand-text) !important;
 }

@@ -72,7 +72,10 @@ function HomePage() {
         {/* ─── HERO ─── */}
         <section className="relative overflow-hidden border-b border-ink/10">
           <div className="absolute inset-y-0 right-0 w-full lg:w-[65%] pointer-events-none">
-            <img src="/background.png" alt="" aria-hidden className="w-full h-full object-cover object-left-top opacity-100" />
+            {/* Light Mode Day Image */}
+            <img src="/light-background.png" alt="" aria-hidden className="w-full h-full object-cover object-left-top opacity-100 block dark:hidden" />
+            {/* Dark Mode Night Image */}
+            <img src="/background.png" alt="" aria-hidden className="w-full h-full object-cover object-left-top opacity-100 hidden dark:block" />
             <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/85 to-surface/5" />
             <div className="absolute inset-0 bg-gradient-to-l from-surface/20 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-surface to-transparent" />
@@ -88,7 +91,7 @@ function HomePage() {
 
               <h1 className="font-display text-[clamp(3.5rem,10vw,8.5rem)] leading-[0.92] tracking-wide uppercase text-ink">
                 OKIKE Your{" "}
-                <span className="text-brand">Cultural</span>{" "}
+                <span className="text-[#E0EB32]">Cultural</span>{" "}
                 Architect.
               </h1>
 

@@ -16,6 +16,8 @@ import {
   PlusCircle,
   Award,
   Loader2,
+  Video,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
@@ -55,7 +57,7 @@ function InstructorCurriculumPage() {
   const [loading, setLoading] = useState(true);
 
   // Subtab selections
-  const [subTab, setSubTab] = useState<"syllabus" | "quizzes" | "assignments" | "submissions">("syllabus");
+  const [subTab, setSubTab] = useState<"syllabus" | "quizzes" | "assignments" | "submissions" | "virtual" | "materials">("syllabus");
 
   // Create Course form states
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -82,6 +84,26 @@ function InstructorCurriculumPage() {
   const [assignModule, setAssignModule] = useState("");
   const [assignDesc, setAssignDesc] = useState("");
   const [assignPoints, setAssignPoints] = useState(100);
+
+  // Virtual Classes & Materials states
+  const [virtualClasses, setVirtualClasses] = useState<any[]>([]);
+  const [courseMaterials, setCourseMaterials] = useState<any[]>([]);
+
+  // Virtual class creator states
+  const [showVirtualForm, setShowVirtualForm] = useState(false);
+  const [virtualTitle, setVirtualTitle] = useState("");
+  const [virtualUrl, setVirtualUrl] = useState("");
+  const [virtualTime, setVirtualTime] = useState("");
+  const [virtualModule, setVirtualModule] = useState("");
+  const [virtualType, setVirtualType] = useState("night");
+
+  // Materials creator states
+  const [showMaterialForm, setShowMaterialForm] = useState(false);
+  const [materialTitle, setMaterialTitle] = useState("");
+  const [materialModule, setMaterialModule] = useState("");
+  const [materialDesc, setMaterialDesc] = useState("");
+  const [materialFileUrl, setMaterialFileUrl] = useState("");
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // Grading states
   const [selectedSubmission, setSelectedSubmission] = useState<any | null>(null);
@@ -123,6 +145,8 @@ function InstructorCurriculumPage() {
         setQuizzes([]);
         setAssignments([]);
         setSubmissions([]);
+        setVirtualClasses([]);
+        setCourseMaterials([]);
       }
     } catch (err) {
       console.error("Error loading courses", err);
@@ -134,12 +158,16 @@ function InstructorCurriculumPage() {
   async function loadExtraData(courseId: string) {
     setLoadingExtra(true);
     try {
-      const [{ data: q }, { data: a }] = await Promise.all([
+      const [{ data: q }, { data: a }, { data: vc }, { data: cm }] = await Promise.all([
         (supabase as any).from("quizzes").select("*").eq("course_id", courseId),
         (supabase as any).from("assignments").select("*").eq("course_id", courseId),
+        (supabase as any).from("virtual_classes").select("*").eq("course_id", courseId).order("meeting_time", { ascending: true }),
+        (supabase as any).from("course_materials").select("*").eq("course_id", courseId).order("created_at", { ascending: false }),
       ]);
       setQuizzes(q ?? []);
       setAssignments(a ?? []);
+      setVirtualClasses(vc ?? []);
+      setCourseMaterials(cm ?? []);
 
       const aIds = (a ?? []).map((x: any) => x.id);
       if (aIds.length > 0) {
@@ -174,6 +202,8 @@ function InstructorCurriculumPage() {
       // Reset forms
       setShowQuizForm(false);
       setShowAssignmentForm(false);
+      setShowVirtualForm(false);
+      setShowMaterialForm(false);
       setSelectedSubmission(null);
     }
   }
@@ -366,19 +396,132 @@ function InstructorCurriculumPage() {
       .from("assignment_submissions")
       .update({
         grade: gradeScore,
-        feedback: gradeFeedback.trim(),
+        feedback: gradeFeedback.trim() || null,
         graded_at: new Date().toISOString()
       })
       .eq("id", selectedSubmission.id);
 
     setBusy(false);
     if (!error) {
-      toast.success("Submission graded successfully!");
+      toast.success("Grade submitted successfully!");
       setSelectedSubmission(null);
       setGradeFeedback("");
       if (selectedCourse) loadExtraData(selectedCourse.id);
     } else {
-      toast.error("Could not save grade.");
+      toast.error(error.message || "Could not save grade.");
+    }
+  }
+
+  // ─── Virtual classes (Night Sessions) ──────────────────────────────────────
+
+  async function createVirtualClass() {
+    if (!selectedCourse || !virtualTitle.trim() || !virtualUrl.trim() || !virtualTime || !virtualModule) {
+      toast.error("Please fill in all virtual class details.");
+      return;
+    }
+    setBusy(true);
+    const { error } = await (supabase as any)
+      .from("virtual_classes")
+      .insert({
+        course_id: selectedCourse.id,
+        module_name: virtualModule,
+        title: virtualTitle.trim(),
+        meeting_url: virtualUrl.trim(),
+        meeting_time: new Date(virtualTime).toISOString(),
+        session_type: virtualType
+      });
+    setBusy(false);
+    if (!error) {
+      toast.success("Virtual class scheduled successfully!");
+      setShowVirtualForm(false);
+      setVirtualTitle("");
+      setVirtualUrl("");
+      setVirtualTime("");
+      loadExtraData(selectedCourse.id);
+    } else {
+      toast.error(error.message);
+    }
+  }
+
+  async function deleteVirtualClass(id: string) {
+    if (!window.confirm("Are you sure you want to cancel this class?")) return;
+    const { error } = await (supabase as any).from("virtual_classes").delete().eq("id", id);
+    if (!error) {
+      toast.success("Virtual class deleted.");
+      if (selectedCourse) loadExtraData(selectedCourse.id);
+    } else {
+      toast.error(error.message);
+    }
+  }
+
+  // ─── Course Materials ──────────────────────────────────────────────────────
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+      const filePath = `course-materials/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from("media")
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("media")
+        .getPublicUrl(filePath);
+
+      setMaterialFileUrl(publicUrl);
+      toast.success("File uploaded successfully!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to upload file");
+    } finally {
+      setUploadingFile(false);
+    }
+  }
+
+  async function createCourseMaterial() {
+    if (!selectedCourse || !materialTitle.trim() || !materialFileUrl.trim() || !materialModule) {
+      toast.error("Please specify a title, module, and document URL/file.");
+      return;
+    }
+    setBusy(true);
+    const { error } = await (supabase as any)
+      .from("course_materials")
+      .insert({
+        course_id: selectedCourse.id,
+        module_name: materialModule,
+        title: materialTitle.trim(),
+        file_url: materialFileUrl.trim(),
+        description: materialDesc.trim() || null
+      });
+    setBusy(false);
+    if (!error) {
+      toast.success("Course material added successfully!");
+      setShowMaterialForm(false);
+      setMaterialTitle("");
+      setMaterialFileUrl("");
+      setMaterialDesc("");
+      loadExtraData(selectedCourse.id);
+    } else {
+      toast.error(error.message);
+    }
+  }
+
+  async function deleteCourseMaterial(id: string) {
+    if (!window.confirm("Are you sure you want to delete this material?")) return;
+    const { error } = await (supabase as any).from("course_materials").delete().eq("id", id);
+    if (!error) {
+      toast.success("Course material deleted.");
+      if (selectedCourse) loadExtraData(selectedCourse.id);
+    } else {
+      toast.error(error.message);
     }
   }
 
@@ -479,6 +622,8 @@ function InstructorCurriculumPage() {
                 { key: "quizzes", label: "Module Quizzes" },
                 { key: "assignments", label: "Assignments" },
                 { key: "submissions", label: "Submissions Grading" },
+                { key: "virtual", label: "Virtual Classes" },
+                { key: "materials", label: "Course Materials" },
               ].map(t => (
                 <button
                   key={t.key}
@@ -1089,6 +1234,296 @@ function InstructorCurriculumPage() {
                           </div>
                         )}
                       </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 5: VIRTUAL CLASSES (NIGHT SESSIONS) */}
+              {subTab === "virtual" && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center border-b border-ink/5 pb-4">
+                    <div>
+                      <h3 className="font-semibold text-sm text-ink">Virtual Classes & Night Sessions</h3>
+                      <p className="text-[11px] text-ink/50">Schedule Zoom, Teams, or Google Meet live sessions for each module.</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowVirtualForm(!showVirtualForm);
+                        setVirtualModule(lessons[0] || "");
+                      }}
+                      className="px-3.5 py-2 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition shrink-0"
+                    >
+                      {showVirtualForm ? "Hide Form" : "Schedule Live Class"}
+                    </button>
+                  </div>
+
+                  {showVirtualForm && (
+                    <div className="bg-surface p-4 rounded-xl ring-1 ring-ink/10 space-y-4 max-w-xl">
+                      <h4 className="font-semibold text-xs uppercase tracking-wider text-ink">Virtual Class Details</h4>
+                      
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[11px] text-ink/55 block font-semibold mb-1">Session Title</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Cybersecurity Night Q&A"
+                            value={virtualTitle}
+                            onChange={(e) => setVirtualTitle(e.target.value)}
+                            className="w-full bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-ink/55 block font-semibold mb-1">Associated Module</label>
+                          <select
+                            value={virtualModule}
+                            onChange={(e) => setVirtualModule(e.target.value)}
+                            className="w-full bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
+                          >
+                            <option value="">Select a Module</option>
+                            {lessons.map(l => (
+                              <option key={l} value={l}>{l}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[11px] text-ink/55 block font-semibold mb-1">Meeting Date & Time</label>
+                          <input
+                            type="datetime-local"
+                            value={virtualTime}
+                            onChange={(e) => setVirtualTime(e.target.value)}
+                            className="w-full bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-ink/55 block font-semibold mb-1">Session Type</label>
+                          <select
+                            value={virtualType}
+                            onChange={(e) => setVirtualType(e.target.value)}
+                            className="w-full bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
+                          >
+                            <option value="night">Night Session</option>
+                            <option value="general">General Class Session</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] text-ink/55 block font-semibold mb-1">Meeting URL Link (Zoom / Meet / Teams)</label>
+                        <input
+                          type="url"
+                          placeholder="https://zoom.us/j/..."
+                          value={virtualUrl}
+                          onChange={(e) => setVirtualUrl(e.target.value)}
+                          className="w-full bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowVirtualForm(false)}
+                          className="px-4 py-2 rounded-xl text-xs font-semibold uppercase hover:bg-ink/5"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={createVirtualClass}
+                          disabled={busy}
+                          className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-xs font-semibold uppercase tracking-wider hover:opacity-90"
+                        >
+                          Schedule Session
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {loadingExtra ? (
+                    <div className="text-xs text-ink/40"><Loader2 className="size-4 animate-spin inline mr-1" /> Loading live sessions...</div>
+                  ) : virtualClasses.length === 0 ? (
+                    <div className="text-center py-10 bg-surface rounded-2xl border border-dashed border-ink/10 text-xs text-ink/50">
+                      No virtual sessions scheduled yet.
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {virtualClasses.map((vc) => (
+                        <div key={vc.id} className="flex justify-between items-center bg-surface p-4 rounded-xl ring-1 ring-ink/5">
+                          <div className="flex items-start gap-3">
+                            <Video className="size-5 text-brand shrink-0 mt-0.5" />
+                            <div>
+                              <div className="text-xs font-semibold text-ink flex items-center gap-1.5">
+                                {vc.title}
+                                <span className={`text-[8px] font-semibold px-1.5 py-0.5 rounded uppercase ${
+                                  vc.session_type === "night" ? "bg-purple-500/10 text-purple-600" : "bg-blue-500/10 text-blue-600"
+                                }`}>
+                                  {vc.session_type === "night" ? "🌙 Night" : "☀️ General"}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-ink/40 font-mono mt-0.5">Module: {vc.module_name}</div>
+                              <div className="text-[10px] text-ink/65 mt-1 font-semibold">
+                                Time: {new Date(vc.meeting_time).toLocaleString()}
+                              </div>
+                              <a
+                                href={vc.meeting_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[10px] text-brand hover:underline font-semibold block mt-1"
+                              >
+                                {vc.meeting_url}
+                              </a>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => deleteVirtualClass(vc.id)}
+                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition shrink-0"
+                          >
+                            <Trash className="size-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 6: COURSE MATERIALS */}
+              {subTab === "materials" && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center border-b border-ink/5 pb-4">
+                    <div>
+                      <h3 className="font-semibold text-sm text-ink">Course Materials & Resources</h3>
+                      <p className="text-[11px] text-ink/50">Upload slide decks, PDF guides, code files, or reference links for each module.</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowMaterialForm(!showMaterialForm);
+                        setMaterialModule(lessons[0] || "");
+                      }}
+                      className="px-3.5 py-2 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition shrink-0"
+                    >
+                      {showMaterialForm ? "Hide Form" : "Upload Material"}
+                    </button>
+                  </div>
+
+                  {showMaterialForm && (
+                    <div className="bg-surface p-4 rounded-xl ring-1 ring-ink/10 space-y-4 max-w-xl">
+                      <h4 className="font-semibold text-xs uppercase tracking-wider text-ink">Material Resource Details</h4>
+                      
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[11px] text-ink/55 block font-semibold mb-1">Resource Title</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Chapter 1 PDF Guide"
+                            value={materialTitle}
+                            onChange={(e) => setMaterialTitle(e.target.value)}
+                            className="w-full bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-ink/55 block font-semibold mb-1">Associated Module</label>
+                          <select
+                            value={materialModule}
+                            onChange={(e) => setMaterialModule(e.target.value)}
+                            className="w-full bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
+                          >
+                            <option value="">Select a Module</option>
+                            {lessons.map(l => (
+                              <option key={l} value={l}>{l}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] text-ink/55 block font-semibold mb-1">Description / Notes</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Read chapters 1-3 before the night session class."
+                          value={materialDesc}
+                          onChange={(e) => setMaterialDesc(e.target.value)}
+                          className="w-full bg-card ring-1 ring-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
+                        />
+                      </div>
+
+                      {/* File Uploader or Paste link */}
+                      <div className="bg-card p-3 rounded-xl ring-1 ring-ink/10 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[11px] text-ink/55 block font-semibold">Upload File Document</label>
+                          {uploadingFile && <span className="text-[10px] text-brand font-semibold animate-pulse">Uploading file...</span>}
+                        </div>
+                        <input
+                          type="file"
+                          onChange={handleFileUpload}
+                          disabled={uploadingFile}
+                          className="text-xs text-ink"
+                        />
+                        <div className="text-[10px] text-ink/40 text-center uppercase tracking-widest">— OR PASTE LINK DIRECTLY —</div>
+                        <input
+                          type="url"
+                          placeholder="https://drive.google.com/..."
+                          value={materialFileUrl}
+                          onChange={(e) => setMaterialFileUrl(e.target.value)}
+                          className="w-full bg-surface ring-1 ring-ink/10 rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowMaterialForm(false)}
+                          className="px-4 py-2 rounded-xl text-xs font-semibold uppercase hover:bg-ink/5"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={createCourseMaterial}
+                          disabled={busy || uploadingFile}
+                          className="px-4 py-2 rounded-xl bg-brand text-brand-foreground text-xs font-semibold uppercase tracking-wider hover:opacity-90"
+                        >
+                          Add Material
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {loadingExtra ? (
+                    <div className="text-xs text-ink/40"><Loader2 className="size-4 animate-spin inline mr-1" /> Loading course resources...</div>
+                  ) : courseMaterials.length === 0 ? (
+                    <div className="text-center py-10 bg-surface rounded-2xl border border-dashed border-ink/10 text-xs text-ink/50">
+                      No materials uploaded yet.
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {courseMaterials.map((m) => (
+                        <div key={m.id} className="flex justify-between items-center bg-surface p-4 rounded-xl ring-1 ring-ink/5">
+                          <div className="flex items-start gap-3">
+                            <Download className="size-5 text-brand shrink-0 mt-0.5" />
+                            <div>
+                              <div className="text-xs font-semibold text-ink">{m.title}</div>
+                              <div className="text-[10px] text-ink/40 font-mono mt-0.5">Module: {m.module_name}</div>
+                              {m.description && <div className="text-[10px] text-ink/60 mt-1 max-w-xl">{m.description}</div>}
+                              <a
+                                href={m.file_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[10px] text-brand hover:underline font-semibold block mt-1"
+                              >
+                                Download / View Resource →
+                              </a>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => deleteCourseMaterial(m.id)}
+                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition shrink-0"
+                          >
+                            <Trash className="size-3.5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
