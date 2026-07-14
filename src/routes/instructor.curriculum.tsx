@@ -621,7 +621,7 @@ function InstructorCurriculumPage() {
           {/* RIGHT Content area: Tabs & Editors */}
           <div className="lg:col-span-9 bg-card rounded-2xl ring-1 ring-ink/10 overflow-hidden flex flex-col">
             {/* Tabs header */}
-            <div className="flex border-b border-ink/10 bg-surface text-xs font-semibold uppercase tracking-wider flex-wrap">
+            <div className="flex border-b border-ink/10 bg-surface text-xs font-semibold uppercase tracking-wider overflow-x-auto whitespace-nowrap scrollbar-none select-none">
               {[
                 { key: "syllabus", label: "Syllabus Modules" },
                 { key: "quizzes", label: "Module Quizzes" },
@@ -683,12 +683,12 @@ function InstructorCurriculumPage() {
                     ) : (
                       <div className="flex flex-col gap-2">
                         {lessons.map((lesson, idx) => (
-                          <div key={idx} className="flex items-center justify-between gap-3 p-3 bg-surface rounded-xl ring-1 ring-ink/5">
+                          <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-surface rounded-xl ring-1 ring-ink/5">
                             <span className="text-xs text-ink font-semibold pl-1">
                               <span className="text-ink/40 mr-1.5">Module {idx + 1}:</span>
                               {lesson}
                             </span>
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center justify-end gap-1.5 w-full sm:w-auto">
                               <button
                                 onClick={() => moveLesson(idx, "up")}
                                 disabled={idx === 0}
@@ -745,9 +745,9 @@ function InstructorCurriculumPage() {
                     ) : (
                       <div className="flex flex-col gap-2">
                         {milestones.map((m, idx) => (
-                          <div key={m.id} className="flex items-center justify-between gap-3 p-3 bg-surface rounded-xl ring-1 ring-ink/5">
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-ink/40 font-mono">Milestone {idx + 1}:</span>
+                          <div key={m.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-surface rounded-xl ring-1 ring-ink/5">
+                            <div className="flex-1 flex items-center gap-2 w-full">
+                              <span className="text-xs text-ink/40 font-mono shrink-0">Milestone {idx + 1}:</span>
                               <input
                                 type="text"
                                 value={m.title}
@@ -759,12 +759,14 @@ function InstructorCurriculumPage() {
                                 className="flex-1 bg-card ring-1 ring-ink/5 rounded px-2.5 py-1 text-xs text-ink focus:outline-none focus:ring-brand font-semibold"
                               />
                             </div>
-                            <button
-                              onClick={() => setMilestones(milestones.filter(x => x.id !== m.id))}
-                              className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500 shrink-0"
-                            >
-                              <Trash className="size-3.5" />
-                            </button>
+                            <div className="flex justify-end w-full sm:w-auto">
+                              <button
+                                onClick={() => setMilestones(milestones.filter(x => x.id !== m.id))}
+                                className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500 shrink-0"
+                              >
+                                <Trash className="size-3.5" />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -963,7 +965,7 @@ function InstructorCurriculumPage() {
                   ) : (
                     <div className="grid gap-3">
                       {quizzes.map((q) => (
-                        <div key={q.id} className="flex justify-between items-center bg-surface p-4 rounded-xl ring-1 ring-ink/5">
+                        <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-4 rounded-xl ring-1 ring-ink/5">
                           <div className="flex items-start gap-3">
                             <HelpCircle className="size-5 text-brand shrink-0 mt-0.5" />
                             <div>
@@ -971,12 +973,14 @@ function InstructorCurriculumPage() {
                               <div className="text-[10px] text-ink/40 font-mono mt-0.5">Module: {q.module_name} • {q.questions?.length || 0} questions</div>
                             </div>
                           </div>
-                          <button
-                            onClick={() => handleDeleteQuiz(q.id)}
-                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition"
-                          >
-                            <Trash className="size-3.5" />
-                          </button>
+                          <div className="flex justify-end w-full sm:w-auto">
+                            <button
+                              onClick={() => handleDeleteQuiz(q.id)}
+                              className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition"
+                            >
+                              <Trash className="size-3.5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1083,7 +1087,7 @@ function InstructorCurriculumPage() {
                   ) : (
                     <div className="grid gap-3">
                       {assignments.map((a) => (
-                        <div key={a.id} className="flex justify-between items-center bg-surface p-4 rounded-xl ring-1 ring-ink/5">
+                        <div key={a.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-4 rounded-xl ring-1 ring-ink/5">
                           <div className="flex items-start gap-3">
                             <FileText className="size-5 text-brand shrink-0 mt-0.5" />
                             <div>
@@ -1092,12 +1096,14 @@ function InstructorCurriculumPage() {
                               <div className="text-[10px] text-ink/60 mt-1 line-clamp-2 max-w-xl">{a.description}</div>
                             </div>
                           </div>
-                          <button
-                            onClick={() => handleDeleteAssignment(a.id)}
-                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition shrink-0"
-                          >
-                            <Trash className="size-3.5" />
-                          </button>
+                          <div className="flex justify-end w-full sm:w-auto">
+                            <button
+                              onClick={() => handleDeleteAssignment(a.id)}
+                              className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition shrink-0"
+                            >
+                              <Trash className="size-3.5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1355,7 +1361,7 @@ function InstructorCurriculumPage() {
                   ) : (
                     <div className="grid gap-3">
                       {virtualClasses.map((vc) => (
-                        <div key={vc.id} className="flex justify-between items-center bg-surface p-4 rounded-xl ring-1 ring-ink/5">
+                        <div key={vc.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-4 rounded-xl ring-1 ring-ink/5">
                           <div className="flex items-start gap-3">
                             <Video className="size-5 text-brand shrink-0 mt-0.5" />
                             <div>
@@ -1375,18 +1381,20 @@ function InstructorCurriculumPage() {
                                 href={vc.meeting_url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-[10px] text-brand hover:underline font-semibold block mt-1"
+                                className="text-[10px] text-brand hover:underline font-semibold block mt-1 break-all"
                               >
                                 {vc.meeting_url}
                               </a>
                             </div>
                           </div>
-                          <button
-                            onClick={() => deleteVirtualClass(vc.id)}
-                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition shrink-0"
-                          >
-                            <Trash className="size-3.5" />
-                          </button>
+                          <div className="flex justify-end w-full sm:w-auto">
+                            <button
+                              onClick={() => deleteVirtualClass(vc.id)}
+                              className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition shrink-0"
+                            >
+                              <Trash className="size-3.5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1504,7 +1512,7 @@ function InstructorCurriculumPage() {
                   ) : (
                     <div className="grid gap-3">
                       {courseMaterials.map((m) => (
-                        <div key={m.id} className="flex justify-between items-center bg-surface p-4 rounded-xl ring-1 ring-ink/5">
+                        <div key={m.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-4 rounded-xl ring-1 ring-ink/5">
                           <div className="flex items-start gap-3">
                             <Download className="size-5 text-brand shrink-0 mt-0.5" />
                             <div>
@@ -1515,18 +1523,20 @@ function InstructorCurriculumPage() {
                                 href={m.file_url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-[10px] text-brand hover:underline font-semibold block mt-1"
+                                className="text-[10px] text-brand hover:underline font-semibold block mt-1 break-all"
                               >
                                 Download / View Resource →
                               </a>
                             </div>
                           </div>
-                          <button
-                            onClick={() => deleteCourseMaterial(m.id)}
-                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition shrink-0"
-                          >
-                            <Trash className="size-3.5" />
-                          </button>
+                          <div className="flex justify-end w-full sm:w-auto">
+                            <button
+                              onClick={() => deleteCourseMaterial(m.id)}
+                              className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition shrink-0"
+                            >
+                              <Trash className="size-3.5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
