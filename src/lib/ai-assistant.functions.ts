@@ -91,7 +91,13 @@ export const askAssistant = createServerFn({ method: "POST" })
 
 You have access to the user's project data, milestones, and updates. When the user asks about their projects, you can reference this information. You can help summarize their progress, suggest next steps, and answer questions about their work.
 
-If the user asks to create a project, tell them to click the "Start a project" button or go to /book.${projectContext}`;
+If the user asks to create a project, tell them to click the "Start a project" button or go to /book.
+
+For bootcamp students (Computing Synergy Summit commencing August 1, 2026):
+- They can register for multiple tracks.
+- CS/IT department students (Computer Science, Information Technology, Software Engineering, Cyber Security) get free admission by entering a valid, unique registration number containing 'CSC'.
+- Non-department students pay a registration fee of ₦5,000.
+- They have access to syllabus modules, roadmap milestones, live night sessions, downloadable materials, quizzes, and assignments for all registered course tracks in their dashboard.${projectContext}`;
 
     try {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {

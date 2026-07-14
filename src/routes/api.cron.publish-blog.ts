@@ -37,30 +37,11 @@ export const Route = createFileRoute("/api/cron/publish-blog")({
 
                 const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-                // Run the blog publisher
-                try {
-                    const result = await publishAIBlogPostCore(supabase);
-                    if (result.ok) {
-                        console.log(`[cron/publish-blog] Published: "${result.title}" (${result.slug})`);
-                        return new Response(
-                            JSON.stringify({ ok: true, title: result.title, slug: result.slug }),
-                            { status: 200, headers: { "Content-Type": "application/json" } },
-                        );
-                    } else {
-                        console.error(`[cron/publish-blog] Failed: ${result.error}`);
-                        return new Response(JSON.stringify({ ok: false, error: result.error }), {
-                            status: 500,
-                            headers: { "Content-Type": "application/json" },
-                        });
-                    }
-                } catch (e: unknown) {
-                    const msg = e instanceof Error ? e.message : "Unknown error";
-                    console.error(`[cron/publish-blog] Exception: ${msg}`);
-                    return new Response(JSON.stringify({ ok: false, error: msg }), {
-                        status: 500,
-                        headers: { "Content-Type": "application/json" },
-                    });
-                }
+                // Auto blog generation disabled by user request.
+                return new Response(
+                    JSON.stringify({ ok: false, message: "Auto blog publishing is disabled. The user will handle blog posts manually." }),
+                    { status: 200, headers: { "Content-Type": "application/json" } }
+                );
             },
         },
     },
