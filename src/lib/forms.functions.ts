@@ -176,11 +176,18 @@ const bootcampSchema = z.object({
   level: z.string().min(1).max(40),
   is_department_student: z.boolean(),
   course: z.string().min(1).max(200),
+  reg_no: z.string().optional().nullable(),
 });
 
 export const submitBootcampRegistration = createServerFn({ method: "POST" })
   .inputValidator((data) => bootcampSchema.parse(data))
   .handler(async ({ data }) => {
+    if (data.is_department_student) {
+      if (!data.reg_no || !data.reg_no.toLowerCase().includes("csc")) {
+        return { ok: false as const, error: "Invalid registration number. Department students must provide a valid registration number containing 'CSC'." };
+      }
+    }
+
     const reference = "bootcamp_" + Math.random().toString(36).slice(2, 15) + "_" + Date.now();
     const { error } = await supabaseAdmin
       .from("bootcamp_registrations" as never)
@@ -192,6 +199,7 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
         level: data.level,
         course: data.course,
         is_department_student: data.is_department_student,
+        reg_no: data.reg_no ? data.reg_no.trim() : null,
         payment_status: data.is_department_student ? "free" : "pending",
         payment_reference: data.is_department_student ? null : reference,
       } as never);

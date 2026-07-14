@@ -64,6 +64,7 @@ function BootcampPage() {
         department: string;
         level: string;
         course: string;
+        reg_no: string | null;
         reference: string | null;
         status: "pending" | "paid" | "free";
         isDeptStudent: boolean;
@@ -273,6 +274,15 @@ function BootcampPage() {
         const department = String(fd.get("department") || "");
         const level = String(fd.get("level") || "");
         const course = String(fd.get("course") || "");
+        const reg_no = isDeptStudent ? String(fd.get("reg_no") || "").trim() : "";
+
+        if (isDeptStudent) {
+            if (!reg_no || !reg_no.toLowerCase().includes("csc")) {
+                toast.error("Invalid registration number. Department students must provide a valid registration number containing 'CSC'.");
+                setBusy(false);
+                return;
+            }
+        }
 
         try {
             const res = await register({
@@ -284,6 +294,7 @@ function BootcampPage() {
                     level,
                     course,
                     is_department_student: isDeptStudent,
+                    reg_no,
                 },
             });
 
@@ -310,6 +321,7 @@ function BootcampPage() {
                     department,
                     level,
                     course,
+                    reg_no,
                     reference: null,
                     status: "free" as const,
                     isDeptStudent: true
@@ -365,6 +377,7 @@ function BootcampPage() {
                                 department,
                                 level,
                                 course,
+                                reg_no: null,
                                 reference: res.reference,
                                 status: "paid" as const,
                                 isDeptStudent: false
@@ -390,6 +403,7 @@ function BootcampPage() {
                         department,
                         level,
                         course,
+                        reg_no: null,
                         reference: res.reference,
                         status: "pending" as const,
                         isDeptStudent: false
@@ -407,6 +421,7 @@ function BootcampPage() {
                         department,
                         level,
                         course,
+                        reg_no: null,
                         reference: res.reference,
                         status: "pending" as const,
                         isDeptStudent: false
@@ -735,6 +750,20 @@ function BootcampPage() {
                                         ))}
                                     </select>
                                 </label>
+
+                                {isDeptStudent && (
+                                    <div className="flex flex-col gap-1">
+                                        <FormField 
+                                            label="University Registration Number" 
+                                            name="reg_no" 
+                                            required 
+                                            placeholder="e.g. AKSU/CSC/18/001"
+                                        />
+                                        <span className="text-[10px] text-ink/45 -mt-0.5">
+                                            Required for CS/IT department verification. Must contain 'CSC'.
+                                        </span>
+                                    </div>
+                                )}
 
                                 {isDeptStudent ? (
                                     <div className="p-3 bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-600 rounded-xl text-xs font-medium">
