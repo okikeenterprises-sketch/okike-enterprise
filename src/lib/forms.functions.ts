@@ -186,6 +186,17 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
       if (!data.reg_no || !data.reg_no.toLowerCase().includes("csc")) {
         return { ok: false as const, error: "Invalid registration number. Department students must provide a valid registration number containing 'CSC'." };
       }
+
+      // Check for duplicate registration number
+      const { data: existingReg } = await supabaseAdmin
+        .from("bootcamp_registrations" as never)
+        .select("id")
+        .eq("reg_no", data.reg_no.trim())
+        .maybeSingle();
+
+      if (existingReg) {
+        return { ok: false as const, error: "This registration number has already been used for registration." };
+      }
     }
 
     const reference = "bootcamp_" + Math.random().toString(36).slice(2, 15) + "_" + Date.now();
