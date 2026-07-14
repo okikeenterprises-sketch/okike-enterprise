@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, GraduationCap, Calendar, CreditCard, Award, CheckCircle, Clock, BookOpen, Trash2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { approveVerification } from "@/lib/forms.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/bootcamp")({
@@ -19,6 +21,8 @@ type Registration = {
   payment_status: string;
   payment_reference: string | null;
   created_at: string;
+  reg_no: string | null;
+  verification_status: string | null;
 };
 
 const DEFAULT_MILESTONES = [
@@ -36,6 +40,7 @@ function AdminBootcampPage() {
   const [selectedProgress, setSelectedProgress] = useState<any | null>(null);
   const [milestonesUpdate, setMilestonesUpdate] = useState<Record<string, string>>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const verifyFn = useServerFn(approveVerification);
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) =>
@@ -84,6 +89,23 @@ function AdminBootcampPage() {
       .select("*")
       .order("updated_at", { ascending: false });
     setProgressRows(data ?? []);
+  }
+
+  async function updateVerification(id: string, status: "approved" | "rejected") {
+    const loadingToast = toast.loading(`Updating status to ${status}...`);
+    try {
+      const res = await verifyFn({ data: { id, status } });
+      toast.dismiss(loadingToast);
+      if (res.ok) {
+        toast.success(`Registration status updated to ${status}!`);
+        load();
+      } else {
+        toast.error(res.error || "Failed to update verification status.");
+      }
+    } catch (err: any) {
+      toast.dismiss(loadingToast);
+      toast.error(err.message || "An error occurred.");
+    }
   }
 
   useEffect(() => {
@@ -224,6 +246,11 @@ function AdminBootcampPage() {
                         <td className="px-6 py-4">
                           <div className="text-ink">{r.department}</div>
                           <div className="text-xs text-ink/50 mt-0.5">{r.level}</div>
+                          {r.reg_no && (
+                            <div className="text-[10px] bg-brand/5 border border-brand/10 text-brand px-1.5 py-0.5 rounded mt-1.5 font-mono inline-block">
+                              Reg: {r.reg_no}
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4 font-medium text-ink">
                           {r.course ?? "—"}
@@ -238,6 +265,38 @@ function AdminBootcampPage() {
                           }`}>
                             {r.payment_status}
                           </span>
+
+                          {r.payment_status === "free" && (
+                            <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                                r.verification_status === "approved"
+                                  ? "bg-emerald-500/10 text-emerald-600"
+                                  : r.verification_status === "rejected"
+                                    ? "bg-red-500/10 text-red-600"
+                                    : "bg-amber-500/10 text-amber-600 animate-pulse"
+                              }`}>
+                                {r.verification_status || "pending"}
+                              </span>
+
+                              {(r.verification_status === "pending" || !r.verification_status) && (
+                                <div className="flex gap-1">
+                                  <button
+                                    onClick={() => updateVerification(r.id, "approved")}
+                                    className="px-1.5 py-0.5 bg-emerald-500 text-white rounded text-[8px] font-semibold hover:opacity-90 transition"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    onClick={() => updateVerification(r.id, "rejected")}
+                                    className="px-1.5 py-0.5 bg-red-500 text-white rounded text-[8px] font-semibold hover:opacity-90 transition"
+                                  >
+                                    Reject
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
                           {r.payment_reference && (
                             <div className="text-[10px] text-ink/40 font-mono mt-1 select-all" title="Reference">
                               Ref: {r.payment_reference}

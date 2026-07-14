@@ -213,6 +213,7 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
         reg_no: data.reg_no ? data.reg_no.trim() : null,
         payment_status: data.is_department_student ? "free" : "pending",
         payment_reference: data.is_department_student ? null : reference,
+        verification_status: data.is_department_student ? "pending" : "approved",
       } as never);
 
     if (error) {
@@ -381,6 +382,7 @@ export const verifyBootcampPayment = createServerFn({ method: "POST" })
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Ticket Reference:</strong> ${data.reference}</p>
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Status:</strong> Paid & Confirmed</p>
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Date:</strong> 1st August 2026</p>
+<p style="font-size:13px;margin:12px 0 0;"><a href="https://okike.ai/api/receipt/${(reg as any).id}" style="color:#eab308;text-decoration:underline;font-weight:bold;">Click here to view/print your ticket/receipt</a></p>
 </td></tr>
 </table>
 </td></tr>
@@ -525,5 +527,65 @@ export const sendPasswordChangedEmail = createServerFn({ method: "POST" })
       console.error("Failed to send password changed email", err);
       return { ok: false as const, error: err.message };
     }
+  });
+
+export const approveVerification = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ id: z.string(), status: z.enum(["approved", "rejected"]) }).parse(d))
+  .handler(async ({ data }) => {
+    // 1. Update database
+    const { data: reg, error } = await supabaseAdmin
+      .from("bootcamp_registrations" as never)
+      .update({ verification_status: data.status } as never)
+      .eq("id" as never, data.id as never)
+      .select("*")
+      .single();
+
+    if (error || !reg) {
+      return { ok: false as const, error: "Failed to update verification status." };
+    }
+
+    // 2. If approved, send confirmation email
+    if (data.status === "approved") {
+      const appHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Summit Admission Confirmed</title></head>
+<body style="margin:0;padding:0;background:#111;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#111">
+<tr><td align="center" style="padding:40px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#0a0a0a;border-top:4px solid #eab308;">
+<tr><td align="center" style="padding:32px 40px 20px;"><a href="https://okikeenterprises.com"><img src="https://res.cloudinary.com/djzsrfc6h/image/upload/v1781531660/Asset_40_q7oeri.png" alt="OKIKE" width="120" style="display:block;border:0;"/></a></td></tr>
+<tr><td style="padding:0 40px;"><div style="height:2px;background:#eab308;"></div></td></tr>
+<tr><td style="padding:36px 40px 24px;text-align:center;">
+<p style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#eab308;margin:0 0 10px;">Registration Approved</p>
+<h1 style="font-size:32px;font-weight:900;color:#fff;margin:0 0 14px;line-height:1.1;">Your Registration is Approved, <span style="color:#eab308;">${(reg as any).name.split(" ")[0]}!</span></h1>
+<p style="font-size:15px;color:#888;margin:0 0 0;line-height:1.7;">Your free student admission for the <strong style="color:#fff;">Computing Synergy Summit</strong> starting on <strong style="color:#fff;">1st August 2026</strong> has been verified. See you there!</p>
+</td></tr>
+<tr><td style="padding:8px 40px 32px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#111;border-left:4px solid #eab308;">
+<tr><td style="padding:18px 22px;">
+<p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 12px;">Your Summit Ticket:</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Course Track:</strong> ${(reg as any).course || "General Track"}</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Registration No:</strong> ${(reg as any).reg_no || "N/A"}</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><a href="https://okike.ai/api/receipt/${(reg as any).id}" style="color:#eab308;text-decoration:underline;">Click here to view/print your ticket/receipt</a></p>
+</td></tr>
+</table>
+</td></tr>
+<tr><td style="padding:8px 40px 36px;text-align:center;">
+<p style="font-size:13px;color:#555;margin:0;">Questions? <a href="mailto:support@okikeenterprises.com" style="color:#eab308;text-decoration:none;">support@okikeenterprises.com</a></p>
+</td></tr>
+<tr><td style="padding:16px 40px 28px;border-top:1px solid #1a1a1a;text-align:center;">
+<p style="font-size:12px;color:#444;margin:0;">&copy; ${new Date().getFullYear()} OKIKE Enterprises &nbsp;&middot;&nbsp; <a href="https://okikeenterprises.com" style="color:#eab308;text-decoration:none;">okikeenterprises.com</a></p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+      await sendEmail({
+        to: (reg as any).email,
+        subject: "Admission Approved — Computing Synergy Summit",
+        html: appHtml,
+      });
+    }
+
+    return { ok: true as const };
   });
 

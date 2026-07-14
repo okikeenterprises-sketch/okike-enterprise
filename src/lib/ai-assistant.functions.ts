@@ -47,7 +47,7 @@ export const askAssistant = createServerFn({ method: "POST" })
       })
       .parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       return { ok: false as const, error: "AI is not configured." };
@@ -85,6 +85,46 @@ export const askAssistant = createServerFn({ method: "POST" })
       }
     }
 
+    let lmsContext = "";
+    try {
+      const userEmail = context.claims?.email;
+      if (userEmail) {
+        const { data: regs } = await (context.supabase as any)
+          .from("bootcamp_registrations")
+          .select("course")
+          .ilike("email", userEmail);
+
+        const tracks = (regs ?? []).map((r: any) => r.course).filter(Boolean);
+        if (tracks.length > 0) {
+          const { data: courses } = await (context.supabase as any)
+            .from("courses")
+            .select("title, lessons, milestones")
+            .in("track", tracks);
+
+          if (courses && courses.length > 0) {
+            lmsContext = "\n\nSTUDENT ACADEMY SYLLABUS & ROADMAP:\n";
+            for (const course of courses) {
+              lmsContext += `\nCOURSE: ${course.title}\n`;
+              if (Array.isArray(course.lessons) && course.lessons.length > 0) {
+                lmsContext += `- Lessons:\n`;
+                for (const lesson of course.lessons) {
+                  lmsContext += `  • ${lesson}\n`;
+                }
+              }
+              if (Array.isArray(course.milestones) && course.milestones.length > 0) {
+                lmsContext += `- Milestones:\n`;
+                for (const m of course.milestones) {
+                  lmsContext += `  • ${(m as any).title || m}\n`;
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load RAG syllabus context for AI assistant", err);
+    }
+
     const system =
       data.system ??
       `You are OKIKE AI — a concise, helpful assistant inside the OKIKE client dashboard. Answer in 1-3 short paragraphs. Be practical.
@@ -97,7 +137,7 @@ For bootcamp students (Computing Synergy Summit commencing August 1, 2026):
 - They can register for multiple tracks.
 - CS/IT department students (Computer Science, Information Technology, Software Engineering, Cyber Security) get free admission by entering a valid, unique registration number containing 'CSC'.
 - Non-department students pay a registration fee of ₦5,000.
-- They have access to syllabus modules, roadmap milestones, live night sessions, downloadable materials, quizzes, and assignments for all registered course tracks in their dashboard.${projectContext}`;
+- They have access to syllabus modules, roadmap milestones, live night sessions, downloadable materials, quizzes, and assignments for all registered course tracks in their dashboard.${projectContext}${lmsContext}`;
 
     try {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -567,4 +607,68 @@ export const generateInsights = createServerFn({ method: "POST" })
     }
 
     return { ok: true, insights };
+  });
+
+const ReviewInputSchema = z.object({
+  assignmentTitle: z.string(),
+  instructions: z.string(),
+  submissionText: z.string(),
+  maxPoints: z.number(),
+});
+
+export const reviewSubmission = createServerFn({ method: "POST" })
+  .inputValidator((d) => ReviewInputSchema.parse(d))
+  .handler(async ({ data }) => {
+    const apiKey = process.env.OPENROUTER_API_KEY || "";
+    if (!apiKey) {
+      return { ok: false as const, error: "AI is not configured." };
+    }
+
+    const systemPrompt = `You are an expert AI teaching assistant grading a student's project/code submission.
+Review the following assignment constraints and student work, evaluate their score out of ${data.maxPoints}, and write constructive feedback.
+
+Assignment: ${data.assignmentTitle}
+Instructions: ${data.instructions}
+Student Submission: ${data.submissionText}
+
+Your response must be in JSON format:
+{
+  "score": number, // integer score between 0 and ${data.maxPoints} based on quality of submission
+  "feedback": "string" // concise, professional review and suggestions for improvement (1-3 paragraphs)
+}`;
+
+    try {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://okike.ai",
+          "X-Title": "OKIKE Submission Reviewer",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-4o-mini",
+          messages: [{ role: "system", content: systemPrompt }],
+          response_format: { type: "json_object" }
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        return { ok: false as const, error: `AI request failed: ${text.slice(0, 200)}` };
+      }
+
+      const json = await res.json();
+      const content = json?.choices?.[0]?.message?.content ?? "";
+      const parsed = JSON.parse(content);
+      
+      return {
+        ok: true as const,
+        score: typeof parsed.score === "number" ? parsed.score : Math.round(data.maxPoints * 0.8),
+        feedback: parsed.feedback || "Good effort on the submission."
+      };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "AI review failed.";
+      return { ok: false as const, error: msg };
+    }
   });

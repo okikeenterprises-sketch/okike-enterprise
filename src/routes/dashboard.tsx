@@ -557,6 +557,26 @@ function progressFor(projectId: string, milestones: Milestone[]) {
   return Math.round((done / own.length) * 100);
 }
 
+function getGoogleCalendarLink(title: string, startTimeStr: string, meetingUrl: string) {
+  try {
+    const startDate = new Date(startTimeStr);
+    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
+
+    const formatISO = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    };
+
+    const startISO = formatISO(startDate);
+    const endISO = formatISO(endDate);
+
+    const details = `Join the live session here: ${meetingUrl}`;
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startISO}/${endISO}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(meetingUrl)}`;
+  } catch (err) {
+    return "#";
+  }
+}
+
 function DashboardOverview({
   firstName,
   greeting,
@@ -678,6 +698,16 @@ function DashboardOverview({
                     <span className="font-medium text-ink/80 truncate block">{reg.payment_reference || "N/A (Free)"}</span>
                   </div>
                 </div>
+                {reg.payment_status !== "pending" && (
+                  <a
+                    href={`/api/receipt/${reg.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2.5 w-full py-2.5 rounded-xl border border-ink/10 hover:bg-ink/5 font-semibold text-xs uppercase tracking-wider block text-center text-ink transition"
+                  >
+                    Print Ticket / Receipt &rarr;
+                  </a>
+                )}
                 {reg.payment_status === "pending" && (
                   <button
                     type="button"
@@ -923,31 +953,80 @@ function MilestonesView({
         subtitle="Milestones appear once a project enters the build stage."
       />
     );
+
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-6">
       {projects.map((p) => {
         const own = milestones.filter((m) => m.project_id === p.id);
         if (!own.length) return null;
+        const doneCount = own.filter((m) => m.status === "done").length;
+        const progressPercent = Math.round((doneCount / own.length) * 100);
+
         return (
-          <section key={p.id} className="rounded-2xl bg-card ring-1 ring-ink/10 p-5">
-            <div className="font-medium mb-3">{p.title}</div>
-            <ol className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              {own.map((m) => (
-                <li
-                  key={m.id}
-                  className={`rounded-xl p-4 ring-1 ${m.status === "done"
-                    ? "bg-emerald-500/10 ring-emerald-500/20"
-                    : m.status === "active"
-                      ? "bg-brand/10 ring-brand/25"
-                      : "bg-ink/5 ring-ink/10"
-                    }`}
-                >
-                  <div className="text-xs uppercase tracking-wider text-ink/50">{m.position}</div>
-                  <div className="font-medium">{m.name}</div>
-                  <div className="text-xs capitalize mt-1 text-ink/60">{m.status}</div>
-                </li>
-              ))}
-            </ol>
+          <section key={p.id} className="rounded-3xl bg-card ring-1 ring-ink/10 p-6 flex flex-col gap-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-ink/5">
+              <div>
+                <h3 className="font-semibold text-base text-ink">{p.title}</h3>
+                <span className="text-[10px] text-ink/40 uppercase tracking-widest font-semibold">{p.package_name || "Custom Development Project"}</span>
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="flex-1 sm:w-36 bg-ink/5 rounded-full h-2 overflow-hidden ring-1 ring-ink/5">
+                  <div className="bg-brand h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+                </div>
+                <span className="text-xs font-mono font-bold text-brand shrink-0">{progressPercent}% Done</span>
+              </div>
+            </div>
+
+            <div className="relative pl-8 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-ink/10">
+              {own.map((m) => {
+                const isDone = m.status === "done";
+                const isActive = m.status === "active";
+
+                return (
+                  <div key={m.id} className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1.5 rounded-xl hover:bg-surface/50 transition-all">
+                    {/* Stepper Node */}
+                    <div className={`absolute -left-[29px] top-3.5 size-4 rounded-full border-2 transition-all flex items-center justify-center ${
+                      isDone
+                        ? "bg-emerald-500 border-emerald-500 text-white"
+                        : isActive
+                          ? "bg-card border-brand ring-4 ring-brand/10"
+                          : "bg-card border-ink/20"
+                    }`}>
+                      {isDone && (
+                        <svg className="size-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                      {isActive && <div className="size-1.5 rounded-full bg-brand animate-ping" />}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink/40">Step {m.position}</span>
+                        {isActive && (
+                          <span className="text-[8px] bg-brand/10 text-brand px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">
+                            Active Phase
+                          </span>
+                        )}
+                      </div>
+                      <h4 className={`text-sm font-semibold mt-0.5 ${isDone ? "text-ink/50 line-through decoration-ink/25" : "text-ink"}`}>{m.name}</h4>
+                    </div>
+
+                    <div className="shrink-0 flex items-center">
+                      <span className={`text-[9px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider ${
+                        isDone
+                          ? "bg-emerald-500/10 text-emerald-600"
+                          : isActive
+                            ? "bg-brand/10 text-brand"
+                            : "bg-ink/5 text-ink/40"
+                      }`}>
+                        {m.status === "done" ? "Completed" : m.status === "active" ? "In Progress" : "Queued"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </section>
         );
       })}
@@ -1300,7 +1379,7 @@ function CoursesView({ bootcampRegs }: { bootcampRegs: any[] }) {
   } | null>(null);
 
   // LMS tabs
-  const [activeTab, setActiveTab] = useState<"lessons" | "milestones" | "quizzes" | "assignments" | "virtual" | "materials">("lessons");
+  const [activeTab, setActiveTab] = useState<"lessons" | "milestones" | "quizzes" | "assignments" | "virtual" | "materials" | "sandbox">("lessons");
   const [activeLessonIndex, setActiveLessonIndex] = useState<number>(0);
 
   // Extra LMS module state variables
@@ -1667,6 +1746,14 @@ function CoursesView({ bootcampRegs }: { bootcampRegs: any[] }) {
               }`}
             >
               <Download className="size-4" /> Course Materials
+            </button>
+            <button
+              onClick={() => setActiveTab("sandbox")}
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition shrink-0 w-full text-left ${
+                activeTab === "sandbox" ? "bg-brand text-brand-foreground" : "bg-card hover:bg-ink/5 ring-1 ring-ink/10"
+              }`}
+            >
+              <Sparkles className="size-4" /> Coding Sandbox
             </button>
           </div>
 
@@ -2075,6 +2162,16 @@ function CoursesView({ bootcampRegs }: { bootcampRegs: any[] }) {
                               </span>
                             </div>
                             <p className="text-[10px] text-ink/40 font-mono mt-0.5">Time: {new Date(vc.meeting_time).toLocaleString()}</p>
+                            <div className="mt-1 flex items-center">
+                              <a
+                                href={getGoogleCalendarLink(`OKIKE Class: ${vc.title}`, vc.meeting_time, vc.meeting_url)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 text-[10px] text-brand hover:underline font-semibold"
+                              >
+                                <Calendar className="size-3" /> Add to Google Calendar
+                              </a>
+                            </div>
                           </div>
 
                           {isOnline ? (
@@ -2136,6 +2233,14 @@ function CoursesView({ bootcampRegs }: { bootcampRegs: any[] }) {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* TABS: CODING SANDBOX */}
+            {activeTab === "sandbox" && (
+              <SandboxTab
+                courseTitle={selectedCourse.title}
+                lessonTitle={selectedCourse.lessons[activeLessonIndex] || "General"}
+              />
             )}
 
           </div>
@@ -2676,5 +2781,32 @@ function MobileBottomNav({
         </button>
       </nav>
     </>
+  );
+}
+
+function SandboxTab({ courseTitle, lessonTitle }: { courseTitle: string; lessonTitle: string }) {
+  const sandboxUrl = `/sandbox?title=${encodeURIComponent(lessonTitle)}&html=${encodeURIComponent("<!-- " + lessonTitle + " Practice -->\n<h1>" + lessonTitle + " Sandbox</h1>\n<p>Start writing code here...</p>")}`;
+
+  return (
+    <div className="flex flex-col items-center justify-center text-center p-8 bg-surface rounded-2xl border border-dashed border-ink/15 my-6 max-w-xl mx-auto shadow-sm">
+      <div className="size-14 bg-brand/10 text-brand rounded-2xl flex items-center justify-center mb-4">
+        <Sparkles className="size-7 animate-pulse text-[#7c3aed]" />
+      </div>
+      <h3 className="font-semibold text-lg text-ink font-serif">Dedicated Code Sandbox</h3>
+      <p className="text-xs text-ink/65 mt-2 max-w-[42ch] leading-relaxed">
+        We have designed a premium fullscreen interactive code editor playground. Write HTML, CSS, and JS side-by-side with your <strong>{lessonTitle}</strong> module.
+      </p>
+      
+      <a
+        href={sandboxUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand text-brand-foreground px-6 py-3 text-xs font-bold uppercase tracking-wider hover:opacity-90 shadow-lg shadow-purple-500/10 active:scale-95 transition"
+      >
+        Launch Fullscreen Editor ❯
+      </a>
+      
+      <span className="text-[10px] text-ink/40 mt-3 font-medium">Opens in a new browser tab</span>
+    </div>
   );
 }

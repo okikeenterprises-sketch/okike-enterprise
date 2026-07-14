@@ -18,9 +18,12 @@ import {
   Loader2,
   Video,
   Download,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useServerFn } from "@tanstack/react-start";
+import { reviewSubmission } from "@/lib/ai-assistant.functions";
 
 export const Route = createFileRoute("/instructor/curriculum")({
   component: InstructorCurriculumPage,
@@ -109,6 +112,43 @@ function InstructorCurriculumPage() {
   const [selectedSubmission, setSelectedSubmission] = useState<any | null>(null);
   const [gradeScore, setGradeScore] = useState<number>(100);
   const [gradeFeedback, setGradeFeedback] = useState("");
+  
+  // AI Reviewer state
+  const [runningAIReview, setRunningAIReview] = useState(false);
+  const reviewFn = useServerFn(reviewSubmission);
+
+  async function runAIReview() {
+    if (!selectedSubmission) return;
+    const assignment = assignments.find(x => x.id === selectedSubmission.assignment_id);
+    if (!assignment) {
+      toast.error("Could not find associated assignment details.");
+      return;
+    }
+
+    setRunningAIReview(true);
+    try {
+      const res = await reviewFn({
+        data: {
+          assignmentTitle: assignment.title,
+          instructions: assignment.description || "",
+          submissionText: selectedSubmission.submission_text || "No submission text provided.",
+          maxPoints: assignment.max_points || 100
+        }
+      });
+
+      if (res.ok) {
+        setGradeScore(res.score);
+        setGradeFeedback(res.feedback);
+        toast.success("AI review draft loaded!");
+      } else {
+        toast.error(res.error || "Failed to run AI review.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "An error occurred during AI review.");
+    } finally {
+      setRunningAIReview(false);
+    }
+  }
 
   async function loadCourses() {
     try {
@@ -1202,6 +1242,20 @@ function InstructorCurriculumPage() {
                                 </div>
                               )}
                             </div>
+
+                            <button
+                              type="button"
+                              onClick={runAIReview}
+                              disabled={runningAIReview}
+                              className="w-full py-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition disabled:opacity-50"
+                            >
+                              {runningAIReview ? (
+                                <Loader2 className="size-3.5 animate-spin" />
+                              ) : (
+                                <Sparkles className="size-3.5" />
+                              )}
+                              {runningAIReview ? "AI Reviewing..." : "Get AI Review & Draft Grade"}
+                            </button>
 
                             <form onSubmit={handleSubmitGrade} className="space-y-3 border-t border-ink/5 pt-3">
                               <div>

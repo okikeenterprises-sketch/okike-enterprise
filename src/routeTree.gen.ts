@@ -13,6 +13,7 @@ import { Route as ThankYouRouteImport } from './routes/thank-you'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as SandboxRouteImport } from './routes/sandbox'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as LoginRouteImport } from './routes/login'
@@ -43,6 +44,7 @@ import { Route as AdminInquiriesRouteImport } from './routes/admin.inquiries'
 import { Route as AdminBootcampRouteImport } from './routes/admin.bootcamp'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as ApiReceiptIdRouteImport } from './routes/api.receipt.$id'
 import { Route as ApiCronPublishBlogRouteImport } from './routes/api.cron.publish-blog'
 import { Route as AdminContentTypeRouteImport } from './routes/admin.content.$type'
 
@@ -64,6 +66,11 @@ const SignupRoute = SignupRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SandboxRoute = SandboxRouteImport.update({
+  id: '/sandbox',
+  path: '/sandbox',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -216,6 +223,11 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiReceiptIdRoute = ApiReceiptIdRouteImport.update({
+  id: '/api/receipt/$id',
+  path: '/api/receipt/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCronPublishBlogRoute = ApiCronPublishBlogRouteImport.update({
   id: '/api/cron/publish-blog',
   path: '/api/cron/publish-blog',
@@ -242,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/portfolio': typeof PortfolioRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sandbox': typeof SandboxRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -264,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/instructor/': typeof InstructorIndexRoute
   '/admin/content/$type': typeof AdminContentTypeRoute
   '/api/cron/publish-blog': typeof ApiCronPublishBlogRoute
+  '/api/receipt/$id': typeof ApiReceiptIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -277,6 +291,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/portfolio': typeof PortfolioRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sandbox': typeof SandboxRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -299,6 +314,7 @@ export interface FileRoutesByTo {
   '/instructor': typeof InstructorIndexRoute
   '/admin/content/$type': typeof AdminContentTypeRoute
   '/api/cron/publish-blog': typeof ApiCronPublishBlogRoute
+  '/api/receipt/$id': typeof ApiReceiptIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -316,6 +332,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/portfolio': typeof PortfolioRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sandbox': typeof SandboxRoute
   '/services': typeof ServicesRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -338,6 +355,7 @@ export interface FileRoutesById {
   '/instructor/': typeof InstructorIndexRoute
   '/admin/content/$type': typeof AdminContentTypeRoute
   '/api/cron/publish-blog': typeof ApiCronPublishBlogRoute
+  '/api/receipt/$id': typeof ApiReceiptIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -356,6 +374,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/portfolio'
     | '/reset-password'
+    | '/sandbox'
     | '/services'
     | '/signup'
     | '/sitemap.xml'
@@ -378,6 +397,7 @@ export interface FileRouteTypes {
     | '/instructor/'
     | '/admin/content/$type'
     | '/api/cron/publish-blog'
+    | '/api/receipt/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -391,6 +411,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/portfolio'
     | '/reset-password'
+    | '/sandbox'
     | '/services'
     | '/signup'
     | '/sitemap.xml'
@@ -413,6 +434,7 @@ export interface FileRouteTypes {
     | '/instructor'
     | '/admin/content/$type'
     | '/api/cron/publish-blog'
+    | '/api/receipt/$id'
   id:
     | '__root__'
     | '/'
@@ -429,6 +451,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/portfolio'
     | '/reset-password'
+    | '/sandbox'
     | '/services'
     | '/signup'
     | '/sitemap.xml'
@@ -451,6 +474,7 @@ export interface FileRouteTypes {
     | '/instructor/'
     | '/admin/content/$type'
     | '/api/cron/publish-blog'
+    | '/api/receipt/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -468,11 +492,13 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PortfolioRoute: typeof PortfolioRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SandboxRoute: typeof SandboxRoute
   ServicesRoute: typeof ServicesRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ThankYouRoute: typeof ThankYouRoute
   ApiCronPublishBlogRoute: typeof ApiCronPublishBlogRoute
+  ApiReceiptIdRoute: typeof ApiReceiptIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -503,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sandbox': {
+      id: '/sandbox'
+      path: '/sandbox'
+      fullPath: '/sandbox'
+      preLoaderRoute: typeof SandboxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -715,6 +748,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/receipt/$id': {
+      id: '/api/receipt/$id'
+      path: '/api/receipt/$id'
+      fullPath: '/api/receipt/$id'
+      preLoaderRoute: typeof ApiReceiptIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/cron/publish-blog': {
       id: '/api/cron/publish-blog'
       path: '/api/cron/publish-blog'
@@ -807,11 +847,13 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PortfolioRoute: PortfolioRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SandboxRoute: SandboxRoute,
   ServicesRoute: ServicesRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ThankYouRoute: ThankYouRoute,
   ApiCronPublishBlogRoute: ApiCronPublishBlogRoute,
+  ApiReceiptIdRoute: ApiReceiptIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
