@@ -234,7 +234,7 @@ function InstructorCurriculumPage() {
     if (!selectedCourse) return;
     setBusy(true);
 
-    const { error } = await (supabase as any)
+    const { data, error } = await (supabase as any)
       .from("courses")
       .update({
         lessons: lessons,
@@ -242,12 +242,17 @@ function InstructorCurriculumPage() {
         duration: duration.trim(),
         updated_at: new Date().toISOString()
       })
-      .eq("id", selectedCourse.id);
+      .eq("id", selectedCourse.id)
+      .select();
 
     setBusy(false);
     if (!error) {
-      toast.success("Course curriculum updated successfully!");
-      loadCourses();
+      if (data && data.length > 0) {
+        toast.success("Course curriculum updated successfully!");
+        loadCourses();
+      } else {
+        toast.error("Failed to save changes. You do not have permission to edit this course (or the course is not assigned to you).");
+      }
     } else {
       toast.error(error.message || "Failed to save syllabus changes.");
     }
