@@ -52,7 +52,9 @@ function BootcampPage() {
     const [selectedDept, setSelectedDept] = useState("");
     const isDeptStudent = ["Computer Science", "Information Technology", "Software Engineering", "Cyber Security"].includes(selectedDept);
 
-    const [userReg, setUserReg] = useState<any>(null);
+    const [userRegs, setUserRegs] = useState<any[]>([]);
+    const [showForm, setShowForm] = useState(false);
+    const [selectedLevel, setSelectedLevel] = useState("");
     const [loadingRegCheck, setLoadingRegCheck] = useState(true);
 
     const [cachedReg, setCachedReg] = useState<{
@@ -73,6 +75,9 @@ function BootcampPage() {
     const [courses, setCourses] = useState<string[]>(COURSES);
     const [dbLoading, setDbLoading] = useState(false);
 
+    const registeredTracks = userRegs.map((r) => r.course).filter(Boolean);
+    const availableCourses = courses.filter((c) => !registeredTracks.includes(c));
+
     useEffect(() => {
         async function checkExistingReg() {
             if (loading) return;
@@ -85,10 +90,13 @@ function BootcampPage() {
                     .from("bootcamp_registrations")
                     .select("*")
                     .ilike("email", session.user.email)
-                    .order("created_at", { ascending: false })
-                    .limit(1);
+                    .order("created_at", { ascending: false });
                 if (data && data.length > 0) {
-                    setUserReg(data[0]);
+                    setUserRegs(data);
+                    setSelectedDept(data[0].department || "");
+                    setSelectedLevel(data[0].level || "");
+                } else {
+                    setUserRegs([]);
                 }
             } catch (err) {
                 console.error("Error checking registration", err);
@@ -498,45 +506,54 @@ function BootcampPage() {
                         <div className="bg-card ring-1 ring-ink/10 rounded-2xl p-6 md:p-8 text-center text-ink/40 text-sm">
                             Checking registration status...
                         </div>
-                    ) : userReg ? (
+                    ) : userRegs.length > 0 && !showForm ? (
                         <div className="bg-card ring-1 ring-ink/10 rounded-2xl p-6 md:p-8 flex flex-col gap-5">
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <h3 className="font-semibold text-xl text-ink">You're Registered!</h3>
-                                    <p className="text-xs text-ink/50 mt-1">Computing Synergy Summit 2026</p>
-                                </div>
-                                <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                                    userReg.payment_status === "paid"
-                                        ? "bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20"
-                                        : userReg.payment_status === "free"
-                                            ? "bg-blue-500/10 text-blue-600 ring-1 ring-blue-500/20"
-                                            : "bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20"
-                                }`}>
-                                    {userReg.payment_status === "paid" ? "Confirmed (Paid)" : userReg.payment_status === "free" ? "Confirmed (Free)" : "Payment Pending"}
-                                </span>
+                            <div className="flex flex-col gap-1">
+                                <h3 className="font-semibold text-xl text-ink">You're Registered!</h3>
+                                <p className="text-xs text-ink/50">Computing Synergy Summit 2026</p>
                             </div>
 
                             <p className="text-sm text-ink/70 leading-relaxed">
-                                Hi <strong className="text-ink">{userReg.name}</strong>, your spot is secured. You can view your ticket and project status on your dashboard.
+                                Hi <strong className="text-ink">{userRegs[0].name}</strong>, you have secured your spot for the following track(s):
                             </p>
 
-                            <div className="grid grid-cols-2 gap-4 bg-surface ring-1 ring-ink/5 rounded-xl p-4 text-xs">
-                                <div>
-                                    <span className="text-ink/40 uppercase tracking-wider block text-[10px]">Department</span>
-                                    <span className="font-medium text-ink/80">{userReg.department} ({userReg.level})</span>
-                                </div>
-                                <div>
-                                    <span className="text-ink/40 uppercase tracking-wider block text-[10px]">Course Track</span>
-                                    <span className="font-medium text-ink/80 truncate block">{userReg.course ?? "—"}</span>
-                                </div>
+                            <div className="flex flex-col gap-3">
+                                {userRegs.map((reg: any) => (
+                                    <div key={reg.id} className="p-4 bg-surface ring-1 ring-ink/5 rounded-xl text-xs flex items-center justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <div className="font-semibold text-ink text-sm truncate">{reg.course}</div>
+                                            <div className="text-ink/50 mt-0.5">{reg.department} ({reg.level})</div>
+                                        </div>
+                                        <span className={`text-[9px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider shrink-0 ${
+                                            reg.payment_status === "paid"
+                                                ? "bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20"
+                                                : reg.payment_status === "free"
+                                                    ? "bg-blue-500/10 text-blue-600 ring-1 ring-blue-500/20"
+                                                    : "bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20"
+                                        }`}>
+                                            {reg.payment_status === "paid" ? "Confirmed (Paid)" : reg.payment_status === "free" ? "Confirmed (Free)" : "Pending"}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
 
-                            <button
-                                onClick={() => navigate({ to: "/dashboard" })}
-                                className="w-full py-3.5 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition mt-2"
-                            >
-                                Go to Dashboard &rarr;
-                            </button>
+                            <div className="flex flex-col gap-2 mt-2">
+                                <button
+                                    onClick={() => navigate({ to: "/dashboard" })}
+                                    className="w-full py-3.5 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition"
+                                >
+                                    Go to Dashboard &rarr;
+                                </button>
+                                
+                                {availableCourses.length > 0 && (
+                                    <button
+                                        onClick={() => setShowForm(true)}
+                                        className="w-full py-3.5 rounded-xl bg-secondary hover:bg-ink/5 ring-1 ring-ink/10 text-ink font-semibold text-xs uppercase tracking-wider transition"
+                                    >
+                                        Register for another track &rarr;
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     ) : cachedReg ? (
                         cachedReg.status === "pending" ? (
@@ -621,8 +638,26 @@ function BootcampPage() {
                         )
                     ) : (
                         <div className="bg-card ring-1 ring-ink/10 rounded-2xl p-6 md:p-8">
-                            <h3 className="font-semibold text-xl mb-1">Register for the Summit</h3>
-                            <p className="text-sm text-ink/60 mb-6">Fill in your details below to secure your spot.</p>
+                            {userRegs.length > 0 ? (
+                                <div className="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h3 className="font-semibold text-xl">Register for another track</h3>
+                                        <p className="text-xs text-ink/50 mt-1">Select a new course track below</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowForm(false)}
+                                        className="text-xs text-brand hover:underline font-semibold"
+                                    >
+                                        ← Back
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <h3 className="font-semibold text-xl mb-1">Register for the Summit</h3>
+                                    <p className="text-sm text-ink/60 mb-6">Fill in your details below to secure your spot.</p>
+                                </>
+                            )}
 
                             <form onSubmit={onSubmit} className="flex flex-col gap-4">
                                 {user ? (
@@ -638,11 +673,12 @@ function BootcampPage() {
                                     </>
                                 )}
                                 <FormField 
+                                    key={userRegs[0]?.phone || "phone"}
                                     label="Phone / WhatsApp" 
                                     name="phone" 
                                     required 
                                     placeholder="+234 800 000 0000" 
-                                    defaultValue={user?.phone || user?.user_metadata?.phone || ""}
+                                    defaultValue={userRegs[0]?.phone || user?.phone || user?.user_metadata?.phone || ""}
                                 />
 
                                 <label className="flex flex-col gap-1.5">
@@ -674,9 +710,11 @@ function BootcampPage() {
                                         className="bg-surface ring-1 ring-ink/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
                                     >
                                         <option value="" disabled>Select your course track</option>
-                                        {courses.map((c) => (
-                                            <option key={c} value={c}>{c}</option>
-                                        ))}
+                                        {courses
+                                            .filter(c => !registeredTracks.includes(c))
+                                            .map((c) => (
+                                                <option key={c} value={c}>{c}</option>
+                                            ))}
                                     </select>
                                 </label>
 
@@ -687,7 +725,8 @@ function BootcampPage() {
                                     <select
                                         name="level"
                                         required
-                                        defaultValue=""
+                                        value={selectedLevel}
+                                        onChange={(e) => setSelectedLevel(e.target.value)}
                                         className="bg-surface ring-1 ring-ink/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
                                     >
                                         <option value="" disabled>Select your level</option>

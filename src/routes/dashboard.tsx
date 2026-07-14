@@ -93,7 +93,7 @@ function DashboardPage() {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [updates, setUpdates] = useState<Update[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [bootcampReg, setBootcampReg] = useState<any>(null);
+  const [bootcampRegs, setBootcampRegs] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
@@ -117,8 +117,7 @@ function DashboardPage() {
             .from("bootcamp_registrations")
             .select("*")
             .ilike("email", session!.user.email)
-            .order("created_at", { ascending: false })
-            .limit(1),
+            .order("created_at", { ascending: false }),
         ]);
 
         if (!active) return;
@@ -149,7 +148,7 @@ function DashboardPage() {
         setProjects((p ?? []) as Project[]);
         setMilestones((mRes.data ?? []) as Milestone[]);
         setUpdates((uRes.data ?? []) as Update[]);
-        setBootcampReg(b && b.length > 0 ? b[0] : null);
+        setBootcampRegs(b ?? []);
       } catch (err) {
         console.error("Dashboard loading error:", err);
       } finally {
@@ -499,14 +498,14 @@ function DashboardPage() {
                 onOpenAI={() => setSection("ai")}
                 onSeeProjects={() => setSection("projects")}
                 onPayDeposit={handlePayDeposit}
-                bootcampReg={bootcampReg}
+                bootcampRegs={bootcampRegs}
                 onPayBootcamp={handlePayBootcamp}
               />
             )}
             {section === "projects" && (
               <ProjectsView projects={projects} milestones={milestones} loading={dataLoading} onPayDeposit={handlePayDeposit} />
             )}
-            {section === "courses" && <CoursesView bootcampReg={bootcampReg} />}
+            {section === "courses" && <CoursesView bootcampRegs={bootcampRegs} />}
             {section === "ai" && (
               <AIView
                 firstName={firstName}
@@ -569,7 +568,7 @@ function DashboardOverview({
   onOpenAI,
   onSeeProjects,
   onPayDeposit,
-  bootcampReg,
+  bootcampRegs,
   onPayBootcamp,
 }: {
   firstName: string;
@@ -582,7 +581,7 @@ function DashboardOverview({
   onOpenAI: () => void;
   onSeeProjects: () => void;
   onPayDeposit: (p: Project) => void;
-  bootcampReg: any;
+  bootcampRegs: any[];
   onPayBootcamp: (reg: any) => void;
 }) {
   const active = projects
@@ -643,50 +642,54 @@ function DashboardOverview({
           </div>
         </section>
 
-        {/* Bootcamp ticket */}
-        {bootcampReg && (
-          <section className="rounded-2xl bg-card ring-1 ring-ink/10 p-6 flex flex-col gap-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="font-semibold text-lg flex items-center gap-2">
-                  <Calendar className="size-5 text-brand" />
-                  Computing Synergy Summit
-                </h2>
-                <p className="text-xs text-ink/50 mt-1">1st August 2026 · Venue TBA</p>
-              </div>
-              <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                bootcampReg.payment_status === "paid"
-                  ? "bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20"
-                  : bootcampReg.payment_status === "free"
-                    ? "bg-blue-500/10 text-blue-600 ring-1 ring-blue-500/20"
-                    : "bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20 animate-pulse"
-              }`}>
-                {bootcampReg.payment_status === "paid" ? "Confirmed (Paid)" : bootcampReg.payment_status === "free" ? "Confirmed (Free)" : "Payment Pending"}
-              </span>
-            </div>
-            <p className="text-sm text-ink/75 leading-relaxed">
-              Hi <strong className="text-ink">{bootcampReg.name}</strong>, your spot is reserved for the Computing Synergy Summit.
-            </p>
-            <div className="grid grid-cols-2 gap-4 bg-surface ring-1 ring-ink/5 rounded-xl p-4 text-xs">
-              <div>
-                <span className="text-ink/40 uppercase tracking-wider block text-[10px]">Department</span>
-                <span className="font-medium text-ink/80">{bootcampReg.department} ({bootcampReg.level})</span>
-              </div>
-              <div>
-                <span className="text-ink/40 uppercase tracking-wider block text-[10px]">Ticket Reference</span>
-                <span className="font-medium text-ink/80 truncate block">{bootcampReg.payment_reference || "N/A (Free)"}</span>
-              </div>
-            </div>
-            {bootcampReg.payment_status === "pending" && (
-              <button
-                type="button"
-                onClick={() => onPayBootcamp(bootcampReg)}
-                className="w-full py-3 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition animate-pulse"
-              >
-                Pay Registration Fee (₦5,000) &rarr;
-              </button>
-            )}
-          </section>
+        {/* Bootcamp tickets */}
+        {bootcampRegs && bootcampRegs.length > 0 && (
+          <div className="flex flex-col gap-4">
+            {bootcampRegs.map((reg: any) => (
+              <section key={reg.id} className="rounded-2xl bg-card ring-1 ring-ink/10 p-6 flex flex-col gap-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="font-semibold text-lg flex items-center gap-2">
+                      <Calendar className="size-5 text-brand" />
+                      Computing Synergy Summit — {reg.course}
+                    </h2>
+                    <p className="text-xs text-ink/50 mt-1">1st August 2026 · Venue TBA</p>
+                  </div>
+                  <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                    reg.payment_status === "paid"
+                      ? "bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20"
+                      : reg.payment_status === "free"
+                        ? "bg-blue-500/10 text-blue-600 ring-1 ring-blue-500/20"
+                        : "bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20 animate-pulse"
+                  }`}>
+                    {reg.payment_status === "paid" ? "Confirmed (Paid)" : reg.payment_status === "free" ? "Confirmed (Free)" : "Payment Pending"}
+                  </span>
+                </div>
+                <p className="text-sm text-ink/75 leading-relaxed">
+                  Hi <strong className="text-ink">{reg.name}</strong>, your spot is reserved for the <strong className="text-ink">{reg.course}</strong> track.
+                </p>
+                <div className="grid grid-cols-2 gap-4 bg-surface ring-1 ring-ink/5 rounded-xl p-4 text-xs">
+                  <div>
+                    <span className="text-ink/40 uppercase tracking-wider block text-[10px]">Department</span>
+                    <span className="font-medium text-ink/80">{reg.department} ({reg.level})</span>
+                  </div>
+                  <div>
+                    <span className="text-ink/40 uppercase tracking-wider block text-[10px]">Ticket Reference</span>
+                    <span className="font-medium text-ink/80 truncate block">{reg.payment_reference || "N/A (Free)"}</span>
+                  </div>
+                </div>
+                {reg.payment_status === "pending" && (
+                  <button
+                    type="button"
+                    onClick={() => onPayBootcamp(reg)}
+                    className="w-full py-3 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition animate-pulse"
+                  >
+                    Pay Registration Fee (₦5,000) &rarr;
+                  </button>
+                )}
+              </section>
+            ))}
+          </div>
         )}
 
         {/* Stats — only 3 honest tiles */}
@@ -1279,7 +1282,7 @@ const DEFAULT_MILESTONES = [
   { id: "ms-4", title: "Summit Capstone Approved", description: "Deploy your final summit capstone application/design project and pass instructor review." }
 ];
 
-function CoursesView({ bootcampReg }: { bootcampReg: any }) {
+function CoursesView({ bootcampRegs }: { bootcampRegs: any[] }) {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1394,16 +1397,17 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
 
         setProgress(spRow || { lessons_completed: [], quiz_scores: {}, milestone_status: {}, attendance_mode: "physical" });
 
-        const regTrack = bootcampReg?.course;
-        const isConfirmed = !!bootcampReg;
+        const isConfirmed = bootcampRegs && bootcampRegs.length > 0;
+        const registeredTracks = bootcampRegs.map(r => r.course).filter(Boolean);
+        const regTrackStr = registeredTracks.join(" & ");
 
         setIsRegistered(isConfirmed);
-        setRegisteredTrack(regTrack || null);
+        setRegisteredTrack(regTrackStr || null);
 
         let filtered: Course[] = [];
         const sourceData = dbCourses ?? [];
 
-        if (isConfirmed && regTrack) {
+        if (isConfirmed && registeredTracks.length > 0) {
           filtered = (sourceData as any[])
             .map((course: any) => {
               const completedList = spRow?.lessons_completed || [];
@@ -1420,30 +1424,32 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
               };
             })
             .filter((course) => {
-              const reg = regTrack.toLowerCase().trim();
               const title = (course.title || "").toLowerCase().trim();
               const track = (course.track || "").toLowerCase().trim();
               
-              if (title === reg || track === reg) return true;
+              return registeredTracks.some(regTrack => {
+                const reg = regTrack.toLowerCase().trim();
+                if (title === reg || track === reg) return true;
 
-              // Fuzzy match overlaps (e.g. Cyber Security -> Cyber Security Fundamentals)
-              if (reg.includes("cyber") && (title.includes("cyber") || track.includes("cyber"))) return true;
-              if (
-                (reg.includes("frontend") || reg.includes("backend") || reg.includes("web") || reg.includes("stack")) && 
-                (title.includes("stack") || title.includes("web") || title.includes("frontend") || title.includes("backend") || track.includes("web"))
-              ) {
-                return true;
-              }
-              if (
-                (reg.includes("design") || reg.includes("ui") || reg.includes("ux")) &&
-                (title.includes("design") || title.includes("ui") || title.includes("ux") || track.includes("design") || track.includes("ui"))
-              ) {
-                return true;
-              }
-              if (reg.includes("mobile") && (title.includes("mobile") || track.includes("mobile"))) return true;
-              if (reg.includes("python") && (title.includes("python") || track.includes("python"))) return true;
+                // Fuzzy match overlaps (e.g. Cyber Security -> Cyber Security Fundamentals)
+                if (reg.includes("cyber") && (title.includes("cyber") || track.includes("cyber"))) return true;
+                if (
+                  (reg.includes("frontend") || reg.includes("backend") || reg.includes("web") || reg.includes("stack")) && 
+                  (title.includes("stack") || title.includes("web") || title.includes("frontend") || title.includes("backend") || track.includes("web"))
+                ) {
+                  return true;
+                }
+                if (
+                  (reg.includes("design") || reg.includes("ui") || reg.includes("ux")) &&
+                  (title.includes("design") || title.includes("ui") || title.includes("ux") || track.includes("design") || track.includes("ui"))
+                ) {
+                  return true;
+                }
+                if (reg.includes("mobile") && (title.includes("mobile") || track.includes("mobile"))) return true;
+                if (reg.includes("python") && (title.includes("python") || track.includes("python"))) return true;
 
-              return false;
+                return false;
+              });
             });
         }
 
@@ -1455,7 +1461,7 @@ function CoursesView({ bootcampReg }: { bootcampReg: any }) {
       }
     }
     loadCoursesAndProgress();
-  }, [bootcampReg, session]);
+  }, [bootcampRegs, session]);
 
   // Lessons completed handler
   async function toggleLessonComplete(lessonTitle: string) {

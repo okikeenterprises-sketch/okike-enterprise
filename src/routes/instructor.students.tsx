@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Search, GraduationCap, Award, CheckCircle, Clock, CheckSquare } from "lucide-react";
+import { Users, Search, GraduationCap, Award, CheckCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -49,29 +49,33 @@ function InstructorStudentsPage() {
         const myCourses = courses.filter((c: any) => c.instructor_user_id === user.id);
         
         filteredProgress = (sp ?? []).filter((progressItem: any) => {
-          const studentReg = studentRegs.find(
+          const studentRegsForEmail = studentRegs.filter(
             (r: any) => r.email?.toLowerCase().trim() === progressItem.student_email?.toLowerCase().trim()
           );
-          if (!studentReg?.course) return false;
-          const regTrack = studentReg.course;
-          
-          return myCourses.some((c: any) => {
-            const reg = regTrack.toLowerCase().trim();
-            const title = (c.title || "").toLowerCase().trim();
-            const track = (c.track || "").toLowerCase().trim();
-            if (title === reg || track === reg) return true;
-            if (reg.includes("cyber") && (title.includes("cyber") || track.includes("cyber"))) return true;
-            if (
-              (reg.includes("frontend") || reg.includes("backend") || reg.includes("web") || reg.includes("stack")) && 
-              (title.includes("stack") || title.includes("web") || title.includes("frontend") || title.includes("backend") || track.includes("web"))
-            ) return true;
-            if (
-              (reg.includes("design") || reg.includes("ui") || reg.includes("ux")) &&
-              (title.includes("design") || title.includes("ui") || title.includes("ux") || track.includes("design") || track.includes("ui"))
-            ) return true;
-            if (reg.includes("mobile") && (title.includes("mobile") || track.includes("mobile"))) return true;
-            if (reg.includes("python") && (title.includes("python") || track.includes("python"))) return true;
-            return false;
+          if (studentRegsForEmail.length === 0) return false;
+
+          return studentRegsForEmail.some((studentReg: any) => {
+            if (!studentReg?.course) return false;
+            const regTrack = studentReg.course;
+
+            return myCourses.some((c: any) => {
+              const reg = regTrack.toLowerCase().trim();
+              const title = (c.title || "").toLowerCase().trim();
+              const track = (c.track || "").toLowerCase().trim();
+              if (title === reg || track === reg) return true;
+              if (reg.includes("cyber") && (title.includes("cyber") || track.includes("cyber"))) return true;
+              if (
+                (reg.includes("frontend") || reg.includes("backend") || reg.includes("web") || reg.includes("stack")) && 
+                (title.includes("stack") || title.includes("web") || title.includes("frontend") || title.includes("backend") || track.includes("web"))
+              ) return true;
+              if (
+                (reg.includes("design") || reg.includes("ui") || reg.includes("ux")) &&
+                (title.includes("design") || title.includes("ui") || title.includes("ux") || track.includes("design") || track.includes("ui"))
+              ) return true;
+              if (reg.includes("mobile") && (title.includes("mobile") || track.includes("mobile"))) return true;
+              if (reg.includes("python") && (title.includes("python") || track.includes("python"))) return true;
+              return false;
+            });
           });
         });
       }
@@ -88,29 +92,30 @@ function InstructorStudentsPage() {
     loadProgress();
   }, []);
 
-  function getStudentCourse(email: string) {
-    const studentReg = registrations.find(
+  function getStudentCourses(email: string) {
+    const studentRegs = registrations.filter(
       (r: any) => r.email?.toLowerCase().trim() === email.toLowerCase().trim()
     );
-    if (!studentReg?.course) return null;
-    const regTrack = studentReg.course;
-    return coursesList.find((c) => {
-      const reg = regTrack.toLowerCase().trim();
-      const title = (c.title || "").toLowerCase().trim();
-      const track = (c.track || "").toLowerCase().trim();
-      if (title === reg || track === reg) return true;
-      if (reg.includes("cyber") && (title.includes("cyber") || track.includes("cyber"))) return true;
-      if (
-        (reg.includes("frontend") || reg.includes("backend") || reg.includes("web") || reg.includes("stack")) && 
-        (title.includes("stack") || title.includes("web") || title.includes("frontend") || title.includes("backend") || track.includes("web"))
-      ) return true;
-      if (
-        (reg.includes("design") || reg.includes("ui") || reg.includes("ux")) &&
-        (title.includes("design") || title.includes("ui") || title.includes("ux") || track.includes("design") || track.includes("ui"))
-      ) return true;
-      if (reg.includes("mobile") && (title.includes("mobile") || track.includes("mobile"))) return true;
-      if (reg.includes("python") && (title.includes("python") || track.includes("python"))) return true;
-      return false;
+    const regTracks = studentRegs.map(r => r.course).filter(Boolean);
+    return coursesList.filter((c) => {
+      return regTracks.some(regTrack => {
+        const reg = regTrack.toLowerCase().trim();
+        const title = (c.title || "").toLowerCase().trim();
+        const track = (c.track || "").toLowerCase().trim();
+        if (title === reg || track === reg) return true;
+        if (reg.includes("cyber") && (title.includes("cyber") || track.includes("cyber"))) return true;
+        if (
+          (reg.includes("frontend") || reg.includes("backend") || reg.includes("web") || reg.includes("stack")) && 
+          (title.includes("stack") || title.includes("web") || title.includes("frontend") || title.includes("backend") || track.includes("web"))
+        ) return true;
+        if (
+          (reg.includes("design") || reg.includes("ui") || reg.includes("ux")) &&
+          (title.includes("design") || title.includes("ui") || title.includes("ux") || track.includes("design") || track.includes("ui"))
+        ) return true;
+        if (reg.includes("mobile") && (title.includes("mobile") || track.includes("mobile"))) return true;
+        if (reg.includes("python") && (title.includes("python") || track.includes("python"))) return true;
+        return false;
+      });
     });
   }
 
@@ -192,15 +197,22 @@ function InstructorStudentsPage() {
                       const scores = p.quiz_scores || {};
                       const milestones = p.milestone_status || {};
                       
-                      const course = getStudentCourse(p.student_email);
-                      const courseMilestones = course?.milestones || BACKUP_MILESTONES;
+                      const courses = getStudentCourses(p.student_email);
+                      const courseMilestones = courses.length > 0 ? courses.flatMap((c: any) => c.milestones || []) : BACKUP_MILESTONES;
                       const completedMilestones = Object.keys(milestones).filter(k => 
                         courseMilestones.some((m: any) => m.id === k) && milestones[k] === "completed"
                       ).length;
-
+                      
                       return (
                         <tr key={p.id} className="hover:bg-ink/5 transition text-xs">
-                          <td className="px-6 py-4 font-semibold text-ink">{p.student_email}</td>
+                          <td className="px-6 py-4 font-semibold text-ink">
+                            {p.student_email}
+                            {courses.length > 0 && (
+                              <div className="text-[10px] text-brand font-normal mt-0.5">
+                                {courses.map((c: any) => c.title).join(", ")}
+                              </div>
+                            )}
+                          </td>
                           <td className="px-6 py-4 font-mono">{completedCount} modules complete</td>
                           <td className="px-6 py-4">
                             {Object.keys(scores).length > 0 ? (
@@ -248,13 +260,13 @@ function InstructorStudentsPage() {
               <div className="flex flex-col gap-4 border-t border-ink/5 pt-4">
                 {/* Modules completed checkbox */}
                 {(() => {
-                  const course = getStudentCourse(selectedProgress.student_email);
-                  const courseLessons = (course?.lessons as string[]) || [];
+                  const courses = getStudentCourses(selectedProgress.student_email);
+                  const courseLessons = courses.flatMap((c) => (c.lessons as string[]) || []);
 
                   return (
                     <div className="flex flex-col gap-2 p-3 bg-surface rounded-xl">
                       <div className="text-xs font-semibold text-ink flex items-center gap-1">
-                        <CheckSquare className="size-4 text-brand" /> Course Modules Completion
+                        <CheckCircle className="size-4 text-brand" /> Course Modules Completion
                       </div>
                       {courseLessons.length > 0 ? (
                         <div className="space-y-2 mt-2 max-h-48 overflow-y-auto pr-1">
@@ -286,8 +298,8 @@ function InstructorStudentsPage() {
 
                 {/* Milestones status updates */}
                 {(() => {
-                  const course = getStudentCourse(selectedProgress.student_email);
-                  const courseMilestones = course?.milestones || BACKUP_MILESTONES;
+                  const courses = getStudentCourses(selectedProgress.student_email);
+                  const courseMilestones = courses.length > 0 ? courses.flatMap((c: any) => c.milestones || []) : BACKUP_MILESTONES;
 
                   return (
                     <div className="flex flex-col gap-2.5">
