@@ -49,12 +49,15 @@ function BootcampPage() {
     const register = useServerFn(submitBootcampRegistration);
     const verifyPayment = useServerFn(verifyBootcampPayment);
     const [busy, setBusy] = useState(false);
+    const [regType, setRegType] = useState<"student" | "non-student">("student");
     const [selectedDept, setSelectedDept] = useState("");
-    const isDeptStudent = ["Computer Science", "Information Technology", "Software Engineering", "Cyber Security"].includes(selectedDept);
+    const [selectedLevel, setSelectedLevel] = useState("");
+    const isDeptStudent = regType === "student" &&
+        ["Computer Science", "Information Technology", "Software Engineering", "Cyber Security"].includes(selectedDept) &&
+        selectedLevel !== "Not a Student";
 
     const [userRegs, setUserRegs] = useState<any[]>([]);
     const [showForm, setShowForm] = useState(false);
-    const [selectedLevel, setSelectedLevel] = useState("");
     const [loadingRegCheck, setLoadingRegCheck] = useState(true);
 
     const [cachedReg, setCachedReg] = useState<{
@@ -271,10 +274,10 @@ function BootcampPage() {
         const name = user ? (user.user_metadata?.full_name || "Student") : String(fd.get("name") || "");
         const email = user ? (user.email || "") : String(fd.get("email") || "").toLowerCase().trim();
         const phone = String(fd.get("phone") || "");
-        const department = String(fd.get("department") || "");
-        const level = String(fd.get("level") || "");
+        const department = regType === "student" ? String(fd.get("department") || "") : "General Public";
+        const level = regType === "student" ? String(fd.get("level") || "") : "Not a Student";
         const course = String(fd.get("course") || "");
-        const reg_no = isDeptStudent ? String(fd.get("reg_no") || "").trim() : "";
+        const reg_no = (regType === "student" && isDeptStudent) ? String(fd.get("reg_no") || "").trim() : "";
 
         if (isDeptStudent) {
             if (!reg_no || !reg_no.toLowerCase().includes("csc")) {
@@ -687,6 +690,46 @@ function BootcampPage() {
                                         <FormField label="Email address" name="email" type="email" required placeholder="john@example.com" />
                                     </>
                                 )}
+
+                                <div className="flex flex-col gap-1.5">
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
+                                        I am registering as <span className="text-brand">*</span>
+                                    </span>
+                                    <div className="grid grid-cols-2 p-1 bg-surface ring-1 ring-ink/10 rounded-xl">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setRegType("student");
+                                                if (selectedLevel === "Not a Student") {
+                                                    setSelectedLevel("");
+                                                }
+                                            }}
+                                            className={`py-2.5 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                                                regType === "student"
+                                                    ? "bg-brand text-brand-foreground shadow-sm font-bold"
+                                                    : "text-ink/60 hover:text-ink hover:bg-ink/5"
+                                            }`}
+                                        >
+                                            University Student
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setRegType("non-student");
+                                                setSelectedDept("");
+                                                setSelectedLevel("Not a Student");
+                                            }}
+                                            className={`py-2.5 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                                                regType === "non-student"
+                                                    ? "bg-brand text-brand-foreground shadow-sm font-bold"
+                                                    : "text-ink/60 hover:text-ink hover:bg-ink/5"
+                                            }`}
+                                        >
+                                            General Attendee
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <FormField 
                                     key={userRegs[0]?.phone || "phone"}
                                     label="Phone / WhatsApp" 
@@ -696,23 +739,25 @@ function BootcampPage() {
                                     defaultValue={userRegs[0]?.phone || user?.phone || user?.user_metadata?.phone || ""}
                                 />
 
-                                <label className="flex flex-col gap-1.5">
-                                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
-                                        Department <span className="text-brand">*</span>
-                                    </span>
-                                    <select
-                                        name="department"
-                                        required
-                                        value={selectedDept}
-                                        onChange={(e) => setSelectedDept(e.target.value)}
-                                        className="bg-surface ring-1 ring-ink/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
-                                    >
-                                        <option value="" disabled>Select your department</option>
-                                        {departments.map((d) => (
-                                            <option key={d} value={d}>{d}</option>
-                                        ))}
-                                    </select>
-                                </label>
+                                {regType === "student" && (
+                                    <label className="flex flex-col gap-1.5">
+                                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
+                                            Department <span className="text-brand">*</span>
+                                        </span>
+                                        <select
+                                            name="department"
+                                            required
+                                            value={selectedDept}
+                                            onChange={(e) => setSelectedDept(e.target.value)}
+                                            className="bg-surface ring-1 ring-ink/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                                        >
+                                            <option value="" disabled>Select your department</option>
+                                            {departments.map((d) => (
+                                                <option key={d} value={d}>{d}</option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                )}
 
                                 <label className="flex flex-col gap-1.5">
                                     <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
@@ -733,25 +778,27 @@ function BootcampPage() {
                                     </select>
                                 </label>
 
-                                <label className="flex flex-col gap-1.5">
-                                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
-                                        Level <span className="text-brand">*</span>
-                                    </span>
-                                    <select
-                                        name="level"
-                                        required
-                                        value={selectedLevel}
-                                        onChange={(e) => setSelectedLevel(e.target.value)}
-                                        className="bg-surface ring-1 ring-ink/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
-                                    >
-                                        <option value="" disabled>Select your level</option>
-                                        {LEVELS.map((l) => (
-                                            <option key={l} value={l}>{l}</option>
-                                        ))}
-                                    </select>
-                                </label>
+                                {regType === "student" && (
+                                    <label className="flex flex-col gap-1.5">
+                                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
+                                            Level <span className="text-brand">*</span>
+                                        </span>
+                                        <select
+                                            name="level"
+                                            required
+                                            value={selectedLevel}
+                                            onChange={(e) => setSelectedLevel(e.target.value)}
+                                            className="bg-surface ring-1 ring-ink/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                                        >
+                                            <option value="" disabled>Select your level</option>
+                                            {LEVELS.map((l) => (
+                                                <option key={l} value={l}>{l}</option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                )}
 
-                                {isDeptStudent && (
+                                {regType === "student" && isDeptStudent && (
                                     <div className="flex flex-col gap-1">
                                         <FormField 
                                             label="University Registration Number" 
@@ -769,7 +816,7 @@ function BootcampPage() {
                                     <div className="p-3 bg-emerald-500/10 ring-1 ring-emerald-500/20 text-emerald-600 rounded-xl text-xs font-medium">
                                         ✓ Free admission (CS / IT department student)
                                     </div>
-                                ) : selectedDept ? (
+                                ) : selectedDept || regType === "non-student" ? (
                                     <div className="p-3 bg-brand/5 ring-1 ring-brand/20 rounded-xl text-xs text-ink/70">
                                         ₦5,000 payment will be handled securely via Korapay checkout modal.
                                     </div>
@@ -778,7 +825,7 @@ function BootcampPage() {
                                 <button
                                     type="submit"
                                     disabled={busy || dbLoading}
-                                    className="bg-brand text-brand-foreground py-3.5 font-semibold text-sm uppercase tracking-widest hover:opacity-90 transition disabled:opacity-50 mt-2"
+                                    className="bg-brand text-brand-foreground py-3.5 font-semibold text-sm uppercase tracking-widest hover:opacity-90 transition disabled:opacity-50 mt-2 cursor-pointer"
                                 >
                                     {dbLoading ? "Loading Form..." : busy ? "Registering…" : isDeptStudent ? "Register Free →" : "Register & Pay Registration Fee →"}
                                 </button>
