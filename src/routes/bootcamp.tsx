@@ -921,13 +921,26 @@ function FormField({
 const CAREER_TRACKS = [
   {
     name: "Frontend Web Development",
-    role: "Frontend Engineer / React Developer",
-    description: "Craft visually stunning, highly interactive web applications. As a frontend engineer, you will bring designs to life, manage client-side state, and construct responsive interfaces that function across all devices.",
-    demand: "Very High" as const,
-    difficulty: "Beginner Friendly" as const,
-    salaryLocal: "₦300,000 - ₦1,200,000 / month",
-    salaryRemote: "$35,000 - $90,000 / year",
-    skills: ["HTML5 & CSS3", "Tailwind CSS", "Modern JavaScript (ES6+)", "React & JSX", "TypeScript", "Vite & Package Managers", "TanStack Router & Query", "Git & GitHub API Collaboration"],
+    roles: [
+      {
+        name: "Frontend Developer (Junior/Intermediate)",
+        description: "Build responsive web interfaces, handle styling, and implement interactive elements using HTML, CSS, JavaScript, and Tailwind CSS.",
+        demand: "High" as const,
+        difficulty: "Beginner Friendly" as const,
+        salaryLocal: "₦250,000 - ₦600,000 / month",
+        salaryRemote: "$25,000 - $60,000 / year",
+        skills: ["HTML5 & CSS3", "Tailwind CSS", "JavaScript ES6+", "DOM Manipulation", "Git Version Control", "Responsive Web Design"]
+      },
+      {
+        name: "React / Next.js Specialist (Advanced)",
+        description: "Develop high-performance, SEO-optimized React/Next.js applications. Implement complex client-side state management, React Query data fetching, dynamic routing, and backend integrations.",
+        demand: "Very High" as const,
+        difficulty: "Intermediate" as const,
+        salaryLocal: "₦500,000 - ₦1,200,000 / month",
+        salaryRemote: "$45,000 - $95,000 / year",
+        skills: ["React.js", "Next.js (App Router)", "TypeScript", "TanStack Query", "Zustand & Context API", "Vercel deployments", "API Integration"]
+      }
+    ],
     roadmap: [
       {
         title: "Stage 1: Web Fundamentals & Git Workspace",
@@ -953,13 +966,26 @@ const CAREER_TRACKS = [
   },
   {
     name: "Backend Web Development",
-    role: "Backend Engineer / API Developer",
-    description: "Architect the backbone of software systems. You will design databases, secure server operations, write microservices/APIs, and deploy robust cloud backend architectures.",
-    demand: "Very High" as const,
-    difficulty: "Intermediate" as const,
-    salaryLocal: "₦400,000 - ₦1,500,000 / month",
-    salaryRemote: "$40,000 - $110,000 / year",
-    skills: ["Node.js & Express", "PostgreSQL & SQL Schema", "Database Migrations", "API Security & JWT", "Supabase & Postgres Functions", "Serverless Functions & Edge", "REST & GraphQL", "CI/CD & Docker Basics"],
+    roles: [
+      {
+        name: "Backend Developer (Node/SQL)",
+        description: "Program scalable application servers and design normalized relational databases. Write secure RESTful APIs, manage server middleware, and implement JWT-based user authentication.",
+        demand: "High" as const,
+        difficulty: "Intermediate" as const,
+        salaryLocal: "₦350,000 - ₦800,000 / month",
+        salaryRemote: "$35,000 - $80,000 / year",
+        skills: ["Node.js", "Express.js", "SQL Databases", "PostgreSQL", "REST APIs", "JWT Auth", "MVC Architecture"]
+      },
+      {
+        name: "Cloud Architect (Supabase/Docker)",
+        description: "Design cloud database pipelines, serverless functions, database security logic (RLS), and containerized microservices. Implement CI/CD automation, scale database connection pools, and manage cloud environments.",
+        demand: "Very High" as const,
+        difficulty: "Advanced" as const,
+        salaryLocal: "₦650,000 - ₦1,600,000 / month",
+        salaryRemote: "$60,000 - $120,000 / year",
+        skills: ["Postgres Functions", "Row Level Security (RLS)", "Docker & Containers", "Supabase Backend", "GitHub Actions CI/CD", "Cloudflare CDN & Edge"]
+      }
+    ],
     roadmap: [
       {
         title: "Stage 1: Database Architecture & SQL",
@@ -985,13 +1011,26 @@ const CAREER_TRACKS = [
   },
   {
     name: "Product Design (UI/UX)",
-    role: "Product Designer / UI UX Researcher",
-    description: "Design products that feel intuitive and look spectacular. As a Product Designer, you will study user behavior, map flow logic, compile scalable design systems, and output high-fidelity prototypes.",
-    demand: "High" as const,
-    difficulty: "Beginner Friendly" as const,
-    salaryLocal: "₦250,000 - ₦1,000,000 / month",
-    salaryRemote: "$30,000 - $85,000 / year",
-    skills: ["UX Research & Personas", "User Journey Mapping", "Wireframing & FigJam", "Visual Design Principles", "Scalable Design Systems", "Figma Advanced Layouts", "High-Fidelity Prototyping", "Usability Testing & Case Studies"],
+    roles: [
+      {
+        name: "UI/UX Designer",
+        description: "Research user expectations, construct wireframes, and design beautiful high-fidelity software screens in Figma. Formulate user personas, map navigation journeys, and run usability feedback tests.",
+        demand: "High" as const,
+        difficulty: "Beginner Friendly" as const,
+        salaryLocal: "₦200,000 - ₦600,000 / month",
+        salaryRemote: "$30,000 - $70,000 / year",
+        skills: ["Figma Basics", "UX Research", "User Personas", "Wireframing", "UI Styling", "Usability Testing", "Interactive Prototypes"]
+      },
+      {
+        name: "Senior Product Designer",
+        description: "Scale interface designs by building reusable component-driven libraries and design systems in Figma. Lead product research, align visual design with development tokens, and structure premium responsive dashboard systems.",
+        demand: "Very High" as const,
+        difficulty: "Intermediate" as const,
+        salaryLocal: "₦500,000 - ₦1,200,000 / month",
+        salaryRemote: "$45,000 - $95,000 / year",
+        skills: ["Design Systems", "Figma Auto-Layout & Variables", "Component Libraries", "UX Strategy", "Developer Handoff", "Interactive micro-animations"]
+      }
+    ],
     roadmap: [
       {
         title: "Stage 1: UX Strategy & User Research",
@@ -1017,13 +1056,26 @@ const CAREER_TRACKS = [
   },
   {
     name: "Mobile App Development",
-    role: "Mobile App Developer / React Native Engineer",
-    description: "Create native and cross-platform mobile apps. You will construct high-performance iOS and Android user experiences, configure native hardware integrations, and handle app store releases.",
-    demand: "High" as const,
-    difficulty: "Intermediate" as const,
-    salaryLocal: "₦350,000 - ₦1,300,000 / month",
-    salaryRemote: "$40,000 - $95,000 / year",
-    skills: ["React Native Core", "Expo Framework", "Mobile UI Layouts", "Stack/Drawer Routing", "Native Device Hardware", "Offline Local Caching", "Push Notification Pipelines", "App Store Publishing"],
+    roles: [
+      {
+        name: "React Native Developer",
+        description: "Compile cross-platform iOS and Android mobile apps from a single JavaScript/TypeScript codebase using React Native. Connect APIs, manage device storage, and handle user navigation.",
+        demand: "High" as const,
+        difficulty: "Intermediate" as const,
+        salaryLocal: "₦300,000 - ₦750,000 / month",
+        salaryRemote: "$35,000 - $80,000 / year",
+        skills: ["React Native", "Expo CLI", "TypeScript", "Mobile Navigation", "Local Storage", "API Integrations", "App Store Deployments"]
+      },
+      {
+        name: "Mobile Systems Engineer",
+        description: "Engineer native platform applications using Swift/SwiftUI for iOS and Kotlin/Jetpack Compose for Android. Integrate device-native features (GPS, background tasks, camera APIs) and optimize app performance.",
+        demand: "Very High" as const,
+        difficulty: "Advanced" as const,
+        salaryLocal: "₦600,000 - ₦1,500,000 / month",
+        salaryRemote: "$50,000 - $115,000 / year",
+        skills: ["Swift & SwiftUI", "Kotlin & Jetpack Compose", "Native Device APIs", "Mobile Performance Tuning", "Memory Management", "Multithreading"]
+      }
+    ],
     roadmap: [
       {
         title: "Stage 1: Mobile UI & React Native Core",
@@ -1049,13 +1101,44 @@ const CAREER_TRACKS = [
   },
   {
     name: "Cyber Security",
-    role: "Security Analyst / Ethical Hacker",
-    description: "Become a digital defender. Learn how networks connect, explore vulnerability reconnaissance, run penetration tests, understand OWASP security bugs, and harden network systems.",
-    demand: "Very High" as const,
-    difficulty: "Intermediate" as const,
-    salaryLocal: "₦400,000 - ₦1,800,000 / month",
-    salaryRemote: "$45,000 - $120,000 / year",
-    skills: ["Linux Command Line", "Networking (TCP/IP, HTTP)", "Reconnaissance (Nmap)", "Web Penetration Testing", "OWASP Top 10 vulnerabilities", "Exploitation Tools (Burp Suite)", "System Hardening", "Incident Response Basics"],
+    roles: [
+      {
+        name: "Cyber Security Analyst (Entry-Level)",
+        description: "Defend organizations against active cyber attacks. Monitor security systems, analyze firewalls, investigate suspicious traffic, and triage security alerts in a Security Operations Center (SOC).",
+        demand: "Very High" as const,
+        difficulty: "Beginner Friendly" as const,
+        salaryLocal: "₦300,000 - ₦750,000 / month",
+        salaryRemote: "$40,000 - $85,000 / year",
+        skills: ["Security Operations (SOC)", "SIEM tools (Splunk/ELK)", "Log Analysis", "Incident Triage", "Firewalls", "Wireshark Packet Analysis"]
+      },
+      {
+        name: "Ethical Hacker / Penetration Tester",
+        description: "Conduct authorized attack simulation drills on target servers, web apps, and APIs. Identify vulnerabilities, run exploits, and write detailed remediation guidelines to secure systems.",
+        demand: "Very High" as const,
+        difficulty: "Intermediate" as const,
+        salaryLocal: "₦500,000 - ₦1,400,000 / month",
+        salaryRemote: "$50,000 - $110,000 / year",
+        skills: ["Penetration Testing", "Nmap & Scanning", "Metasploit exploit framework", "Burp Suite Proxy", "OWASP Top 10 vulnerabilities", "Privilege Escalation"]
+      },
+      {
+        name: "IT Auditor & Compliance Officer",
+        description: "Review and audit security systems to ensure they comply with compliance frameworks (SOC 2, ISO 27001, PCI-DSS, GDPR). Perform risk assessment, inspect logs, and manage risk registries.",
+        demand: "High" as const,
+        difficulty: "Beginner Friendly" as const,
+        salaryLocal: "₦350,000 - ₦1,000,000 / month",
+        salaryRemote: "$45,000 - $95,000 / year",
+        skills: ["IT Audit Principles", "Compliance Frameworks (ISO/SOC2)", "Risk Assessment", "Security Policy Audits", "Data Governance", "Access Reviews"]
+      },
+      {
+        name: "Security Architect & Cloud Defense",
+        description: "Architect secure networks, construct perimeter firewalls, and automate security scans (SAST/DAST) in deployment pipelines. Secure cloud operations and implement zero-trust access controls.",
+        demand: "Very High" as const,
+        difficulty: "Advanced" as const,
+        salaryLocal: "₦700,000 - ₦2,000,000 / month",
+        salaryRemote: "$70,000 - $160,000 / year",
+        skills: ["DevSecOps CI/CD integration", "Cloud Security Architectures", "Cryptography", "Infrastructure as Code Security", "Zero Trust Identity", "Threat Modeling"]
+      }
+    ],
     roadmap: [
       {
         title: "Stage 1: Linux Operating Systems & Network Layers",
@@ -1081,13 +1164,26 @@ const CAREER_TRACKS = [
   },
   {
     name: "Data Analysis with Python",
-    role: "Data Analyst / Analytics Engineer",
-    description: "Extract actionable insights from raw data. Master databases, data manipulation libraries, statistical concepts, and interactive dashboards to drive business decisions.",
-    demand: "High" as const,
-    difficulty: "Beginner Friendly" as const,
-    salaryLocal: "₦250,000 - ₦1,100,000 / month",
-    salaryRemote: "$30,000 - $80,000 / year",
-    skills: ["Python Programming", "Pandas & NumPy", "SQL Queries", "Data Visualization", "Jupyter Notebooks", "Power BI & Tableau", "Statistical Analysis", "Git Portfolio"],
+    roles: [
+      {
+        name: "Data Analyst (SQL & Python cleaning)",
+        description: "Clean messy datasets, write database SQL queries, and construct data charts to extract facts from raw business operations.",
+        demand: "High" as const,
+        difficulty: "Beginner Friendly" as const,
+        salaryLocal: "₦250,000 - ₦650,000 / month",
+        salaryRemote: "$30,000 - $65,000 / year",
+        skills: ["Python script writing", "SQL database joins", "Pandas DataFrames", "Data Cleaning", "Matplotlib & Seaborn"]
+      },
+      {
+        name: "Business Intelligence Analyst (PowerBI & Pandas)",
+        description: "Build visual dashboards, design interactive key performance indicators (KPIs), write data models, and structure analytical reports using Power BI and advanced Pandas pipelines.",
+        demand: "High" as const,
+        difficulty: "Intermediate" as const,
+        salaryLocal: "₦450,000 - ₦1,100,000 / month",
+        salaryRemote: "$40,000 - $80,000 / year",
+        skills: ["Power BI", "DAX Data Formulas", "Pandas Advanced Pivot", "Interactive Dashboard Design", "Data Modeling", "Business KPI formulation"]
+      }
+    ],
     roadmap: [
       {
         title: "Stage 1: SQL & Data Foundations",
@@ -1113,13 +1209,26 @@ const CAREER_TRACKS = [
   },
   {
     name: "AI & Machine Learning",
-    role: "AI Developer / Machine Learning Engineer",
-    description: "Build predictive models and deploy AI pipelines. Master regression algorithms, classification models, neural network structures, and natural language processing.",
-    demand: "Very High" as const,
-    difficulty: "Advanced" as const,
-    salaryLocal: "₦400,000 - ₦1,700,000 / month",
-    salaryRemote: "$45,000 - $130,000 / year",
-    skills: ["Python for ML", "Linear Algebra & Calculus", "Scikit-Learn models", "Neural Networks", "TensorFlow & Keras", "Computer Vision Basics", "NLP & LLM Prompting", "Model Deployment"],
+    roles: [
+      {
+        name: "Machine Learning Engineer (Regression & Classification)",
+        description: "Develop statistical algorithms to predict trends, classify categories, and partition data structures using Scikit-Learn libraries.",
+        demand: "High" as const,
+        difficulty: "Intermediate" as const,
+        salaryLocal: "₦400,000 - ₦950,000 / month",
+        salaryRemote: "$45,000 - $95,000 / year",
+        skills: ["Python for ML", "Scikit-Learn models", "Supervised Learning", "Regression & Classification", "Model evaluation metrics"]
+      },
+      {
+        name: "Deep Learning & NLP Specialist (TensorFlow & LLMs)",
+        description: "Construct artificial neural networks for complex computer vision and text analysis. Fine-tune LLMs, integrate transformers, and deploy model APIs.",
+        demand: "Very High" as const,
+        difficulty: "Advanced" as const,
+        salaryLocal: "₦750,000 - ₦1,700,000 / month",
+        salaryRemote: "$65,000 - $130,000 / year",
+        skills: ["TensorFlow & Keras", "Convolutional Networks (CNN)", "Large Language Models", "HuggingFace Transformers", "API Model Deployment", "GPU computing"]
+      }
+    ],
     roadmap: [
       {
         title: "Stage 1: Linear Algebra, Calculus & Data Prep",
@@ -1147,7 +1256,17 @@ const CAREER_TRACKS = [
 
 function CareerPathExplorer() {
     const [selectedTrack, setSelectedTrack] = useState(CAREER_TRACKS[0].name);
-    const active = CAREER_TRACKS.find(t => t.name === selectedTrack) || CAREER_TRACKS[0];
+    const activeTrack = CAREER_TRACKS.find(t => t.name === selectedTrack) || CAREER_TRACKS[0];
+
+    // Maintain state for selected sub-role name
+    const [selectedRoleName, setSelectedRoleName] = useState(activeTrack.roles[0].name);
+
+    // Sync selected role when track changes
+    useEffect(() => {
+        setSelectedRoleName(activeTrack.roles[0].name);
+    }, [selectedTrack]);
+
+    const activeRole = activeTrack.roles.find(r => r.name === selectedRoleName) || activeTrack.roles[0];
 
     function getTrackIcon(name: string) {
         switch (name) {
@@ -1189,14 +1308,14 @@ function CareerPathExplorer() {
                 </div>
 
                 {/* Track Selector Tabs */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 mb-10">
+                <div className="grid grid-cols-2 md:grid-cols-7 gap-2.5 mb-10">
                     {CAREER_TRACKS.map((t) => {
                         const isSelected = selectedTrack === t.name;
                         return (
                             <button
                                 key={t.name}
                                 onClick={() => setSelectedTrack(t.name)}
-                                className={`flex items-center gap-3 p-4 rounded-xl text-left border transition-all cursor-pointer select-none ${
+                                className={`flex flex-col md:flex-row items-center gap-2.5 p-4 rounded-xl text-center md:text-left border transition-all cursor-pointer select-none ${
                                     isSelected
                                         ? "bg-brand text-brand-foreground border-brand shadow-sm font-semibold"
                                         : "bg-card border-ink/10 text-ink/75 hover:bg-ink/5 hover:border-ink/20"
@@ -1205,7 +1324,7 @@ function CareerPathExplorer() {
                                 <span className={`shrink-0 ${isSelected ? "text-brand-foreground" : "text-brand"}`}>
                                     {getTrackIcon(t.name)}
                                 </span>
-                                <span className="text-xs md:text-sm font-semibold tracking-wide truncate">{t.name}</span>
+                                <span className="text-[10px] md:text-[11px] font-bold tracking-wide uppercase line-clamp-2 md:line-clamp-none">{t.name.replace(" Web Development", "").replace(" App Development", "")}</span>
                             </button>
                         );
                     })}
@@ -1218,27 +1337,50 @@ function CareerPathExplorer() {
                     <div className="flex flex-col gap-8">
                         {/* Summary Block */}
                         <div className="bg-card border border-ink/10 rounded-2xl p-6 md:p-8">
+                            {/* Specialization selector */}
+                            <div className="flex flex-col gap-2.5 mb-6 pb-6 border-b border-ink/5">
+                                <span className="text-[10px] uppercase tracking-[0.15em] text-brand font-semibold">Specialization Roles / Tracks</span>
+                                <div className="flex flex-wrap gap-2">
+                                    {activeTrack.roles.map((r) => {
+                                        const isRoleSelected = selectedRoleName === r.name;
+                                        return (
+                                            <button
+                                                key={r.name}
+                                                onClick={() => setSelectedRoleName(r.name)}
+                                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer select-none ${
+                                                    isRoleSelected
+                                                        ? "bg-brand/15 border-brand text-brand shadow-sm"
+                                                        : "bg-surface/50 border-ink/10 text-ink/65 hover:bg-ink/5"
+                                                }`}
+                                            >
+                                                {r.name}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
                             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                                 <div>
                                     <span className="text-[10px] uppercase tracking-widest text-brand font-semibold block mb-1">Target Job Role</span>
-                                    <h3 className="font-display text-2xl md:text-3xl text-ink uppercase tracking-wide">{active.role}</h3>
+                                    <h3 className="font-display text-2xl md:text-3xl text-ink uppercase tracking-wide">{activeRole.name}</h3>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-[9px] font-semibold px-2.5 py-1 rounded-full bg-brand/10 text-brand border border-brand/20 uppercase tracking-wider">
-                                        {active.difficulty}
+                                        {activeRole.difficulty}
                                     </span>
                                 </div>
                             </div>
-                            <p className="text-ink/65 text-sm leading-relaxed">{active.description}</p>
+                            <p className="text-ink/65 text-sm leading-relaxed">{activeRole.description}</p>
                         </div>
 
                         {/* Visual Learning Timeline */}
                         <div>
-                            <h4 className="font-display text-xl uppercase tracking-wide text-ink mb-6 flex items-center gap-2">
+                            <h4 className="font-display text-xl uppercase tracking-wide text-ink mb-6 flex items-center gap-2 font-semibold">
                                 <Layers className="size-4 text-brand" /> Learning Syllabus Timeline
                             </h4>
                             <div className="relative border-l-2 border-brand/20 ml-3 pl-6 space-y-8 py-2">
-                                {active.roadmap.map((step, idx) => (
+                                {activeTrack.roadmap.map((step, idx) => (
                                     <div key={idx} className="relative group">
                                         {/* Timeline Dot */}
                                         <div className="absolute -left-[33px] top-1.5 size-4 rounded-full bg-surface border-2 border-brand flex items-center justify-center transition-all group-hover:scale-125">
@@ -1286,7 +1428,7 @@ function CareerPathExplorer() {
                                         <Briefcase className="size-3 text-brand" /> Job Market Demand
                                     </div>
                                     <div className="text-lg font-bold mt-1 flex items-center gap-2">
-                                        {active.demand}
+                                        {activeRole.demand}
                                         <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
                                     </div>
                                 </div>
@@ -1296,7 +1438,7 @@ function CareerPathExplorer() {
                                         <Coins className="size-3 text-brand" /> Est. Salary (Nigeria)
                                     </div>
                                     <div className="text-lg font-bold text-brand mt-1 tabular-nums">
-                                        {active.salaryLocal}
+                                        {activeRole.salaryLocal}
                                     </div>
                                 </div>
 
@@ -1305,7 +1447,7 @@ function CareerPathExplorer() {
                                         <Globe className="size-3 text-brand" /> Est. Salary (Remote / Global)
                                     </div>
                                     <div className="text-lg font-bold text-contrast-foreground mt-1 tabular-nums">
-                                        {active.salaryRemote}
+                                        {activeRole.salaryRemote}
                                     </div>
                                 </div>
                             </div>
@@ -1320,7 +1462,7 @@ function CareerPathExplorer() {
                                 Master these industry-standard systems and tools to build a strong professional profile.
                             </p>
                             <div className="flex flex-wrap gap-1.5">
-                                {active.skills.map((s, idx) => (
+                                {activeRole.skills.map((s, idx) => (
                                     <span
                                         key={idx}
                                         className="text-[10px] font-medium tracking-wide uppercase px-2.5 py-1.5 bg-surface text-ink/80 rounded-lg ring-1 ring-ink/15 hover:ring-brand/40 transition-colors"
@@ -1368,6 +1510,7 @@ const COURSE_ROLES: Record<string, { name: string; price: number }[]> = {
     "Cyber Security": [
         { name: "Cyber Security Analyst (Entry-Level)", price: 5000 },
         { name: "Ethical Hacker / Penetration Tester", price: 8000 },
+        { name: "IT Auditor & Compliance Officer", price: 8000 },
         { name: "Security Architect & Cloud Defense", price: 12000 }
     ],
     "Data Analysis with Python": [
