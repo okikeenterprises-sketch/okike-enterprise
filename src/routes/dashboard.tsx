@@ -537,7 +537,7 @@ function DashboardPage() {
               <MilestonesView projects={projects} milestones={milestones} />
             )}
             {section === "settings" && (
-              <SettingsView email={user?.email ?? ""} fullName={fullName} />
+              <SettingsView email={user?.email ?? ""} fullName={fullName} user={user} role={role} />
             )}
           </main>
         </div>
@@ -2404,11 +2404,116 @@ function CoursesView({ bootcampRegs }: { bootcampRegs: any[] }) {
 
 /* ---------------- Settings ---------------- */
 
-function SettingsView({ email, fullName }: { email: string; fullName: string }) {
+function SettingsView({
+  email,
+  fullName,
+  user,
+  role,
+}: {
+  email: string;
+  fullName: string;
+  user: any;
+  role: string | null;
+}) {
   const sendEmailAlert = useServerFn(sendPasswordChangedEmail);
+  const [activeTab, setActiveTab] = useState<"profile" | "notifications" | "security">("profile");
+
+  // Profile states
+  const [name, setName] = useState(fullName);
+  const [phone, setPhone] = useState(user?.user_metadata?.phone || "");
+  const [github, setGithub] = useState(user?.user_metadata?.github || "");
+  const [linkedin, setLinkedin] = useState(user?.user_metadata?.linkedin || "");
+  const [portfolioUrl, setPortfolioUrl] = useState(user?.user_metadata?.portfolio_url || "");
+  const [resumeUrl, setResumeUrl] = useState(user?.user_metadata?.resume_url || "");
+  const [attendanceMode, setAttendanceMode] = useState(user?.user_metadata?.attendance_preference || "physical");
+
+  // Client states
+  const [companyName, setCompanyName] = useState(user?.user_metadata?.company_name || "");
+  const [billingAddress, setBillingAddress] = useState(user?.user_metadata?.billing_address || "");
+  const [billingEmail, setBillingEmail] = useState(user?.user_metadata?.billing_email || "");
+  const [taxId, setTaxId] = useState(user?.user_metadata?.tax_id || "");
+  const [preferredCurrency, setPreferredCurrency] = useState(user?.user_metadata?.preferred_currency || "NGN");
+
+  // Notification states
+  const [notifyClasses, setNotifyClasses] = useState(user?.user_metadata?.notify_classes ?? true);
+  const [notifyAssignments, setNotifyAssignments] = useState(user?.user_metadata?.notify_assignments ?? true);
+  const [notifyMilestones, setNotifyMilestones] = useState(user?.user_metadata?.notify_milestones ?? true);
+  const [notifyBilling, setNotifyBilling] = useState(user?.user_metadata?.notify_billing ?? true);
+
+  // Security states
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
   const [busy, setBusy] = useState(false);
+  const [securityBusy, setSecurityBusy] = useState(false);
+
+  async function handleProfileSave(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+
+    try {
+      // Update Auth Metadata
+      const metadataUpdates: any = {
+        full_name: name,
+        phone,
+        github,
+        linkedin,
+        portfolio_url: portfolioUrl,
+        resume_url: resumeUrl,
+        attendance_preference: attendanceMode,
+        company_name: companyName,
+        billing_address: billingAddress,
+        billing_email: billingEmail,
+        tax_id: taxId,
+        preferred_currency: preferredCurrency,
+      };
+
+      const { error: authErr } = await supabase.auth.updateUser({
+        data: metadataUpdates
+      });
+
+      if (authErr) throw authErr;
+
+      // Sync with profiles table
+      const { error: dbErr } = await supabase
+        .from("profiles")
+        .update({
+          full_name: name,
+        })
+        .eq("user_id", user?.id);
+
+      if (dbErr) throw dbErr;
+
+      toast.success("Profile settings updated successfully!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update settings.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleNotificationsSave(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          notify_classes: notifyClasses,
+          notify_assignments: notifyAssignments,
+          notify_milestones: notifyMilestones,
+          notify_billing: notifyBilling,
+        }
+      });
+
+      if (error) throw error;
+      toast.success("Notification preferences saved successfully!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save notifications.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault();
@@ -2416,9 +2521,9 @@ function SettingsView({ email, fullName }: { email: string; fullName: string }) 
       toast.error("New passwords do not match.");
       return;
     }
-    setBusy(true);
+    setSecurityBusy(true);
     const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setBusy(false);
+    setSecurityBusy(false);
 
     if (error) {
       toast.error(error.message);
@@ -2430,58 +2535,364 @@ function SettingsView({ email, fullName }: { email: string; fullName: string }) 
     }
   }
 
+  async function handleLogoutOthers() {
+    setSecurityBusy(true);
+    const { error } = await supabase.auth.signOut({ scope: "others" });
+    setSecurityBusy(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Successfully logged out from all other devices!");
+    }
+  }
+
   return (
-    <div className="grid md:grid-cols-2 gap-5 max-w-4xl">
-      <section className="rounded-2xl bg-card ring-1 ring-ink/10 p-6">
-        <h2 className="font-semibold mb-4">Account Details</h2>
-        <div className="grid gap-3 text-sm">
-          <div className="flex justify-between border-b border-ink/5 pb-2">
-            <span className="text-ink/60">Name</span>
-            <span className="capitalize font-medium text-ink">{fullName}</span>
-          </div>
-          <div className="flex justify-between border-b border-ink/5 pb-2">
-            <span className="text-ink/60">Email</span>
-            <span className="font-medium text-ink">{email}</span>
-          </div>
+    <div className="max-w-4xl">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+        {/* Navigation panel */}
+        <aside className="w-full md:w-56 shrink-0 flex md:flex-col gap-1 p-1 bg-surface ring-1 ring-ink/5 rounded-2xl md:bg-transparent md:ring-0">
+          {[
+            { key: "profile", label: role === "client" ? "Studio Settings" : "Student Settings" },
+            { key: "notifications", label: "Notifications" },
+            { key: "security", label: "Security & Sessions" }
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as any)}
+              className={`flex-1 md:flex-none text-left px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all select-none cursor-pointer ${
+                activeTab === tab.key
+                  ? "bg-brand text-brand-foreground shadow-sm"
+                  : "text-ink/65 hover:text-ink hover:bg-ink/5"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </aside>
+
+        {/* Content panel */}
+        <div className="flex-grow w-full">
+          {/* PROFILE / INVOICING SETTINGS */}
+          {activeTab === "profile" && (
+            <form onSubmit={handleProfileSave} className="bg-card border border-ink/10 rounded-2xl p-6 md:p-8 space-y-6">
+              <div>
+                <h3 className="font-semibold text-lg text-ink">
+                  {role === "client" ? "Studio Client Profile" : "Student profile details"}
+                </h3>
+                <p className="text-xs text-ink/50 mt-1">
+                  Manage your display settings, social links, and career status.
+                </p>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Full Name</span>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Phone / WhatsApp</span>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+234 800 000 0000"
+                    className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                  />
+                </label>
+              </div>
+
+              {/* Student specific fields */}
+              {role !== "client" && (
+                <div className="space-y-6 pt-4 border-t border-ink/5">
+                  <div>
+                    <h4 className="font-semibold text-sm text-ink mb-1">Career & Academic Directory</h4>
+                    <p className="text-[10px] text-ink/50">Provide reference links for certificates and hiring dashboards.</p>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">GitHub URL</span>
+                      <input
+                        type="url"
+                        value={github}
+                        onChange={(e) => setGithub(e.target.value)}
+                        placeholder="https://github.com/yourusername"
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">LinkedIn URL</span>
+                      <input
+                        type="url"
+                        value={linkedin}
+                        onChange={(e) => setLinkedin(e.target.value)}
+                        placeholder="https://linkedin.com/in/yourusername"
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Portfolio Website</span>
+                      <input
+                        type="url"
+                        value={portfolioUrl}
+                        onChange={(e) => setPortfolioUrl(e.target.value)}
+                        placeholder="https://yourportfolio.com"
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Resume / CV Link</span>
+                      <input
+                        type="url"
+                        value={resumeUrl}
+                        onChange={(e) => setResumeUrl(e.target.value)}
+                        placeholder="https://drive.google.com/..."
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Default Attendance Preference</span>
+                      <select
+                        value={attendanceMode}
+                        onChange={(e) => setAttendanceMode(e.target.value)}
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                      >
+                        <option value="physical">Physical Classroom Attendance</option>
+                        <option value="online">Online Virtual / Night Session Only</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Client specific fields */}
+              {role === "client" && (
+                <div className="space-y-6 pt-4 border-t border-ink/5">
+                  <div>
+                    <h4 className="font-semibold text-sm text-ink mb-1">Company Invoicing Details</h4>
+                    <p className="text-[10px] text-ink/50">Configure metadata applied automatically to invoices and statements.</p>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Company Name</span>
+                      <input
+                        type="text"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholder="Acme Corp"
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Billing Email</span>
+                      <input
+                        type="email"
+                        value={billingEmail}
+                        onChange={(e) => setBillingEmail(e.target.value)}
+                        placeholder="finance@acme.com"
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Tax / VAT ID</span>
+                      <input
+                        type="text"
+                        value={taxId}
+                        onChange={(e) => setTaxId(e.target.value)}
+                        placeholder="VAT-123456"
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Billing Currency</span>
+                      <select
+                        value={preferredCurrency}
+                        onChange={(e) => setPreferredCurrency(e.target.value)}
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                      >
+                        <option value="NGN">NGN (₦) - Naira</option>
+                        <option value="USD">USD ($) - US Dollar</option>
+                      </select>
+                    </label>
+
+                    <label className="flex flex-col gap-1.5 sm:col-span-2">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Billing Address</span>
+                      <textarea
+                        value={billingAddress}
+                        onChange={(e) => setBillingAddress(e.target.value)}
+                        rows={2}
+                        placeholder="123 Studio Blvd, Lagos, Nigeria"
+                        className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition resize-none"
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={busy}
+                className="w-full bg-brand text-brand-foreground py-3 font-semibold text-xs uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition rounded-xl cursor-pointer"
+              >
+                {busy ? "Saving Settings…" : "Save Changes"}
+              </button>
+            </form>
+          )}
+
+          {/* NOTIFICATION SETTINGS */}
+          {activeTab === "notifications" && (
+            <form onSubmit={handleNotificationsSave} className="bg-card border border-ink/10 rounded-2xl p-6 md:p-8 space-y-6">
+              <div>
+                <h3 className="font-semibold text-lg text-ink">Notification Preferences</h3>
+                <p className="text-xs text-ink/50 mt-1">
+                  Choose how and when you want to receive alerts from our platform.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  {
+                    state: notifyClasses,
+                    setter: setNotifyClasses,
+                    title: "Virtual Sessions & Live Reminders",
+                    desc: "Receive email alerts 1 hour before scheduled night classes or live syllabus tutorials starts."
+                  },
+                  {
+                    state: notifyAssignments,
+                    setter: setNotifyAssignments,
+                    title: "Syllabus Assignments & Materials",
+                    desc: "Get notified when instructors upload new coding materials or publish module assignments."
+                  },
+                  {
+                    state: notifyMilestones,
+                    setter: setNotifyMilestones,
+                    title: "Project Progress & Milestones",
+                    desc: "Receive immediate updates when your project milestones are approved by the director."
+                  },
+                  {
+                    state: notifyBilling,
+                    setter: setNotifyBilling,
+                    title: "Billing & Receipts",
+                    desc: "Get invoice deposit invoices, transaction alerts, and print ticket confirmations."
+                  }
+                ].map((item, index) => (
+                  <label key={index} className="flex gap-4 p-4 bg-surface rounded-xl border border-ink/5 cursor-pointer hover:border-brand/30 transition duration-300">
+                    <input
+                      type="checkbox"
+                      checked={item.state}
+                      onChange={(e) => item.setter(e.target.checked)}
+                      className="size-4 mt-0.5 accent-brand rounded border-ink/10 focus:ring-0"
+                    />
+                    <div className="space-y-1">
+                      <span className="text-sm font-semibold text-ink block">{item.title}</span>
+                      <span className="text-[11px] text-ink/50 leading-relaxed block">{item.desc}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                disabled={busy}
+                className="w-full bg-brand text-brand-foreground py-3 font-semibold text-xs uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition rounded-xl cursor-pointer"
+              >
+                {busy ? "Saving Settings…" : "Save Notification Preferences"}
+              </button>
+            </form>
+          )}
+
+          {/* SECURITY & SESSIONS */}
+          {activeTab === "security" && (
+            <div className="space-y-6">
+              {/* Change Password Form */}
+              <form onSubmit={handlePasswordChange} className="bg-card border border-ink/10 rounded-2xl p-6 md:p-8 space-y-6">
+                <div>
+                  <h3 className="font-semibold text-lg text-ink">Change Password</h3>
+                  <p className="text-xs text-ink/50 mt-1">
+                    Update your account password. Must be at least 6 characters.
+                  </p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">New Password</span>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                    />
+                  </label>
+
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">Confirm New Password</span>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                    />
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={securityBusy}
+                  className="w-full bg-brand text-brand-foreground py-3 font-semibold text-xs uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition rounded-xl cursor-pointer"
+                >
+                  {securityBusy ? "Updating Password…" : "Update Password"}
+                </button>
+              </form>
+
+              {/* Sessions Management */}
+              <section className="bg-card border border-ink/10 rounded-2xl p-6 md:p-8 space-y-6">
+                <div>
+                  <h3 className="font-semibold text-lg text-ink">Advanced Session Control</h3>
+                  <p className="text-xs text-ink/50 mt-1">
+                    Sign out of other browsers or mobile sessions linked to this account.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl flex items-start gap-3">
+                  <Shield className="size-5 text-brand mt-0.5 shrink-0" />
+                  <div className="text-xs text-ink/75 leading-relaxed">
+                    <strong>Logged in on multiple devices?</strong> If you suspect unauthorized access or have finished working on shared networks, you can securely clear all other sessions in one click.
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={securityBusy}
+                  onClick={handleLogoutOthers}
+                  className="w-full py-3 border border-red-500/30 text-red-500 hover:bg-red-500/5 font-semibold text-xs uppercase tracking-widest transition rounded-xl disabled:opacity-50 cursor-pointer"
+                >
+                  {securityBusy ? "Clearing Sessions…" : "Log Out of All Other Devices"}
+                </button>
+              </section>
+            </div>
+          )}
         </div>
-      </section>
-
-      <section className="rounded-2xl bg-card ring-1 ring-ink/10 p-6">
-        <h2 className="font-semibold mb-4">Change Password</h2>
-        <form onSubmit={handlePasswordChange} className="flex flex-col gap-3">
-          <div>
-            <label className="text-[10px] text-ink/50 uppercase tracking-wider block font-semibold mb-1">New Password</label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              placeholder="••••••••"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full rounded-xl bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-brand"
-            />
-          </div>
-
-          <div>
-            <label className="text-[10px] text-ink/50 uppercase tracking-wider block font-semibold mb-1">Confirm New Password</label>
-            <input
-              type="password"
-              required
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded-xl bg-surface ring-1 ring-ink/10 px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-brand"
-            />
-          </div>
-
-          <button
-            disabled={busy}
-            className="mt-2 bg-brand text-brand-foreground font-semibold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition w-full"
-          >
-            {busy ? "Updating…" : "Update Password"}
-          </button>
-        </form>
-      </section>
+      </div>
     </div>
   );
 }

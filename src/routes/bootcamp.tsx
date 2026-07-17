@@ -13,9 +13,9 @@ export const Route = createFileRoute("/bootcamp")({
     head: () => ({
         meta: [
             { title: "Computing Synergy Summit — Register Now" },
-            { name: "description", content: "Register for the Computing Synergy Summit starting 1st August 2026. Free for department students, from ₦5,000 for others." },
+            { name: "description", content: "Register for the Computing Synergy Summit starting 1st August 2026. Free for CS/IT department students, ₦5,000 for others." },
             { property: "og:title", content: "Computing Synergy Summit — Register Now" },
-            { property: "og:description", content: "Register for the Computing Synergy Summit. Free for CS/IT department students, from ₦5,000 for others." },
+            { property: "og:description", content: "Register for the Computing Synergy Summit. Free for CS/IT department students, ₦5,000 for others." },
         ],
     }),
     component: BootcampPage,
@@ -487,7 +487,7 @@ function BootcampPage() {
                             Free for CS/IT department students
                         </div>
                         <div className="flex items-center gap-2 px-4 py-2 bg-contrast-foreground/10 text-contrast-foreground/80 text-sm font-semibold rounded-full">
-                            From ₦5,000 for non-department attendees
+                            ₦5,000 for non-department attendees
                         </div>
                     </div>
                 </div>
@@ -530,7 +530,7 @@ function BootcampPage() {
 
                         <div className="p-5 bg-brand/5 ring-1 ring-brand/20 rounded-xl">
                             <div className="text-sm font-semibold text-brand mb-2">Payment info (for non-department attendees)</div>
-                            <p className="text-sm text-ink/70">Registration is free for all CS/IT department students. If you are not from the department, your registration payment secures your spot. Price varies from ₦5,000 to ₦12,000 based on the track and specialization level you choose.</p>
+                            <p className="text-sm text-ink/70">Registration is free for all CS/IT department students. If you are not from the department, your registration payment of ₦5,000 secures your spot.</p>
                         </div>
                     </div>
 
