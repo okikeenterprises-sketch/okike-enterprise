@@ -8,6 +8,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { askAssistant, generateInsights } from "@/lib/ai-assistant.functions";
 import { toast } from "sonner";
 import { verifyProjectDeposit, verifyBootcampPayment, sendPasswordChangedEmail } from "@/lib/forms.functions";
+import { getBootcampCoursePrice } from "@/lib/utils";
 import heroImg from "@/assets/dashboard-hero.jpg";
 import heroImgLight from "@/assets/dashboard-hero-light.png";
 import okikeLogo from "@/assets/okike-logo.png";
@@ -205,7 +206,7 @@ function DashboardPage() {
     korapay.initialize({
       key: koraKey,
       reference: reg.payment_reference,
-      amount: 5000,
+      amount: getBootcampCoursePrice(reg.course),
       currency: "NGN",
       customer: {
         name: reg.name,
@@ -714,7 +715,7 @@ function DashboardOverview({
                     onClick={() => onPayBootcamp(reg)}
                     className="w-full py-3 rounded-xl bg-brand text-brand-foreground font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition animate-pulse"
                   >
-                    Pay Registration Fee (₦5,000) &rarr;
+                    Pay Registration Fee (₦${getBootcampCoursePrice(reg.course).toLocaleString()}) &rarr;
                   </button>
                 )}
               </section>

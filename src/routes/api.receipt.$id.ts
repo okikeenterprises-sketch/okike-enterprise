@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 import path from "path";
+import { getBootcampCoursePrice } from "@/lib/utils";
 
 export const Route = createFileRoute("/api/receipt/$id")({
   server: {
@@ -115,7 +116,7 @@ export const Route = createFileRoute("/api/receipt/$id")({
                 </span>
             </div>
             <div class="amount">
-                ${reg.payment_status === "paid" ? "₦5,000.00" : "₦0.00"}
+                ${reg.payment_status === "paid" ? `₦${getBootcampCoursePrice(reg.course).toLocaleString()}.00` : "₦0.00"}
             </div>
         </div>
         <div class="footer">

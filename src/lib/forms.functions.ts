@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { getBootcampCoursePrice } from "@/lib/utils";
 import {
   sendEmail,
   welcomeEmail,
@@ -200,6 +201,7 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
     }
 
     const reference = "bootcamp_" + Math.random().toString(36).slice(2, 15) + "_" + Date.now();
+    const coursePrice = getBootcampCoursePrice(data.course);
     const { error } = await supabaseAdmin
       .from("bootcamp_registrations" as never)
       .insert({
@@ -242,7 +244,7 @@ export const submitBootcampRegistration = createServerFn({ method: "POST" })
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Department:</strong> ${data.department}</p>
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Level:</strong> ${data.level}</p>
 <p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Course:</strong> ${data.course}</p>
-<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Admission:</strong> ${data.is_department_student ? "Free (CS/IT Student)" : "₦5,000 — payment required"}</p>
+<p style="font-size:13px;color:#bbb;margin:4px 0;"><strong style="color:#fff;">Admission:</strong> ${data.is_department_student ? "Free (CS/IT Student)" : `₦${coursePrice.toLocaleString()} — payment required`}</p>
 </td></tr>
 </table>
 </td></tr>
@@ -250,7 +252,7 @@ ${!data.is_department_student ? `<tr><td style="padding:0 40px 24px;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#1a1200;border-left:4px solid #eab308;">
 <tr><td style="padding:16px 22px;">
 <p style="font-size:13px;font-weight:700;color:#eab308;margin:0 0 6px;">Payment required</p>
-<p style="font-size:13px;color:#999;margin:0;line-height:1.6;">Since you're not in the CS/IT department, a payment of <strong style="color:#fff;">₦5,000</strong> is required to confirm your ticket. If you didn't pay during checkout, please verify with our support.</p>
+<p style="font-size:13px;color:#999;margin:0;line-height:1.6;">Since you're not in the CS/IT department, a payment of <strong style="color:#fff;">₦${coursePrice.toLocaleString()}</strong> is required to confirm your ticket. If you didn't pay during checkout, please verify with our support.</p>
 </td></tr>
 </table>
 </td></tr>` : ""}
@@ -285,11 +287,11 @@ ${!data.is_department_student ? `<tr><td style="padding:0 40px 24px;">
 <p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Phone:</strong> ${data.phone}</p>
 <p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Department:</strong> ${data.department}</p>
 <p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Level:</strong> ${data.level}</p>
-<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Dept student:</strong> ${data.is_department_student ? "✅ Yes (Free)" : "❌ No (₦5,000 due)"}</p>
+<p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Dept student:</strong> ${data.is_department_student ? "✅ Yes (Free)" : `❌ No (₦${coursePrice.toLocaleString()} due)`}</p>
 <p style="font-size:14px;color:#444;margin:4px 0;"><strong style="color:#111;">Payment Reference:</strong> ${reference}</p>
 </td></tr>
 </table>
-${!data.is_department_student ? `<p style="font-size:13px;color:#e67e00;margin:16px 0 0;font-weight:600;">⚠️ This registrant requires a ₦5,000 payment. Payment reference: ${reference}</p>` : ""}
+${!data.is_department_student ? `<p style="font-size:13px;color:#e67e00;margin:16px 0 0;font-weight:600;">⚠️ This registrant requires a ₦${coursePrice.toLocaleString()} payment. Payment reference: ${reference}</p>` : ""}
 </td></tr>
 </table>
 </td></tr>
@@ -304,7 +306,7 @@ ${!data.is_department_student ? `<p style="font-size:13px;color:#e67e00;margin:1
       }),
       sendEmail({
         to: "okikeenterprises@gmail.com",
-        subject: `New summit registration — ${data.name} (${data.is_department_student ? "Free" : "₦5,000 due"})`,
+        subject: `New summit registration — ${data.name} (${data.is_department_student ? "Free" : `₦${coursePrice.toLocaleString()} due`})`,
         html: adminHtml,
       }),
     ]);
@@ -373,7 +375,7 @@ export const verifyBootcampPayment = createServerFn({ method: "POST" })
 <tr><td style="padding:36px 40px 24px;text-align:center;">
 <p style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#eab308;margin:0 0 10px;">Payment Confirmed</p>
 <h1 style="font-size:32px;font-weight:900;color:#fff;margin:0 0 14px;line-height:1.1;">You're fully confirmed, <span style="color:#eab308;">${(reg as any).name.split(" ")[0]}!</span></h1>
-<p style="font-size:15px;color:#888;margin:0 0 0;line-height:1.7;">We have received your payment of <strong style="color:#fff;">₦5,000</strong> for the <strong style="color:#fff;">Computing Synergy Summit</strong> starting on <strong style="color:#fff;">1st August 2026</strong>. See you there!</p>
+<p style="font-size:15px;color:#888;margin:0 0 0;line-height:1.7;">We have received your payment of <strong style="color:#fff;">₦${getBootcampCoursePrice((reg as any).course).toLocaleString()}</strong> for the <strong style="color:#fff;">Computing Synergy Summit</strong> starting on <strong style="color:#fff;">1st August 2026</strong>. See you there!</p>
 </td></tr>
 <tr><td style="padding:8px 40px 32px;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#111;border-left:4px solid #eab308;">
@@ -406,7 +408,7 @@ export const verifyBootcampPayment = createServerFn({ method: "POST" })
             sendEmail({
               to: "okikeenterprises@gmail.com",
               subject: `Summit Payment Confirmed — ${(reg as any).name}`,
-              html: `<p>Payment of ₦5,000 received for <strong>${(reg as any).name}</strong>. Reference: ${data.reference}</p>`,
+              html: `<p>Payment of ₦${getBootcampCoursePrice((reg as any).course).toLocaleString()} received for <strong>${(reg as any).name}</strong>. Reference: ${data.reference}</p>`,
             })
           ]);
         }
