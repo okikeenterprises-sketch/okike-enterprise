@@ -47,7 +47,10 @@ export const Route = createFileRoute("/portfolio")({
 function PortfolioPage() {
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [studentCount, setStudentCount] = useState<string>("3,000+");
+  const [orgCount, setOrgCount] = useState<string>("30+");
+  const [projectCount, setProjectCount] = useState<string>("20+");
+ 
   useEffect(() => {
     supabase
       .from("portfolio_items")
@@ -58,29 +61,68 @@ function PortfolioPage() {
         setItems((data ?? []) as unknown as PortfolioItem[]);
         setLoading(false);
       });
+ 
+    // Query actual student headcount dynamically from bootcamp_registrations
+    supabase
+      .from("bootcamp_registrations" as any)
+      .select("email", { count: "exact", head: true })
+      .then(({ count, error }) => {
+        if (!error && typeof count === "number") {
+          // If we have registrations, display the exact live count, otherwise fallback to a default baseline.
+          setStudentCount(count > 0 ? count.toLocaleString() : "3,000+");
+        }
+      });
+
+    // Query actual organizations served dynamically from partners table
+    supabase
+      .from("partners")
+      .select("id", { count: "exact", head: true })
+      .eq("published", true)
+      .then(({ count, error }) => {
+        if (!error && typeof count === "number") {
+          setOrgCount(count > 0 ? `${count}+` : "30+");
+        }
+      });
+
+    // Query actual projects launched dynamically from portfolio_items table
+    supabase
+      .from("portfolio_items")
+      .select("id", { count: "exact", head: true })
+      .eq("published", true)
+      .then(({ count, error }) => {
+        if (!error && typeof count === "number") {
+          setProjectCount(count > 0 ? `${count}+` : "20+");
+        }
+      });
   }, []);
+ 
+  const stats = [
+    { value: orgCount, label: "Organisations served" },
+    { value: projectCount, label: "Projects launched" },
+    { value: studentCount, label: "Students reached" },
+    { value: "100%", label: "Client satisfaction" },
+  ];
 
   return (
     <SiteLayout>
       {/* 1. HERO */}
-      <section className="relative overflow-hidden border-b border-ink/10">
-        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-0 md:pt-28 min-h-[72vh] flex flex-col justify-between">
-          <div className="flex flex-col gap-6 max-w-3xl">
-            <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50">
-              <span className="h-px w-8 bg-brand" />
-              <span>Selected Work</span>
-            </div>
+      <section className="pt-20 md:pt-28 pb-0 px-6 border-b border-ink/10">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.2em] uppercase text-ink/50 mb-8">
+            <span className="h-px w-8 bg-brand" />
+            <span>Vol. 02 — Shipped Products</span>
+          </div>
 
-            <h1 className="font-display text-[clamp(3.5rem,9vw,7.5rem)] leading-[0.92] tracking-wide uppercase text-ink">
-              Digital products that{" "}
-              <span className="text-brand">make a difference.</span>
+          <div className="max-w-3xl">
+            <h1 className="font-display text-5xl md:text-8xl leading-[0.92] tracking-wide uppercase text-ink">
+              Engineered <br />
+              to perform.
             </h1>
-
-            <p className="text-base md:text-lg text-ink/65 max-w-[48ch] leading-relaxed">
+            <p className="text-base md:text-lg text-ink/65 max-w-[46ch] leading-relaxed mt-6">
               From SaaS platforms to student portals — real systems with real impact for
               founders, creators and educational institutions.
             </p>
-
+ 
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
                 to="/book"
@@ -101,12 +143,7 @@ function PortfolioPage() {
           {/* Stats bar */}
           <div className="relative mt-16 -mx-6 border-t border-ink/10 bg-surface/80 backdrop-blur overflow-hidden">
             <div className="flex divide-x divide-ink/10 overflow-x-auto scrollbar-none">
-              {[
-                { value: "30+", label: "Organisations served" },
-                { value: "20+", label: "Projects launched" },
-                { value: "3,000+", label: "Students reached" },
-                { value: "100%", label: "Client satisfaction" },
-              ].map(({ value, label }) => (
+              {stats.map(({ value, label }) => (
                 <div key={label} className="flex-shrink-0 px-8 py-5 flex flex-col gap-0.5 min-w-[160px]">
                   <span className="font-display text-3xl leading-none tracking-wide uppercase text-ink">{value}</span>
                   <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/45">{label}</span>

@@ -83,18 +83,12 @@ function BootcampPage() {
     const [dbLoading, setDbLoading] = useState(false);
 
     const [selectedCourse, setSelectedCourse] = useState("");
-    const [selectedRole, setSelectedRole] = useState("");
 
-    const currentRoles = getRolesForCourse(selectedCourse);
-    const activeRole = currentRoles.find(r => r.name === selectedRole) || currentRoles[0];
-    const currentPrice = activeRole ? activeRole.price : 5000;
+    const currentPrice = 5000;
 
     useEffect(() => {
         if (courses.length > 0 && !selectedCourse) {
-            const initialCourse = courses[0];
-            setSelectedCourse(initialCourse);
-            const roles = getRolesForCourse(initialCourse);
-            setSelectedRole(roles[0]?.name || "");
+            setSelectedCourse(courses[0]);
         }
     }, [courses, selectedCourse]);
 
@@ -295,7 +289,7 @@ function BootcampPage() {
         const phone = String(fd.get("phone") || "");
         const department = regType === "student" ? String(fd.get("department") || "") : "General Public";
         const level = regType === "student" ? String(fd.get("level") || "") : "Not a Student";
-        const course = selectedRole ? `${selectedCourse} - ${selectedRole}` : selectedCourse;
+        const course = selectedCourse;
         const reg_no = (regType === "student" && isDeptStudent) ? String(fd.get("reg_no") || "").trim() : "";
 
         if (isDeptStudent) {
@@ -789,10 +783,7 @@ function BootcampPage() {
                                         required
                                         value={selectedCourse}
                                         onChange={(e) => {
-                                            const val = e.target.value;
-                                            setSelectedCourse(val);
-                                            const roles = getRolesForCourse(val);
-                                            setSelectedRole(roles[0]?.name || "");
+                                            setSelectedCourse(e.target.value);
                                         }}
                                         className="bg-surface ring-1 ring-ink/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
                                     >
@@ -804,27 +795,6 @@ function BootcampPage() {
                                             ))}
                                     </select>
                                 </label>
-
-                                {selectedCourse && getRolesForCourse(selectedCourse).length > 0 && (
-                                    <label className="flex flex-col gap-1.5">
-                                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/50">
-                                            Select Role / Specialization <span className="text-brand">*</span>
-                                        </span>
-                                        <select
-                                            name="course_role"
-                                            required
-                                            value={selectedRole}
-                                            onChange={(e) => setSelectedRole(e.target.value)}
-                                            className="bg-surface ring-1 ring-ink/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
-                                        >
-                                            {getRolesForCourse(selectedCourse).map((r) => (
-                                                <option key={r.name} value={r.name}>
-                                                    {r.name} {isDeptStudent ? "" : `(₦${r.price.toLocaleString()})`}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-                                )}
 
                                 {regType === "student" && (
                                     <label className="flex flex-col gap-1.5">

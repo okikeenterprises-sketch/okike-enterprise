@@ -223,7 +223,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(!t){t='dark';}if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`,
           }}
         />
         <HeadContent />
@@ -244,11 +244,7 @@ function RootComponent() {
     function applyTheme() {
       try {
         const stored = localStorage.getItem("theme");
-        let theme = stored === "light" || stored === "dark"
-          ? stored
-          : window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
+        let theme = stored === "light" || stored === "dark" ? stored : "dark";
 
         if (theme === "dark") {
           document.documentElement.classList.add("dark");
